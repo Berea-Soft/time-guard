@@ -1,0 +1,115 @@
+{
+  "name": "@bereasoftware/time-guard",
+  "private": false,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/time-guard.cjs",
+  "module": "./dist/time-guard.es.js",
+  "types": "./dist/types/index.d.ts",
+  "unpkg": "./dist/time-guard.umd.js",
+  "browser": {
+    "./dist/time-guard.umd.js": "./dist/time-guard.umd.js",
+    "./dist/time-guard.iife.js": "./dist/time-guard.iife.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/time-guard.es.js",
+      "require": "./dist/time-guard.cjs",
+      "browser": "./dist/time-guard.umd.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./umd": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/time-guard.umd.js",
+      "require": "./dist/time-guard.umd.js",
+      "browser": "./dist/time-guard.umd.js"
+    },
+    "./iife": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/time-guard.iife.js",
+      "require": "./dist/time-guard.iife.js",
+      "browser": "./dist/time-guard.iife.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "keywords": [
+    "time-guard",
+    "typescript",
+    "date",
+    "time",
+    "temporal",
+    "date-time",
+    "datetime",
+    "immutable",
+    "locale",
+    "i18n",
+    "internationalization",
+    "formatter",
+    "date-formatter",
+    "temporal-api",
+    "solid-principles",
+    "javascript"
+  ],
+  "author": "John Andrade <johnandrade@bereasoft.com>",
+  "license": "MIT",
+  "description": "A modern, fully-typed TypeScript date/time library built with the Temporal API, SOLID principles, and complete i18n support. Immutable, zero-dependencies, and designed for type safety.",
+  "maintainers": [
+    {
+      "name": "John Andrade",
+      "email": "johnandrade@bereasoft.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Berea-Soft/time-guard"
+  },
+  "bugs": {
+    "url": "https://github.com/Berea-Soft/time-guard/issues"
+  },
+  "engines": {
+    "node": ">=20.18.0",
+    "npm": ">=10.8.2"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "not IE 11",
+    "> 1%"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "postrelease": "git push --follow-tags origin main && npm publish",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "@types/node": "^25.5.0",
+    "standard-version": "^9.5.0",
+    "typescript": "~5.8.3",
+    "vite": "^8.0.0",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@js-temporal/polyfill": ">=0.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@js-temporal/polyfill": {
+      "optional": true
+    }
+  }
+}

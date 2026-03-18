@@ -1,0 +1,93 @@
+/**
+ * Asian Locales
+ * ja, zh-cn, zh-tw, ko, th, vi, id
+ */
+
+import type { ILocale } from '../types';
+
+export const JA_LOCALE_DATA: ILocale = {
+  name: 'ja',
+  months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  monthsShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  weekdays: ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'],
+  weekdaysShort: ['日', '月', '火', '水', '木', '金', '土'],
+  weekdaysMin: ['日', '月', '火', '水', '木', '金', '土'],
+  meridiem: { am: '午前', pm: '午後' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'YYYY年MM月DD日', time: 'HH:mm:ss', datetime: 'YYYY年MM月DD日 HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const ZH_CN_LOCALE_DATA: ILocale = {
+  name: 'zh-cn',
+  months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  monthsShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+  weekdaysShort: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+  weekdaysMin: ['日', '一', '二', '三', '四', '五', '六'],
+  meridiem: { am: '上午', pm: '下午' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'YYYY-MM-DD', time: 'HH:mm:ss', datetime: 'YYYY-MM-DD HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const ZH_TW_LOCALE_DATA: ILocale = {
+  name: 'zh-tw',
+  months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  monthsShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+  weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+  weekdaysShort: ['週日', '週一', '週二', '週三', '週四', '週五', '週六'],
+  weekdaysMin: ['日', '一', '二', '三', '四', '五', '六'],
+  meridiem: { am: '上午', pm: '下午' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'YYYY-MM-DD', time: 'HH:mm:ss', datetime: 'YYYY-MM-DD HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const KO_LOCALE_DATA: ILocale = {
+  name: 'ko',
+  months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+  monthsShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+  weekdays: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+  weekdaysShort: ['일', '월', '화', '수', '목', '금', '토'],
+  weekdaysMin: ['일', '월', '화', '수', '목', '금', '토'],
+  meridiem: { am: '오전', pm: '오후' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'YYYY-MM-DD', time: 'HH:mm:ss', datetime: 'YYYY-MM-DD HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const TH_LOCALE_DATA: ILocale = {
+  name: 'th',
+  months: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
+  monthsShort: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+  weekdays: ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'],
+  weekdaysShort: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
+  weekdaysMin: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+  meridiem: { am: 'AM', pm: 'PM' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'DD/MM/YYYY', time: 'HH:mm:ss', datetime: 'DD/MM/YYYY HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const VI_LOCALE_DATA: ILocale = {
+  name: 'vi',
+  months: ['tháng 1', 'tháng 2', 'tháng 3', 'tháng 4', 'tháng 5', 'tháng 6', 'tháng 7', 'tháng 8', 'tháng 9', 'tháng 10', 'tháng 11', 'tháng 12'],
+  monthsShort: ['Th01', 'Th02', 'Th03', 'Th04', 'Th05', 'Th06', 'Th07', 'Th08', 'Th09', 'Th10', 'Th11', 'Th12'],
+  weekdays: ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'],
+  weekdaysShort: ['CN', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'],
+  weekdaysMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+  meridiem: { am: 'AM', pm: 'PM' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'DD/MM/YYYY', time: 'HH:mm:ss', datetime: 'DD/MM/YYYY HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const ID_LOCALE_DATA: ILocale = {
+  name: 'id',
+  months: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+  monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+  weekdays: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+  weekdaysShort: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+  weekdaysMin: ['Mg', 'Sn', 'Sl', 'Rb', 'Km', 'Jm', 'Sb'],
+  meridiem: { am: 'AM', pm: 'PM' },
+  formats: { iso: 'YYYY-MM-DDTHH:mm:ss.SSSZ', date: 'DD/MM/YYYY', time: 'HH:mm:ss', datetime: 'DD/MM/YYYY HH:mm:ss', rfc2822: 'ddd, DD MMM YYYY HH:mm:ss Z' },
+};
+
+export const ASIAN_LOCALES: Record<string, ILocale> = {
+  'ja': JA_LOCALE_DATA,
+  'zh-cn': ZH_CN_LOCALE_DATA,
+  'zh-tw': ZH_TW_LOCALE_DATA,
+  'ko': KO_LOCALE_DATA,
+  'th': TH_LOCALE_DATA,
+  'vi': VI_LOCALE_DATA,
+  'id': ID_LOCALE_DATA,
+};
