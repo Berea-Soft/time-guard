@@ -61,7 +61,7 @@ Una biblioteca moderna y de nivel producción para manipulación de fechas/horas
 ## 🚀 Inicio Rápido
 
 ```typescript
-import { TimeGuard } from "time-guard";
+import { TimeGuard } from "@bereasoftware/time-guard";
 
 // Crear una fecha
 const now = TimeGuard.now();
@@ -95,11 +95,11 @@ console.log(date.isAfter(new Date("2020-01-01"))); // true
 ## 📦 Instalación
 
 ```bash
-npm install time-guard
+npm install @bereasoftware/time-guard
 # o
-yarn add time-guard
+yarn add @bereasoftware/time-guard
 # o
-pnpm add time-guard
+pnpm add @bereasoftware/time-guard
 ```
 
 ### Requisitos
@@ -256,14 +256,14 @@ TimeGuard incluye soporte para múltiples sistemas de calendario, extensible a t
 ### Supported Calendars
 
 ```typescript
-import { TimeGuard, CalendarManager } from "time-guard";
+import { TimeGuard, CalendarManager } from "@bereasoftware/time-guard";
 import {
   IslamicCalendar,
   HebrewCalendar,
   ChineseCalendar,
   JapaneseCalendar,
   BuddhistCalendar,
-} from "time-guard/calendars";
+} from "@bereasoftware/time-guard/calendars";
 
 // Get calendar manager
 const calendarMgr = CalendarManager.getInstance();
@@ -289,7 +289,7 @@ console.log(gregorian.isLeapYear(2024)); // true
 #### Gregorian Calendar
 
 ```typescript
-import { GregorianCalendar } from "time-guard/calendars";
+import { GregorianCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new GregorianCalendar();
 console.log(calendar.daysInMonth(2024, 2)); // 29 (leap year)
@@ -299,7 +299,7 @@ console.log(calendar.daysInYear(2024)); // 366
 #### Islamic Calendar (Hijri)
 
 ```typescript
-import { IslamicCalendar } from "time-guard/calendars";
+import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new IslamicCalendar();
 console.log(calendar.getMonthName(9)); // "Ramadan"
@@ -309,7 +309,7 @@ console.log(calendar.isLeapYear(1445)); // true
 #### Hebrew Calendar
 
 ```typescript
-import { HebrewCalendar } from "time-guard/calendars";
+import { HebrewCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new HebrewCalendar();
 console.log(calendar.getMonthName(1)); // "Tishrei"
@@ -319,7 +319,7 @@ console.log(calendar.isLeapYear(5784)); // true
 #### Chinese Calendar
 
 ```typescript
-import { ChineseCalendar } from "time-guard/calendars";
+import { ChineseCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new ChineseCalendar();
 const zodiac = calendar.getZodiacSign(2024); // "龙" (Dragon)
@@ -328,7 +328,7 @@ const zodiac = calendar.getZodiacSign(2024); // "龙" (Dragon)
 #### Japanese Calendar
 
 ```typescript
-import { JapaneseCalendar } from "time-guard/calendars";
+import { JapaneseCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new JapaneseCalendar();
 console.log(calendar.getMonthName(3)); // "3月"
@@ -337,7 +337,7 @@ console.log(calendar.getMonthName(3)); // "3月"
 #### Buddhist Calendar
 
 ```typescript
-import { BuddhistCalendar } from "time-guard/calendars";
+import { BuddhistCalendar } from "@bereasoftware/time-guard/calendars";
 
 const calendar = new BuddhistCalendar();
 // Year 2567 BE = 2024 CE
@@ -355,8 +355,8 @@ TimeGuard includes an optional plugin system for extended functionality:
 1. **Relative Time Plugin** - Human-readable time differences
 
    ```typescript
-   import { TimeGuard, PluginManager } from "time-guard";
-   import relativeTimePlugin from "time-guard/plugins/relative-time";
+   import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+   import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
 
    PluginManager.use(relativeTimePlugin, TimeGuard);
 
@@ -367,7 +367,7 @@ TimeGuard includes an optional plugin system for extended functionality:
 2. **Duration Plugin** - ISO 8601 duration support
 
    ```typescript
-   import { Duration } from "time-guard/plugins/duration";
+   import { Duration } from "@bereasoftware/time-guard/plugins/duration";
 
    const duration = Duration.fromISO("P2Y3M4D");
    duration.humanize(); // "2 years, 3 months, 4 days"
@@ -377,7 +377,7 @@ TimeGuard includes an optional plugin system for extended functionality:
 3. **Advanced Format Plugin** - Extended format tokens
 
    ```typescript
-   import advancedFormatPlugin from "time-guard/plugins/advanced-format";
+   import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
 
    PluginManager.use(advancedFormatPlugin, TimeGuard);
 
@@ -491,7 +491,7 @@ Locale codes follow the standard `[language]-[region]` pattern:
 #### Setting Locales
 
 ```typescript
-import { TimeGuard } from "time-guard";
+import { TimeGuard } from "@bereasoftware/time-guard";
 
 const date = TimeGuard.from("2024-03-13 14:30:00");
 
@@ -653,7 +653,7 @@ TimeGuard includes a powerful plugin system for extending functionality. Plugins
 ### Plugin Manager
 
 ```typescript
-import { TimeGuard, PluginManager } from "time-guard";
+import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
 
 // Use a plugin
 PluginManager.use(myPlugin, TimeGuard);
@@ -670,8 +670,8 @@ PluginManager.listInstalled();
 Adds human-readable time differences like "2 hours ago" or "in 3 days".
 
 ```typescript
-import { TimeGuard, PluginManager } from "time-guard";
-import relativeTimePlugin from "time-guard/plugins/relative-time";
+import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
 
 // Install plugin once
 PluginManager.use(relativeTimePlugin, TimeGuard);
@@ -721,9 +721,9 @@ date.humanize(other, true); // "a month" (exact mode)
 ISO 8601 duration support with advanced calculations.
 
 ```typescript
-import { TimeGuard } from "time-guard";
-import { Duration, durationPlugin } from "time-guard/plugins/duration";
-import { PluginManager } from "time-guard";
+import { TimeGuard } from "@bereasoftware/time-guard";
+import { Duration, durationPlugin } from "@bereasoftware/time-guard/plugins/duration";
+import { PluginManager } from "@bereasoftware/time-guard";
 
 // Install plugin
 PluginManager.use(durationPlugin, TimeGuard);
@@ -812,8 +812,8 @@ Duration.fromISO("-P1D"); // Negative: -1 day
 Extended format tokens for specialized formatting needs.
 
 ```typescript
-import { TimeGuard, PluginManager } from "time-guard";
-import advancedFormatPlugin from "time-guard/plugins/advanced-format";
+import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
 
 // Install plugin
 PluginManager.use(advancedFormatPlugin, TimeGuard);
@@ -872,8 +872,8 @@ interface ITimeGuardPlugin {
 ### Creating Custom Plugins
 
 ```typescript
-import { TimeGuard } from "time-guard";
-import type { ITimeGuardPlugin } from "time-guard/types";
+import { TimeGuard } from "@bereasoftware/time-guard";
+import type { ITimeGuardPlugin } from "@bereasoftware/time-guard/types";
 
 class MyCustomPlugin implements ITimeGuardPlugin {
   name = "my-plugin";

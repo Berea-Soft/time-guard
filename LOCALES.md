@@ -90,7 +90,7 @@ import { ASIAN_LOCALES } from './locales/asian.locale';
 
 ### Usar con TimeGuard
 ```typescript
-import { TimeGuard, getAvailableLocales, LOCALES_COUNT } from 'time-guard';
+import { TimeGuard, getAvailableLocales, LOCALES_COUNT } from '@bereasoftware/time-guard';
 
 // Ver todas las locales disponibles
 const locales = getAvailableLocales();

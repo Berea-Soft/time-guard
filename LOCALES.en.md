@@ -86,7 +86,7 @@ import { ASIAN_LOCALES } from './locales/asian.locale';
 
 ### Use with TimeGuard
 ```typescript
-import { TimeGuard, getAvailableLocales, LOCALES_COUNT } from 'time-guard';
+import { TimeGuard, getAvailableLocales, LOCALES_COUNT } from '@bereasoftware/time-guard';
 
 // View all available locales
 const locales = getAvailableLocales();

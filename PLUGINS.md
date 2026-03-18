@@ -13,9 +13,9 @@ TimeGuard incluye un sistema de plugins opcional que extiende la funcionalidad p
 ### Uso Básico de Plugins
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
-import relativeTimePlugin from 'time-guard/plugins/relative-time';
-import durationPlugin from 'time-guard/plugins/duration';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
+import durationPlugin from '@bereasoftware/time-guard/plugins/duration';
 
 // Registrar plugins
 PluginManager.use(relativeTimePlugin, TimeGuard);
@@ -38,8 +38,8 @@ Añade diferencias de tiempo legibles para humanos.
 #### Instalación
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
-import relativeTimePlugin from 'time-guard/plugins/relative-time';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
 
 PluginManager.use(relativeTimePlugin, TimeGuard);
 ```
@@ -92,7 +92,7 @@ TimeGuard.from('2024-03-20').toNow(true);   // "7 días"
 #### Personalización
 
 ```typescript
-import { RelativeTimePlugin } from 'time-guard/plugins/relative-time';
+import { RelativeTimePlugin } from '@bereasoftware/time-guard/plugins/relative-time';
 
 const customPlugin = new RelativeTimePlugin({
   rounding: Math.floor, // Usar floor en lugar de round
@@ -124,8 +124,8 @@ Implementa soporte de duración ISO 8601 para intervalos de tiempo y cálculos.
 #### Instalación
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
-import durationPlugin from 'time-guard/plugins/duration';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import durationPlugin from '@bereasoftware/time-guard/plugins/duration';
 
 PluginManager.use(durationPlugin, TimeGuard);
 ```
@@ -232,8 +232,8 @@ Añade tokens de formato avanzado para necesidades de formato especializadas.
 #### Instalación
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
-import advancedFormatPlugin from 'time-guard/plugins/advanced-format';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
 
 PluginManager.use(advancedFormatPlugin, TimeGuard);
 ```
@@ -339,12 +339,12 @@ PluginManager.clear();
 ### Usando Múltiples Plugins Juntos
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
 import {
   relativeTimePlugin,
   durationPlugin,
   advancedFormatPlugin,
-} from 'time-guard/plugins';
+} from '@bereasoftware/time-guard/plugins';
 
 // Registrar todos los plugins
 PluginManager.use(relativeTimePlugin, TimeGuard);
@@ -364,8 +364,8 @@ console.log(today.format('Do MMMM YYYY'));       // "13º marzo 2024"
 ### Creando Configuración Personalizada
 
 ```typescript
-import { RelativeTimePlugin } from 'time-guard/plugins/relative-time';
-import { DurationPlugin } from 'time-guard/plugins/duration';
+import { RelativeTimePlugin } from '@bereasoftware/time-guard/plugins/relative-time';
+import { DurationPlugin } from '@bereasoftware/time-guard/plugins/duration';
 
 // Tiempo relativo personalizado
 const customRelative = new RelativeTimePlugin({
@@ -413,8 +413,8 @@ PluginManager.use(customRelative, TimeGuard);
 **Solución:** Asegúrate de registrar el plugin antes de usarlo:
 
 ```typescript
-import { TimeGuard, PluginManager } from 'time-guard';
-import relativeTimePlugin from 'time-guard/plugins/relative-time';
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
 
 // Registrar PRIMERO
 PluginManager.use(relativeTimePlugin, TimeGuard);
