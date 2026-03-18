@@ -1,7 +1,7 @@
 {
   "name": "@bereasoftware/time-guard",
   "private": false,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "main": "./dist/time-guard.cjs",
   "module": "./dist/time-guard.es.js",
