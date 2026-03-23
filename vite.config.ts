@@ -1,51 +1,138 @@
-import { defineConfig } from 'vite';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-import { readFileSync } from 'fs';
-import dts from 'vite-plugin-dts';
+/**
+ *
+ * Three build modes (run sequentially via npm run build):
+ *
+ *   vite build                → core + submodules (ES + CJS) + types
+ *   vite build --mode full    → full bundle (ES + CJS), self-contained
+ *   vite build --mode umd     → core only (UMD + IIFE) for CDN / <script>
+ *
+ * Separating "full" from the main build prevents Rollup from creating
+ * shared chunks (the cause of locales.esm / locales2.cjs artifacts).
+ */
+import { defineConfig, type UserConfig } from "vite";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+import { readFileSync } from "fs";
+import dts from "vite-plugin-dts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const pack = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+const pack = JSON.parse(
+  readFileSync(resolve(__dirname, "package.json"), "utf-8"),
+);
 
 const banner = `/*! time-guard v${
   pack.version
 } | (c) ${new Date().getFullYear()} Berea-Soft | MIT License | https://github.com/Berea-Soft/time-guard */`;
 
-export default defineConfig({
-  define: {
-    __VERSION__: JSON.stringify(pack.version),
-  },
-  build: {
-    lib: {
-      // Punto de entrada principal
-      entry: resolve(__dirname, 'src/index.ts'),
-      // Nombre global para UMD/IIFE: debe ser un identificador JS valido
-      name: 'BereasoftTimeGuard',
-      // Nombres de archivo personalizados
-      fileName: (format) => `time-guard.${format === "cjs" ? "cjs" : `${format}.js`}`,
-      formats: ["es", "cjs", "umd", "iife"],
-    },
-    rollupOptions: {
-      output: {
-        // Agregar banner a cada formato
-        banner,
+/**
+ * Naming convention:  ESM → <entry>.es.js  |  CJS → <entry>.cjs
+ */
+const fileName = (format: string, entryName: string) =>
+  format === "cjs" ? `${entryName}.cjs` : `${entryName}.${format}.js`;
+
+export default defineConfig(({ mode }): UserConfig => {
+  const shared = {
+    define: { __VERSION__: JSON.stringify(pack.version) },
+  };
+
+  // ── UMD / IIFE (core only, for CDN / <script>) ───────────────
+  if (mode === "umd") {
+    return {
+      ...shared,
+      build: {
+        lib: {
+          entry: resolve(__dirname, "src/index.ts"),
+          name: "BereasoftTimeGuard",
+          fileName: (format: string) =>
+            format === "cjs" ? "time-guard.cjs" : `time-guard.${format}.js`,
+          formats: ["umd", "iife"],
+        },
+        rollupOptions: {
+          external: ["@js-temporal/polyfill"],
+          output: {
+            banner,
+            exports: "named" as const,
+            globals: { "@js-temporal/polyfill": "temporal" },
+          },
+        },
+        emptyOutDir: false,
+        sourcemap: false,
+        minify: "oxc",
+        reportCompressedSize: true,
       },
+    };
+  }
+
+  // ── Full bundle (standalone, all-inclusive entry) ─────────────
+  if (mode === "full") {
+    return {
+      ...shared,
+      build: {
+        lib: {
+          entry: { full: resolve(__dirname, "src/full.ts") },
+          fileName,
+          formats: ["es", "cjs"],
+        },
+        rollupOptions: {
+          external: ["@js-temporal/polyfill"],
+          output: {
+            exports: "named" as const,
+            banner,
+          },
+        },
+        emptyOutDir: false,
+        sourcemap: false,
+        minify: "oxc",
+        reportCompressedSize: true,
+      },
+    };
+  }
+
+  // ── Default: core + on-demand submodules (ES + CJS) + types ──
+  return {
+    ...shared,
+    build: {
+      lib: {
+        entry: {
+          "time-guard": resolve(__dirname, "src/index.ts"),
+          locales: resolve(__dirname, "src/locales/index.ts"),
+          calendars: resolve(__dirname, "src/calendars/index.ts"),
+          "plugin-relative-time": resolve(
+            __dirname,
+            "src/plugins/relative-time/index.ts",
+          ),
+          "plugin-duration": resolve(
+            __dirname,
+            "src/plugins/duration/index.ts",
+          ),
+          "plugin-advanced-format": resolve(
+            __dirname,
+            "src/plugins/advanced-format/index.ts",
+          ),
+        },
+        fileName,
+        formats: ["es", "cjs"],
+      },
+      rollupOptions: {
+        external: ["@js-temporal/polyfill"],
+        output: {
+          exports: "named" as const,
+          banner,
+        },
+      },
+      emptyOutDir: true,
+      sourcemap: false,
+      minify: "oxc",
+      reportCompressedSize: true,
     },
-    // Limpiar la carpeta de salida antes de cada build
-    emptyOutDir: true,
-    // Generar source maps para facilitar el debugging
-    sourcemap: false,
-    // Minimizar el código para producción
-    minify: "oxc",
-  },
-  plugins: [
-    // Generar archivos de definición de tipos (.d.ts) automáticamente
-    dts({
-      rollupTypes: true,
-      insertTypesEntry: true,
-      include: ['src/**/*.ts'],
-      outDir: 'dist/types',
-    }),
-  ],
+    plugins: [
+      dts({
+        rollupTypes: false,
+        insertTypesEntry: true,
+        include: ["src/**/*.ts"],
+        outDir: "dist/types",
+      }),
+    ],
+  };
 });

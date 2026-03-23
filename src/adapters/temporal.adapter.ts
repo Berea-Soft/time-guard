@@ -1,9 +1,8 @@
 /**
  * Temporal Adapter - Convert to/from JavaScript's Temporal API
  * Single Responsibility: Handle all Temporal API conversions
+ * Note: The polyfill must be loaded by the consumer or via the "full" entry.
  */
-
-import '@js-temporal/polyfill';
 
 type TemporalPlainDateTime = Temporal.PlainDateTime;
 type TemporalZonedDateTime = Temporal.ZonedDateTime;

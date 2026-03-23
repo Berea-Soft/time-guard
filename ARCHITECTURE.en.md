@@ -15,7 +15,8 @@ A modern, fully-typed TypeScript date/time library built using the **Temporal AP
 - 🌍 **i18n Support** - Built-in locale management (EN, ES, and extensible)
 - 🔄 **Immutable** - All operations return new instances
 - 🪝 **Plugin System** - Extend functionality with custom plugins
-- 📦 **Zero Dependencies** - No external dependencies required
+- 📦 **Modular Bundle** - Lightweight core (~5KB gzip), load locales/plugins/calendars on demand
+- 🔗 **Peer Dependency** - Requires `@js-temporal/polyfill` as peer dependency
 
 ## 📦 Installation
 
@@ -26,34 +27,31 @@ npm install @bereasoftware/time-guard
 ## 🚀 Quick Start
 
 ```typescript
-import { TimeGuard, timeGuard } from '@bereasoftware/time-guard';
+import { TimeGuard, timeGuard } from "@bereasoftware/time-guard";
 
 // Create instance
 const now = TimeGuard.now();
-const date = new TimeGuard('2024-03-13');
-const aliased = timeGuard('2024-03-13');
+const date = new TimeGuard("2024-03-13");
+const aliased = timeGuard("2024-03-13");
 
 // Format
-date.format('YYYY-MM-DD'); // "2024-03-13"
-date.format('MMMM D, YYYY'); // "March 13, 2024"
+date.format("YYYY-MM-DD"); // "2024-03-13"
+date.format("MMMM D, YYYY"); // "March 13, 2024"
 
 // Arithmetic
-date.add({ day: 5 }).format('YYYY-MM-DD'); // "2024-03-18"
-date.subtract({ month: 1 }).format('YYYY-MM-DD'); // "2024-02-13"
+date.add({ day: 5 }).format("YYYY-MM-DD"); // "2024-03-18"
+date.subtract({ month: 1 }).format("YYYY-MM-DD"); // "2024-02-13"
 
 // Query
-date.isBefore(new TimeGuard('2024-03-20')); // true
-date.isAfter(new TimeGuard('2024-03-10')); // true
+date.isBefore(new TimeGuard("2024-03-20")); // true
+date.isAfter(new TimeGuard("2024-03-10")); // true
 
 // Manipulation
-date.startOf('month').format('YYYY-MM-DD'); // "2024-03-01"
-date.endOf('year').format('YYYY-MM-DD'); // "2024-12-31"
+date.startOf("month").format("YYYY-MM-DD"); // "2024-03-01"
+date.endOf("year").format("YYYY-MM-DD"); // "2024-12-31"
 
 // Chaining
-date
-  .add({ month: 1 })
-  .startOf('month')
-  .format('YYYY-MM-DD'); // "2024-04-01"
+date.add({ month: 1 }).startOf("month").format("YYYY-MM-DD"); // "2024-04-01"
 ```
 
 ## 🏛️ Architecture & SOLID Principles
@@ -86,10 +84,7 @@ interface ITimeGuardPlugin {
 All date/time objects implement `ITimeGuard` interface consistently:
 
 ```typescript
-interface ITimeGuard
-  extends IDateArithmetic,
-    IDateQuery,
-    IDateManipulation {
+interface ITimeGuard extends IDateArithmetic, IDateQuery, IDateManipulation {
   // ... required methods
 }
 ```
@@ -109,7 +104,12 @@ interface IDateQuery {
   isBefore(other: TimeGuard): boolean;
   isAfter(other: TimeGuard): boolean;
   isSame(other: TimeGuard, unit?: Unit): boolean;
-  isBetween(start: TimeGuard, end: TimeGuard, unit?: Unit, inclusivity?: '[)' | '()' | '[]' | '(]'): boolean;
+  isBetween(
+    start: TimeGuard,
+    end: TimeGuard,
+    unit?: Unit,
+    inclusivity?: "[)" | "()" | "[]" | "(]",
+  ): boolean;
 }
 
 interface IDateManipulation {
@@ -128,7 +128,7 @@ Depends on abstractions, not concrete implementations:
 // Low-level modules depend on abstractions
 class TimeGuard implements ITimeGuard {
   private localeManager: LocaleManager; // Singleton abstraction
-  private formatter: DateFormatter;    // Dependency injection
+  private formatter: DateFormatter; // Dependency injection
   private temporal: Temporal.PlainDateTime | Temporal.ZonedDateTime;
 }
 ```
@@ -138,18 +138,18 @@ class TimeGuard implements ITimeGuard {
 Tests are organized around user behaviors (BDD style):
 
 ```typescript
-describe('TimeGuard - Core Functionality', () => {
-  describe('Creating instances', () => {
-    it('should create a TimeGuard instance with current date when no argument provided', () => {
+describe("TimeGuard - Core Functionality", () => {
+  describe("Creating instances", () => {
+    it("should create a TimeGuard instance with current date when no argument provided", () => {
       const tg = new TimeGuard();
       expect(tg.toDate()).toBeInstanceOf(Date);
     });
   });
 
-  describe('Formatting', () => {
-    it('should format with YYYY-MM-DD pattern', () => {
-      const tg = new TimeGuard('2024-03-13T14:30:45.123');
-      expect(tg.format('YYYY-MM-DD')).toBe('2024-03-13');
+  describe("Formatting", () => {
+    it("should format with YYYY-MM-DD pattern", () => {
+      const tg = new TimeGuard("2024-03-13T14:30:45.123");
+      expect(tg.format("YYYY-MM-DD")).toBe("2024-03-13");
     });
   });
 
@@ -176,144 +176,143 @@ npm run test:coverage
 
 ```typescript
 // Current date/time
-TimeGuard.now()
+TimeGuard.now();
 
 // From various inputs
-new TimeGuard('2024-03-13')
-new TimeGuard(new Date())
-new TimeGuard(1710340800000) // Unix timestamp (ms)
-new TimeGuard({ year: 2024, month: 3, day: 13 })
+new TimeGuard("2024-03-13");
+new TimeGuard(new Date());
+new TimeGuard(1710340800000); // Unix timestamp (ms)
+new TimeGuard({ year: 2024, month: 3, day: 13 });
 
 // With configuration
-new TimeGuard('2024-03-13', { locale: 'es', timezone: 'UTC' })
+new TimeGuard("2024-03-13", { locale: "es", timezone: "UTC" });
 
 // Factory function
-timeGuard('2024-03-13')
+timeGuard("2024-03-13");
 ```
 
 ### Formatting
 
 ```typescript
-const tg = new TimeGuard('2024-03-13T14:30:45');
+const tg = new TimeGuard("2024-03-13T14:30:45");
 
 // Custom patterns
-tg.format('YYYY-MM-DD')           // "2024-03-13"
-tg.format('DD/MM/YYYY')           // "13/03/2024"
-tg.format('MMMM D, YYYY')         // "March 13, 2024"
-tg.format('dddd')                 // "Wednesday"
-tg.format('[Date: ]YYYY-MM-DD')   // "Date: 2024-03-13"
+tg.format("YYYY-MM-DD"); // "2024-03-13"
+tg.format("DD/MM/YYYY"); // "13/03/2024"
+tg.format("MMMM D, YYYY"); // "March 13, 2024"
+tg.format("dddd"); // "Wednesday"
+tg.format("[Date: ]YYYY-MM-DD"); // "Date: 2024-03-13"
 
 // Presets
-tg.format('iso')       // ISO 8601
-tg.format('date')      // Date only
-tg.format('time')      // Time only
-tg.format('datetime')  // Date and time
-tg.format('rfc2822')   // RFC 2822
-tg.format('utc')       // UTC format
+tg.format("iso"); // ISO 8601
+tg.format("date"); // Date only
+tg.format("time"); // Time only
+tg.format("datetime"); // Date and time
+tg.format("rfc2822"); // RFC 2822
+tg.format("utc"); // UTC format
 ```
 
 ### Arithmetic Operations
 
 ```typescript
-const tg = new TimeGuard('2024-03-13');
+const tg = new TimeGuard("2024-03-13");
 
-tg.add({ day: 5 })
-tg.add({ month: 1, day: 15 })
-tg.add({ year: 1, hour: 5, minute: 30 })
+tg.add({ day: 5 });
+tg.add({ month: 1, day: 15 });
+tg.add({ year: 1, hour: 5, minute: 30 });
 
-tg.subtract({ day: 5 })
-tg.subtract({ month: 1, year: 1 })
+tg.subtract({ day: 5 });
+tg.subtract({ month: 1, year: 1 });
 
 // Difference between dates
-tg.diff(new TimeGuard('2024-03-20'), 'day')     // -7
-tg.diff(new TimeGuard('2024-04-13'), 'month')   // -1
+tg.diff(new TimeGuard("2024-03-20"), "day"); // -7
+tg.diff(new TimeGuard("2024-04-13"), "month"); // -1
 ```
 
 ### Query Operations
 
 ```typescript
-const tg1 = new TimeGuard('2024-03-13');
-const tg2 = new TimeGuard('2024-03-20');
+const tg1 = new TimeGuard("2024-03-13");
+const tg2 = new TimeGuard("2024-03-20");
 
-tg1.isBefore(tg2)                              // true
-tg1.isAfter(tg2)                               // false
-tg1.isSame(tg1.clone())                        // true
-tg1.isSame(tg2, 'month')                       // true
+tg1.isBefore(tg2); // true
+tg1.isAfter(tg2); // false
+tg1.isSame(tg1.clone()); // true
+tg1.isSame(tg2, "month"); // true
 
-tg1.isBetween(
-  new TimeGuard('2024-03-01'),
-  new TimeGuard('2024-03-31')
-)                                              // true
+tg1.isBetween(new TimeGuard("2024-03-01"), new TimeGuard("2024-03-31")); // true
 ```
 
 ### Manipulation Operations
 
 ```typescript
-const tg = new TimeGuard('2024-03-13T14:30:45');
+const tg = new TimeGuard("2024-03-13T14:30:45");
 
-tg.clone()                         // New instance
-tg.startOf('year')                 // 2024-01-01 00:00:00
-tg.startOf('month')                // 2024-03-01 00:00:00
-tg.startOf('day')                  // 2024-03-13 00:00:00
+tg.clone(); // New instance
+tg.startOf("year"); // 2024-01-01 00:00:00
+tg.startOf("month"); // 2024-03-01 00:00:00
+tg.startOf("day"); // 2024-03-13 00:00:00
 
-tg.endOf('year')                   // 2024-12-31 23:59:59
-tg.endOf('month')                  // 2024-03-31 23:59:59
+tg.endOf("year"); // 2024-12-31 23:59:59
+tg.endOf("month"); // 2024-03-31 23:59:59
 
-tg.set({ month: 12, day: 25 })     // 2024-12-25 14:30:45
-tg.set({ hour: 0, minute: 0 })     // 2024-03-13 00:00:00
+tg.set({ month: 12, day: 25 }); // 2024-12-25 14:30:45
+tg.set({ hour: 0, minute: 0 }); // 2024-03-13 00:00:00
 ```
 
 ### Conversion Operations
 
 ```typescript
-const tg = new TimeGuard('2024-03-13T14:30:45');
+const tg = new TimeGuard("2024-03-13T14:30:45");
 
-tg.toDate()           // JavaScript Date object
-tg.toISOString()      // "2024-03-13T14:30:45Z"
-tg.valueOf()          // Unix timestamp (ms)
-tg.unix()             // Unix timestamp (seconds)
-tg.toJSON()           // JSON-compatible string
-tg.toString()         // "2024-03-13 14:30:45"
-tg.toTemporal()       // Temporal.PlainDateTime
+tg.toDate(); // JavaScript Date object
+tg.toISOString(); // "2024-03-13T14:30:45Z"
+tg.valueOf(); // Unix timestamp (ms)
+tg.unix(); // Unix timestamp (seconds)
+tg.toJSON(); // JSON-compatible string
+tg.toString(); // "2024-03-13 14:30:45"
+tg.toTemporal(); // Temporal.PlainDateTime
 ```
 
 ### Getters
 
 ```typescript
-const tg = new TimeGuard('2024-03-13T14:30:45.123');
+const tg = new TimeGuard("2024-03-13T14:30:45.123");
 
-tg.get('year')         // 2024
-tg.get('month')        // 3
-tg.get('day')          // 13
-tg.get('hour')         // 14
-tg.get('minute')       // 30
-tg.get('second')       // 45
-tg.get('millisecond')  // 123
+tg.get("year"); // 2024
+tg.get("month"); // 3
+tg.get("day"); // 13
+tg.get("hour"); // 14
+tg.get("minute"); // 30
+tg.get("second"); // 45
+tg.get("millisecond"); // 123
 ```
 
 ### Locale Operations
 
 ```typescript
-const tg = new TimeGuard('2024-03-13');
+const tg = new TimeGuard("2024-03-13");
 
-tg.locale()                      // "en"
-tg.locale('es').locale()         // "es"
+tg.locale(); // "en"
+tg.locale("es").locale(); // "es"
 
-tg.locale('es').format('MMMM')   // "Marzo"
-tg.locale('en').format('MMMM')   // "March"
+tg.locale("es").format("MMMM"); // "Marzo"
+tg.locale("en").format("MMMM"); // "March"
 
 // Register custom locale
 const manager = LocaleManager.getInstance();
-manager.setLocale('custom', { /* locale data */ });
+manager.setLocale("custom", {
+  /* locale data */
+});
 ```
 
 ### Timezone Operations
 
 ```typescript
-const tg = new TimeGuard('2024-03-13', { timezone: 'UTC' });
+const tg = new TimeGuard("2024-03-13", { timezone: "UTC" });
 
-tg.timezone()                     // "UTC"
-tg.timezone('America/New_York')   // New instance with different timezone
+tg.timezone(); // "UTC"
+tg.timezone("America/New_York"); // New instance with different timezone
 ```
 
 ## 🔧 Development
@@ -322,19 +321,57 @@ tg.timezone('America/New_York')   // New instance with different timezone
 
 ```
 src/
-├── index.ts                    # Main entry point
-├── types.ts                    # TypeScript interfaces & types
+├── index.ts                    # Lightweight core (~5KB gzip, EN/ES only)
+├── full.ts                     # Full bundle (core + polyfill + all locales/plugins/calendars)
+├── polyfill-loader.ts          # Temporal polyfill loader
 ├── time-guard.ts               # Main TimeGuard class
 ├── adapters/
-│   └── temporal.adapter.ts      # Temporal API adapter
+│   └── temporal.adapter.ts     # Temporal API adapter
+├── calendars/
+│   ├── index.ts                # Exports all calendar systems
+│   └── calendar.manager.ts     # Manager + Gregorian (core)
 ├── formatters/
-│   └── date.formatter.ts        # Date formatting strategy
-└── locales/
-    └── locale.manager.ts        # Locale management
+│   └── date.formatter.ts       # Date formatting strategy
+├── locales/
+│   ├── index.ts                # Exports all 40+ locales
+│   └── locale.manager.ts       # Singleton manager (EN/ES in core)
+├── plugins/
+│   ├── manager.ts              # Plugin manager
+│   ├── relative-time/          # Relative time plugin
+│   ├── duration/               # ISO 8601 duration plugin
+│   └── advanced-format/        # Advanced format plugin
+└── types/                      # TypeScript interfaces & types
 
 test/
 ├── time-guard.test.ts          # Core functionality tests
-└── advanced.test.ts            # Advanced features tests
+├── advanced.test.ts            # Advanced features tests
+├── comprehensive.test.ts       # Integration tests
+├── locales.test.ts             # Locale tests
+├── plugins.test.ts             # Plugin tests
+├── bundle-size.test.ts         # Bundle size validation
+└── setup.ts                    # Vitest global setup
+```
+
+### Modular Build System
+
+The build runs in 3 sequential modes:
+
+```bash
+# npm run build executes:
+vite build                  # Core + submodules (ES + CJS) + types
+vite build --mode full      # Full bundle (ES + CJS)
+vite build --mode umd       # Core (UMD + IIFE) for CDN / <script>
+```
+
+**Subpath exports** in `package.json`:
+
+```typescript
+import { TimeGuard } from '@bereasoftware/time-guard'              // Lightweight core
+import { TimeGuard } from '@bereasoftware/time-guard/full'         // All inclusive
+import { ALL_LOCALES } from '@bereasoftware/time-guard/locales'    // On-demand locales
+import { IslamicCalendar } from '@bereasoftware/time-guard/calendars'
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time'
+import { Duration } from '@bereasoftware/time-guard/plugins/duration'
 ```
 
 ### Build Commands
@@ -370,9 +407,22 @@ npm run format
 
 ## 🌍 Supported Locales
 
-Currently supported:
-- `en` - English
-- `es` - Spanish (Español)
+**40+ locales included** organized by family: English (4), Spanish (3), Romance (5), Slavic (4), Nordic (4), Asian (7), European (7), Middle Eastern/South Asian (3), and more.
+
+The **core** includes only EN and ES to keep the bundle lightweight. Others are loaded on demand:
+
+```typescript
+// Core: only EN/ES available
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Load all locales on demand
+import { ALL_LOCALES, registerAllLocales } from '@bereasoftware/time-guard/locales';
+import { LocaleManager } from '@bereasoftware/time-guard';
+LocaleManager.getInstance().loadLocales(ALL_LOCALES);
+
+// Or use the full bundle which includes everything
+import { TimeGuard } from '@bereasoftware/time-guard/full';
+```
 
 Add custom locales:
 
@@ -380,12 +430,12 @@ Add custom locales:
 import { LocaleManager } from '@bereasoftware/time-guard';
 
 const manager = LocaleManager.getInstance();
-manager.setLocale('de', {
-  name: 'de',
-  months: ['Januar', 'Februar', ...],
+manager.setLocale('custom', {
+  name: 'custom',
+  months: ['January', 'February', ...],
   monthsShort: ['Jan', 'Feb', ...],
-  weekdays: ['Sonntag', 'Montag', ...],
-  weekdaysShort: ['So', 'Mo', ...],
+  weekdays: ['Sunday', 'Monday', ...],
+  weekdaysShort: ['Sun', 'Mon', ...],
   weekdaysMin: ['S', 'M', ...],
 });
 ```
@@ -410,11 +460,11 @@ Available units for arithmetic and formatting:
 All operations return new instances, ensuring immutability:
 
 ```typescript
-const original = new TimeGuard('2024-03-13');
+const original = new TimeGuard("2024-03-13");
 const modified = original.add({ day: 1 });
 
-console.log(original.format('YYYY-MM-DD')); // "2024-03-13"
-console.log(modified.format('YYYY-MM-DD')); // "2024-03-14"
+console.log(original.format("YYYY-MM-DD")); // "2024-03-13"
+console.log(modified.format("YYYY-MM-DD")); // "2024-03-14"
 ```
 
 ### Type Safety
@@ -423,9 +473,9 @@ Complete TypeScript support with strict mode:
 
 ```typescript
 // Everything is typed
-const tg: TimeGuard = new TimeGuard('2024-03-13');
-const formatted: string = tg.format('YYYY-MM-DD');
-const diff: number = tg.diff(TimeGuard.now(), 'day');
+const tg: TimeGuard = new TimeGuard("2024-03-13");
+const formatted: string = tg.format("YYYY-MM-DD");
+const diff: number = tg.diff(TimeGuard.now(), "day");
 ```
 
 ### Temporal API
@@ -439,10 +489,11 @@ const temporal = tg.toTemporal();
 
 ## 🚀 Performance
 
+- **Core ~5KB gzip** — only the essentials (TimeGuard, formatter, EN/ES, Gregorian)
 - Minimal overhead through adapter pattern
 - Lazy evaluation where possible
 - Efficient locale caching
-- No external dependencies
+- `@js-temporal/polyfill` as peer dependency (not included in bundle)
 
 ## 📄 License
 
@@ -466,13 +517,14 @@ Contributions are welcome! Please ensure:
 
 ## 🎯 Roadmap
 
-- [ ] Additional locales (FR, DE, IT, JP, etc.)
-- [ ] Advanced timezone support
-- [ ] Plugin system implementation
+- [x] 40+ locales (EN, ES, FR, DE, IT, JA, ZH, KO, AR, etc.)
+- [x] Plugin system (relative-time, duration, advanced-format)
+- [x] 6 calendar systems (Gregorian, Islamic, Hebrew, Chinese, Japanese, Buddhist)
+- [x] UMD/IIFE builds for CDN and `<script>`
+- [x] Modular architecture (core ~5KB gzip + on-demand loading)
+- [ ] Advanced timezone support (DST conversions)
 - [ ] Performance optimizations
-- [ ] Browser compatibility polyfills
 - [ ] Date recurrence patterns
-- [ ] Calendar operations
 
 ## 📧 Support
 

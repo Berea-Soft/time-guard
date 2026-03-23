@@ -1,6 +1,7 @@
 # TimeGuard 🕐
 
 > 📚 **Documentación disponible en otros idiomas:**
+>
 > - 🇪🇸 **Español** (este archivo - README.md)
 > - 🇬🇧 [English](README.en.md)
 
@@ -104,8 +105,31 @@ pnpm add @bereasoftware/time-guard
 
 ### Requisitos
 
-- **Node.js** 16+ (soporte de Temporal API)
+- **Node.js** 20.18.0+ (soporte de Temporal API)
 - **TypeScript** 5.0+ (opcional pero recomendado)
+- **@js-temporal/polyfill** >=0.5.0 (peer dependency)
+
+### Bundle Modular
+
+TimeGuard usa una arquitectura modular inspirada en dayjs. El **core** pesa ~5KB gzip e incluye solo lo esencial (TimeGuard, formatter, EN/ES, Gregoriano). Locales, plugins y calendarios se cargan bajo demanda:
+
+```typescript
+// Core ligero (~5KB gzip) - solo EN/ES
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Bundle completo (core + polyfill + todos los locales/plugins/calendarios)
+import { TimeGuard } from '@bereasoftware/time-guard/full';
+
+// Módulos bajo demanda
+import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
+import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
+import { Duration } from '@bereasoftware/time-guard/plugins/duration';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
+
+// UMD para CDN / <script>
+// <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
+```
 
 ---
 
@@ -253,7 +277,7 @@ date.round({
 
 TimeGuard incluye soporte para múltiples sistemas de calendario, extensible a través del gestor de calendarios:
 
-### Supported Calendars
+### Calendarios Soportados
 
 ```typescript
 import { TimeGuard, CalendarManager } from "@bereasoftware/time-guard";
@@ -284,9 +308,9 @@ console.log(gregorian.getWeekdayName(1)); // "Sunday"
 console.log(gregorian.isLeapYear(2024)); // true
 ```
 
-### Calendar Objects
+### Objetos de Calendario
 
-#### Gregorian Calendar
+#### Calendario Gregoriano
 
 ```typescript
 import { GregorianCalendar } from "@bereasoftware/time-guard/calendars";
@@ -296,7 +320,7 @@ console.log(calendar.daysInMonth(2024, 2)); // 29 (leap year)
 console.log(calendar.daysInYear(2024)); // 366
 ```
 
-#### Islamic Calendar (Hijri)
+#### Calendario Islámico (Hijri)
 
 ```typescript
 import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
@@ -306,7 +330,7 @@ console.log(calendar.getMonthName(9)); // "Ramadan"
 console.log(calendar.isLeapYear(1445)); // true
 ```
 
-#### Hebrew Calendar
+#### Calendario Hebreo
 
 ```typescript
 import { HebrewCalendar } from "@bereasoftware/time-guard/calendars";
@@ -316,7 +340,7 @@ console.log(calendar.getMonthName(1)); // "Tishrei"
 console.log(calendar.isLeapYear(5784)); // true
 ```
 
-#### Chinese Calendar
+#### Calendario Chino
 
 ```typescript
 import { ChineseCalendar } from "@bereasoftware/time-guard/calendars";
@@ -325,7 +349,7 @@ const calendar = new ChineseCalendar();
 const zodiac = calendar.getZodiacSign(2024); // "龙" (Dragon)
 ```
 
-#### Japanese Calendar
+#### Calendario Japonés
 
 ```typescript
 import { JapaneseCalendar } from "@bereasoftware/time-guard/calendars";
@@ -334,7 +358,7 @@ const calendar = new JapaneseCalendar();
 console.log(calendar.getMonthName(3)); // "3月"
 ```
 
-#### Buddhist Calendar
+#### Calendario Budista
 
 ```typescript
 import { BuddhistCalendar } from "@bereasoftware/time-guard/calendars";
@@ -348,11 +372,11 @@ console.log(calendar.isLeapYear(2567)); // true
 
 ## � Plugins
 
-TimeGuard includes an optional plugin system for extended functionality:
+TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 
-### Available Plugins
+### Plugins Disponibles
 
-1. **Relative Time Plugin** - Human-readable time differences
+1. **Plugin de Tiempo Relativo** - Diferencias de tiempo legibles para humanos
 
    ```typescript
    import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
@@ -364,7 +388,7 @@ TimeGuard includes an optional plugin system for extended functionality:
    TimeGuard.from("2024-04-01").toNow(); // "in 19 days"
    ```
 
-2. **Duration Plugin** - ISO 8601 duration support
+2. **Plugin de Duración** - Soporte de duración ISO 8601
 
    ```typescript
    import { Duration } from "@bereasoftware/time-guard/plugins/duration";
@@ -374,7 +398,7 @@ TimeGuard includes an optional plugin system for extended functionality:
    duration.asDays(); // 1159
    ```
 
-3. **Advanced Format Plugin** - Extended format tokens
+3. **Plugin de Formato Avanzado** - Tokens de formato extendidos
 
    ```typescript
    import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
@@ -391,104 +415,104 @@ TimeGuard includes an optional plugin system for extended functionality:
 
 ## �📚 Documentation
 
-### Main Documentation Files
+### Archivos de Documentación Principal
 
-| Document                              | Purpose                                                                   |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| [📖 ARCHITECTURE.md](ARCHITECTURE.md) | Deep dive into design patterns, SOLID principles, and system architecture |
+| Documento                             | Propósito                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [📖 ARCHITECTURE.md](ARCHITECTURE.md) | Deep dive into design patterns, SOLID principles, and system architecture | Inmersión profunda en patrones de diseño, principios SOLID y arquitectura |
 | [💡 EXAMPLES.md](EXAMPLES.md)         | Real-world usage examples and common scenarios                            |
 | [🌍 LOCALES.md](LOCALES.md)           | Complete guide to localization and supported languages                    |
 | [� PLUGINS.md](PLUGINS.md)            | Plugin system documentation and usage guide                               |
 | [�📖 API Reference](#api-overview)    | Quick API reference (below)                                               |
 
-### Quick Navigation
+### Navegación Rápida
 
-- **Getting Started** → Start with [Quick Start](#quick-start) above
-- **Advanced Usage** → See [EXAMPLES.md](EXAMPLES.md)
-- **Localization** → See [LOCALES.md](LOCALES.md)
-- **Architecture** → See [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Inicio** → Comienza con [Inicio Rápido](#inicio-r%C3%A1pido) arriba
+- **Uso Avanzado** → Ver [EXAMPLES.md](EXAMPLES.md)
+- **Localización** → Ver [LOCALES.md](LOCALES.md)
+- **Arquitectura** → Ver [ARCHITECTURE.md](ARCHITECTURE.md)
 
-## 🌍 Supported Locales - Complete Guide
+## 🌍 Locales Soportadas
 
-TimeGuard provides **40+ languages and regional variants** with full internationalization support. Locales are organized by language family for easy discovery.
+TimeGuard proporciona **más de 40 idiomas y variantes regionales** con soporte completo de internacionalización. Los locales se organizan por familia de idiomas para facilitar el descubrimiento.
 
-### Locale Code Format
+### Formato de Código de Locale
 
-Locale codes follow the standard `[language]-[region]` pattern:
+Los códigos de locale siguen el patrón estándar `[language]-[region]`:
 
-- `en` - Default form (used if region variant not specified)
-- `en-gb` - Specific region variant (Great Britain)
-- `es-mx` - Spanish variant for Mexico
-- `zh-cn` - Simplified Chinese
+- `en` - Forma predeterminada (se usa si no se especifica variante de región)
+- `en-gb` - Variante de región específica (Gran Bretaña)
+- `es-mx` - Variante española para México
+- `zh-cn` - Chino simplificado
 
-### Available Locales by Family
+### Locales Disponibles por Familia
 
-#### 🇬🇧 English (4 variants)
+####-🇬🇧 Inglés (4 variantes)
 
-- `en` - English (US)
-- `en-au` - English (Australia)
-- `en-gb` - English (Great Britain)
-- `en-ca` - English (Canada)
+- `en` - Inglés (US)
+- `en-au` - Inglés (Australia)
+- `en-gb` - Inglés (Gran Bretaña)
+- `en-ca` - Inglés (Canadá)
 
-### Spanish (3 variants)
+### Español (3 variantes)
 
-- `es` - Spanish (Spain)
-- `es-mx` - Spanish (Mexico)
-- `es-us` - Spanish (US)
+- `es` - Español (España)
+- `es-mx` - Español (México)
+- `es-us` - Español (US)
 
-### Romance Languages (5)
+### Idiomas Románicos (5)
 
-- `fr` - French
-- `it` - Italian
-- `pt` - Portuguese (Portugal)
-- `pt-br` - Portuguese (Brazil)
-- `ro` - Romanian
+- `fr` - Francés
+- `it` - Italiano
+- `pt` - Portugués (Portugal)
+- `pt-br` - Portugués (Brasil)
+- `ro` - Rumano
 
-### Slavic Languages (4)
+### Idiomas Eslavos (4)
 
-- `ru` - Russian
-- `pl` - Polish
-- `cs` - Czech
-- `sk` - Slovak
+- `ru` - Ruso
+- `pl` - Polaco
+- `cs` - Checo
+- `sk` - Eslovaco
 
-### Nordic Languages (4)
+### Idiomas Nórdicos (4)
 
-- `sv` - Swedish
-- `nb` - Norwegian (Bokmål)
-- `da` - Danish
-- `fi` - Finnish
+- `sv` - Sueco
+- `nb` - Noruego (Bokmål)
+- `da` - Danés
+- `fi` - Finlandés
 
-### Asian Languages (7)
+### Idiomas Asiáticos (7)
 
-- `ja` - Japanese
-- `zh-cn` - Chinese (Simplified)
-- `zh-tw` - Chinese (Traditional)
-- `ko` - Korean
+- `ja` - Japonés
+- `zh-cn` - Chino (Simplificado)
+- `zh-tw` - Chino (Tradicional)
+- `ko` - Coreano
 - `th` - Thai
-- `vi` - Vietnamese
-- `id` - Indonesian
+- `vi` - Vietnamita
+- `id` - Indonesio
 
-### European Languages (7)
+### Idiomas Europeos (7)
 
-- `de` - German
-- `nl` - Dutch
-- `el` - Greek
-- `hu` - Hungarian
-- `eu` - Basque
-- `ca` - Catalan
-- `tr` - Turkish
+- `de` - Alemán
+- `nl` - Holandés
+- `el` - Griego
+- `hu` - Húngaro
+- `eu` - Euskera
+- `ca` - Catalán
+- `tr` - Turco
 
-### Middle Eastern & South Asian (3)
+### Oriente Medio y Asia del Sur (3)
 
-- `ar` - Arabic
-- `he` - Hebrew
+- `ar` - Árabe
+- `he` - Hebreo
 - `hi` - Hindi
 
 ---
 
-### Locale Usage Guide
+### Guía de Uso de Locales
 
-#### Setting Locales
+#### Configuración de Locales
 
 ```typescript
 import { TimeGuard } from "@bereasoftware/time-guard";
@@ -512,7 +536,7 @@ TimeGuard.from("2024-03-13", { locale: "de" });
 TimeGuard.now({ locale: "ja" });
 ```
 
-#### Formatting in Different Locales
+#### Formateo en Diferentes Locales
 
 ```typescript
 const date = TimeGuard.from("2024-03-13");
@@ -571,7 +595,7 @@ date.locale("he").format("DD.MM.YYYY"); // 13.03.2024
 date.locale("hi").format("DD MMMM YYYY"); // 13 मार्च 2024
 ```
 
-#### Day and Month Names
+#### Nombres de Día y Mes
 
 ```typescript
 // Get localized day names
@@ -589,7 +613,7 @@ date.locale("de").format("MMMM"); // März
 date.locale("ru").format("MMMM"); // марта
 ```
 
-#### Multi-Locale Applications
+#### Aplicaciones Multilocale
 
 ```typescript
 // Switch language at runtime (user preference)
@@ -618,7 +642,7 @@ console.log(formatUserDate(date, "fr")); // mercredi, 13 mars 2024 à 14:30
 console.log(formatUserDate(date, "ja")); // 水曜日、2024年3月13日 14:30
 ```
 
-#### Getting Available Locales Programmatically
+#### Obtener Locales Disponibles Programáticamente
 
 ```typescript
 // Get all available locales
@@ -665,9 +689,9 @@ PluginManager.isInstalled(pluginName);
 PluginManager.listInstalled();
 ```
 
-### 1️⃣ Relative Time Plugin
+### 1️⃣ Plugin de Tiempo Relativo
 
-Adds human-readable time differences like "2 hours ago" or "in 3 days".
+Añade diferencias de tiempo legibles como "hace 2 horas" o "en 3 días".
 
 ```typescript
 import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
@@ -716,13 +740,16 @@ date.humanize(other, true); // "a month" (exact mode)
 
 ---
 
-### 2️⃣ Duration Plugin
+### 2️⃣ Plugin de Duración
 
-ISO 8601 duration support with advanced calculations.
+Soporte de duración ISO 8601 con cálculos avanzados.
 
 ```typescript
 import { TimeGuard } from "@bereasoftware/time-guard";
-import { Duration, durationPlugin } from "@bereasoftware/time-guard/plugins/duration";
+import {
+  Duration,
+  durationPlugin,
+} from "@bereasoftware/time-guard/plugins/duration";
 import { PluginManager } from "@bereasoftware/time-guard";
 
 // Install plugin
@@ -807,9 +834,9 @@ Duration.fromISO("-P1D"); // Negative: -1 day
 
 ---
 
-### 3️⃣ Advanced Format Plugin
+### 3️⃣ Plugin de Formato Avanzado
 
-Extended format tokens for specialized formatting needs.
+Tokens de formato extendidos para necesidades de formateo especializadas.
 
 ```typescript
 import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
@@ -857,7 +884,7 @@ zzz                             // Timezone abbreviation (UTC, EST, etc.)
 
 ---
 
-### Plugin Architecture
+### Arquitectura de Plugins
 
 All plugins implement `ITimeGuardPlugin`:
 
@@ -900,7 +927,7 @@ date.myMethod(); // "Hello from my plugin!"
 
 ---
 
-## 🎯 Complete API Reference
+## 🎯 Referencia API
 
 ### Factory Methods
 
@@ -1201,7 +1228,7 @@ Edge cases:              65+ tests
 
 ---
 
-## 🏛️ Architecture
+## 🏛️ Arquitectura
 
 TimeGuard is built on **SOLID principles** ensuring clean, maintainable, and extensible code:
 
@@ -1238,78 +1265,75 @@ npm run build
 npm run dev
 ```
 
-### Project Structure
+### Estructura del Proyecto
 
 ```
 time-guard/
 ├── src/
-│   ├── index.ts                 # Public API exports
-│   ├── types.ts                 # Type definitions
-│   ├── time-guard.ts            # Main class
+│   ├── index.ts                 # Core ligero (~5KB gzip, EN/ES)
+│   ├── full.ts                  # Bundle completo (todo incluido)
+│   ├── polyfill-loader.ts       # Cargador del polyfill Temporal
+│   ├── time-guard.ts            # Clase principal
 │   ├── adapters/
-│   │   └── temporal.adapter.ts  # Temporal API wrapper
+│   │   └── temporal.adapter.ts  # Wrapper del API Temporal
+│   ├── calendars/               # 6 sistemas de calendario
 │   ├── formatters/
-│   │   └── date.formatter.ts    # Format strategies
-│   └── locales/
-│       ├── index.ts             # Locale registry
-│       ├── locale.manager.ts    # Singleton manager
-│       ├── english.locale.ts    # English variants
-│       ├── spanish.locale.ts    # Spanish variants
-│       └── ...                  # 6+ more locale files
+│   │   └── date.formatter.ts    # Estrategias de formateo
+│   ├── locales/                 # 40+ archivos de locale
+│   ├── plugins/                 # 3 plugins (relative-time, duration, advanced-format)
+│   └── types/                   # Definiciones de tipos
 ├── test/
-│   ├── time-guard.test.ts       # Core tests
-│   ├── advanced.test.ts         # Advanced tests
-│   └── locales.test.ts          # Locale tests
-└── docs/
-    ├── ARCHITECTURE.md          # Architecture guide
-    ├── EXAMPLES.md              # Usage examples
-    └── LOCALES.md               # Locale documentation
+│   ├── time-guard.test.ts       # Pruebas core
+│   ├── advanced.test.ts         # Pruebas avanzadas
+│   ├── comprehensive.test.ts    # Pruebas de integración
+│   ├── locales.test.ts          # Pruebas de locales
+│   ├── plugins.test.ts          # Pruebas de plugins
+│   └── bundle-size.test.ts      # Validación de tamaño de bundle
+└── vite.config.ts               # Config unificada (3 modos de build)
 ```
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contribuir
 
-We welcome contributions! Please:
+¡Bienvenidas las contribuciones! Por favor:
 
-1. Follow SOLID principles and existing code patterns
-2. Write tests for new features
-3. Update documentation
-4. Ensure all tests pass (`npm test`)
-5. Check types pass (`npx tsc --noEmit`)
-
----
-
-## 📄 License
-
-MIT License © 2024 Berea-Soft
-
-See [LICENSE](LICENSE) file for details.
+1. Sigue los principios SOLID y patrones de código existentes
+2. Escribe pruebas para nuevas funcionalidades
+3. Actualiza la documentación
+4. Asegúrate de que todas las pruebas pasen (`npm test`)
+5. Verifica que los tipos pasen (`npx tsc --noEmit`)
 
 ---
 
-## 🔗 Quick Links
+## 📄 Licencia
 
-- 📖 [Full API Reference](EXAMPLES.md)
-- 🏛️ [Architecture Guide](ARCHITECTURE.md)
-- 🌍 [Localization Guide](LOCALES.md)
-- 🐛 [Issue Tracker](https://github.com/bereasoftware/time-guard/issues)
-- 💬 [Discussions](https://github.com/bereasoftware/time-guard/discussions)
+Licencia MIT © 2024 Berea-Soft
+
+Ver archivo [LICENSE](LICENSE) para detalles.
 
 ---
 
-## 📞 Support
+## 🔗 Enlaces Rápidos
 
-For questions, issues, or feature requests:
-
-- Open an issue on GitHub
-- Start a discussion
-- Check existing documentation
-
----
+- 📖 [Referencia API Completa](EXAMPLES.md)
+- 🏛️ [Guía de Arquitectura](ARCHITECTURE.md)
+- 🌍 [Guía de Localización](LOCALES.md)
+- 🐛 [Rastreador de Problemas](https://github.com/bereasoftware/time-guard/issues)
+- 💬 [Discusiones](https://github.com/bereasoftware/time-guard/discussions)
 
 ---
 
-## Built with ❤️ by Berea-Soft
+## 📞 Soporte
 
-A modern date/time library with SOLID principles and TypeScript
+Para preguntas, problemas o solicitudes de funciones:
+
+- Abre un problema en GitHub
+- Inicia una discusión
+- Consulta la documentación existente
+
+---
+
+Construído con ❤️ por Berea-Soft
+
+Una librería moderna de fecha/hora con principios SOLID y TypeScript

@@ -100,8 +100,31 @@ pnpm add @bereasoftware/time-guard
 
 ### Requirements
 
-- **Node.js** 16+ (Temporal API support)
+- **Node.js** 20.18.0+ (Temporal API support)
 - **TypeScript** 5.0+ (optional but recommended)
+- **@js-temporal/polyfill** >=0.5.0 (peer dependency)
+
+### Modular Bundle
+
+TimeGuard uses a modular architecture inspired by dayjs. The **core** weighs ~5KB gzip and includes only the essentials (TimeGuard, formatter, EN/ES, Gregorian). Locales, plugins, and calendars are loaded on demand:
+
+```typescript
+// Lightweight core (~5KB gzip) - EN/ES only
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Full bundle (core + polyfill + all locales/plugins/calendars)
+import { TimeGuard } from '@bereasoftware/time-guard/full';
+
+// On-demand modules
+import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
+import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
+import { Duration } from '@bereasoftware/time-guard/plugins/duration';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
+
+// UMD for CDN / <script>
+// <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
+```
 
 ---
 
@@ -658,7 +681,10 @@ ISO 8601 duration support with advanced calculations.
 
 ```typescript
 import { TimeGuard } from "@bereasoftware/time-guard";
-import { Duration, durationPlugin } from "@bereasoftware/time-guard/plugins/duration";
+import {
+  Duration,
+  durationPlugin,
+} from "@bereasoftware/time-guard/plugins/duration";
 import { PluginManager } from "@bereasoftware/time-guard";
 
 // Install plugin
@@ -1179,24 +1205,26 @@ npm run dev
 ```
 time-guard/
 ├── src/
-│   ├── index.ts                 # Public API exports
-│   ├── types.ts                 # Type definitions
+│   ├── index.ts                 # Lightweight core (~5KB gzip, EN/ES)
+│   ├── full.ts                  # Full bundle (all inclusive)
+│   ├── polyfill-loader.ts       # Temporal polyfill loader
 │   ├── time-guard.ts            # Main class
 │   ├── adapters/
 │   │   └── temporal.adapter.ts  # Temporal API wrapper
+│   ├── calendars/               # 6 calendar systems
 │   ├── formatters/
 │   │   └── date.formatter.ts    # Format strategies
-│   └── locales/
-│       ├── index.ts             # Locale registry
-│       └── ...                  # 9+ locale files
+│   ├── locales/                 # 40+ locale files
+│   ├── plugins/                 # 3 plugins (relative-time, duration, advanced-format)
+│   └── types/                   # Type definitions
 ├── test/
 │   ├── time-guard.test.ts       # Core tests
 │   ├── advanced.test.ts         # Advanced tests
-│   └── locales.test.ts          # Locale tests
-└── docs/
-    ├── ARCHITECTURE.md          # Architecture guide
-    ├── EXAMPLES.md              # Usage examples
-    └── LOCALES.md               # Locale documentation
+│   ├── comprehensive.test.ts    # Integration tests
+│   ├── locales.test.ts          # Locale tests
+│   ├── plugins.test.ts          # Plugin tests
+│   └── bundle-size.test.ts      # Bundle size validation
+└── vite.config.ts               # Unified config (3 build modes)
 ```
 
 ---

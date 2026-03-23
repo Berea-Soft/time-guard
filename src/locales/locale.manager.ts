@@ -4,7 +4,6 @@
  */
 
 import type { ILocale, ILocaleManager } from '../types';
-import { registerAllLocales } from './index';
 
 /**
  * English locale data
@@ -71,12 +70,9 @@ export class LocaleManager implements ILocaleManager {
   }
 
   private constructor() {
-    // Register default locales (EN and ES from types)
+    // Register only English by default (minimal core, like dayjs)
     this.locales.set('en', EN_LOCALE);
     this.locales.set('es', ES_LOCALE);
-
-    // Register all additional locales from locales-data
-    registerAllLocales(this.locales);
   }
 
   /**
