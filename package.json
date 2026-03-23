@@ -1,8 +1,9 @@
 {
   "name": "@bereasoftware/time-guard",
   "private": false,
-  "version": "1.0.4",
+  "version": "2.0.1",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/time-guard.cjs",
   "module": "./dist/time-guard.es.js",
   "types": "./dist/types/index.d.ts",
@@ -17,6 +18,36 @@
       "require": "./dist/time-guard.cjs",
       "browser": "./dist/time-guard.umd.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./full": {
+      "import": "./dist/full.es.js",
+      "require": "./dist/full.cjs",
+      "types": "./dist/types/full.d.ts"
+    },
+    "./locales": {
+      "import": "./dist/locales.es.js",
+      "require": "./dist/locales.cjs",
+      "types": "./dist/types/locales/index.d.ts"
+    },
+    "./calendars": {
+      "import": "./dist/calendars.es.js",
+      "require": "./dist/calendars.cjs",
+      "types": "./dist/types/calendars/index.d.ts"
+    },
+    "./plugins/relative-time": {
+      "import": "./dist/plugin-relative-time.es.js",
+      "require": "./dist/plugin-relative-time.cjs",
+      "types": "./dist/types/plugins/relative-time/index.d.ts"
+    },
+    "./plugins/duration": {
+      "import": "./dist/plugin-duration.es.js",
+      "require": "./dist/plugin-duration.cjs",
+      "types": "./dist/types/plugins/duration/index.d.ts"
+    },
+    "./plugins/advanced-format": {
+      "import": "./dist/plugin-advanced-format.es.js",
+      "require": "./dist/plugin-advanced-format.cjs",
+      "types": "./dist/types/plugins/advanced-format/index.d.ts"
     },
     "./umd": {
       "types": "./dist/types/index.d.ts",
@@ -84,7 +115,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --mode full && vite build --mode umd",
     "test": "vitest run",
     "test:watch": "vitest",
     "release": "standard-version",
@@ -99,13 +130,13 @@
     "@js-temporal/polyfill": "^0.5.1",
     "@types/node": "^25.5.0",
     "standard-version": "^9.5.0",
-    "typescript": "~5.8.3",
-    "vite": "^8.0.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.1"
   },
   "peerDependencies": {
-    "@js-temporal/polyfill": ">=0.5.0"
+    "@js-temporal/polyfill": ">=0.5.1"
   },
   "peerDependenciesMeta": {
     "@js-temporal/polyfill": {
