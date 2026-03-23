@@ -12,6 +12,7 @@ import type {
 } from './types';
 import { TemporalAdapter } from './adapters/temporal.adapter';
 import { DateFormatter } from './formatters/date.formatter';
+import type { Temporal } from '@js-temporal/polyfill';
 
 type TemporalDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
 

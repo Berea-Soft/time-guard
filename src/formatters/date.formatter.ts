@@ -5,6 +5,7 @@
 
 import type { IDateFormatter, FormatPreset } from '../types';
 import { LocaleManager } from '../locales/locale.manager';
+import type { Temporal } from '@js-temporal/polyfill';
 
 /**
  * Date Formatter implementation

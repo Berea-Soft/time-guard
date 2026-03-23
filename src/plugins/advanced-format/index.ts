@@ -6,6 +6,7 @@
 
 import type { ITimeGuardPlugin } from '../../types';
 import type { TimeGuard } from '../../time-guard';
+import type { Temporal } from '@js-temporal/polyfill';
 
 export class AdvancedFormatPlugin implements ITimeGuardPlugin {
   name = 'advanced-format';
