@@ -4,6 +4,8 @@
  * Note: The polyfill must be loaded by the consumer or via the "full" entry.
  */
 
+import type { Temporal } from "@js-temporal/polyfill";
+
 type TemporalPlainDateTime = Temporal.PlainDateTime;
 type TemporalZonedDateTime = Temporal.ZonedDateTime;
 
