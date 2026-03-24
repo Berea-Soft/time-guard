@@ -1,7 +1,7 @@
 {
   "name": "@bereasoftware/time-guard",
   "private": false,
-  "version": "2.0.4",
+  "version": "2.0.5",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/time-guard.cjs",
@@ -20,34 +20,34 @@
       "types": "./dist/types/time-guard.d.ts"
     },
     "./full": {
+      "types": "./dist/types/full.d.ts",
       "import": "./dist/full.es.js",
-      "require": "./dist/full.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/full.cjs"
     },
     "./locales": {
+      "types": "./dist/types/locales.d.ts",
       "import": "./dist/locales/index.es.js",
-      "require": "./dist/locales/index.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/locales/index.cjs"
     },
     "./calendars": {
+      "types": "./dist/types/calendars.d.ts",
       "import": "./dist/calendars/index.es.js",
-      "require": "./dist/calendars/index.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/calendars/index.cjs"
     },
     "./plugins/relative-time": {
+      "types": "./dist/types/plugins/relative-time.d.ts",
       "import": "./dist/plugins/relative-time.es.js",
-      "require": "./dist/plugins/relative-time.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/plugins/relative-time.cjs"
     },
     "./plugins/duration": {
+      "types": "./dist/types/plugins/duration.d.ts",
       "import": "./dist/plugins/duration.es.js",
-      "require": "./dist/plugins/duration.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/plugins/duration.cjs"
     },
     "./plugins/advanced-format": {
+      "types": "./dist/types/plugins/advanced-format.d.ts",
       "import": "./dist/plugins/advanced-format.es.js",
-      "require": "./dist/plugins/advanced-format.cjs",
-      "types": "./dist/types/time-guard.d.ts"
+      "require": "./dist/plugins/advanced-format.cjs"
     },
     "./umd": {
       "types": "./dist/types/time-guard.d.ts",
@@ -115,7 +115,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --mode full && vite build --mode umd",
+    "build": "vite build && vite build --mode full && vite build --mode umd && node generate-type-proxies.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "release": "standard-version",
