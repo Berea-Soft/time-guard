@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "./dist/time-guard.cjs",
   "module": "./dist/time-guard.es.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/types/time-guard.d.ts",
   "unpkg": "./dist/time-guard.umd.js",
   "browser": {
     "./dist/time-guard.umd.js": "./dist/time-guard.umd.js",
@@ -17,46 +17,46 @@
       "import": "./dist/time-guard.es.js",
       "require": "./dist/time-guard.cjs",
       "browser": "./dist/time-guard.umd.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./full": {
       "import": "./dist/full.es.js",
       "require": "./dist/full.cjs",
-      "types": "./dist/types/full.d.ts"
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./locales": {
-      "import": "./dist/locales.es.js",
-      "require": "./dist/locales.cjs",
-      "types": "./dist/types/locales/index.d.ts"
+      "import": "./dist/locales/index.es.js",
+      "require": "./dist/locales/index.cjs",
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./calendars": {
-      "import": "./dist/calendars.es.js",
-      "require": "./dist/calendars.cjs",
-      "types": "./dist/types/calendars/index.d.ts"
+      "import": "./dist/calendars/index.es.js",
+      "require": "./dist/calendars/index.cjs",
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./plugins/relative-time": {
-      "import": "./dist/plugin-relative-time.es.js",
-      "require": "./dist/plugin-relative-time.cjs",
-      "types": "./dist/types/plugins/relative-time/index.d.ts"
+      "import": "./dist/plugins/relative-time.es.js",
+      "require": "./dist/plugins/relative-time.cjs",
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./plugins/duration": {
-      "import": "./dist/plugin-duration.es.js",
-      "require": "./dist/plugin-duration.cjs",
-      "types": "./dist/types/plugins/duration/index.d.ts"
+      "import": "./dist/plugins/duration.es.js",
+      "require": "./dist/plugins/duration.cjs",
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./plugins/advanced-format": {
-      "import": "./dist/plugin-advanced-format.es.js",
-      "require": "./dist/plugin-advanced-format.cjs",
-      "types": "./dist/types/plugins/advanced-format/index.d.ts"
+      "import": "./dist/plugins/advanced-format.es.js",
+      "require": "./dist/plugins/advanced-format.cjs",
+      "types": "./dist/types/time-guard.d.ts"
     },
     "./umd": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/types/time-guard.d.ts",
       "import": "./dist/time-guard.umd.js",
       "require": "./dist/time-guard.umd.js",
       "browser": "./dist/time-guard.umd.js"
     },
     "./iife": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/types/time-guard.d.ts",
       "import": "./dist/time-guard.iife.js",
       "require": "./dist/time-guard.iife.js",
       "browser": "./dist/time-guard.iife.js"
@@ -128,6 +128,7 @@
   },
   "devDependencies": {
     "@js-temporal/polyfill": "^0.5.1",
+    "@microsoft/api-extractor": "^7.52.8",
     "@types/node": "^25.5.0",
     "standard-version": "^9.5.0",
     "typescript": "~6.0.2",

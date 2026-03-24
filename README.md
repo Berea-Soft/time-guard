@@ -115,17 +115,17 @@ TimeGuard usa una arquitectura modular inspirada en dayjs. El **core** pesa ~5KB
 
 ```typescript
 // Core ligero (~5KB gzip) - solo EN/ES
-import { TimeGuard } from '@bereasoftware/time-guard';
+import { TimeGuard } from "@bereasoftware/time-guard";
 
 // Bundle completo (core + polyfill + todos los locales/plugins/calendarios)
-import { TimeGuard } from '@bereasoftware/time-guard/full';
+import { TimeGuard } from "@bereasoftware/time-guard/full";
 
 // Módulos bajo demanda
-import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
-import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
-import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
-import { Duration } from '@bereasoftware/time-guard/plugins/duration';
-import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
+import { ALL_LOCALES } from "@bereasoftware/time-guard/locales";
+import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
+import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
+import { Duration } from "@bereasoftware/time-guard/plugins/duration";
+import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
 
 // UMD para CDN / <script>
 // <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
@@ -1321,6 +1321,16 @@ Ver archivo [LICENSE](LICENSE) para detalles.
 - 🌍 [Guía de Localización](LOCALES.md)
 - 🐛 [Rastreador de Problemas](https://github.com/bereasoftware/time-guard/issues)
 - 💬 [Discusiones](https://github.com/bereasoftware/time-guard/discussions)
+
+---
+
+## 🤝 Contribuidores
+
+¡Gracias a todos los que han contribuido!
+
+<a href="https://github.com/Berea-Soft/time-guard/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Berea-Soft/time-guard" alt="contribuidores" />
+</a>
 
 ---
 

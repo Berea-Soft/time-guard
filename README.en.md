@@ -1259,6 +1259,16 @@ See [LICENSE](LICENSE) file for details.
 
 ---
 
+## 🤝 Contributors
+
+Thanks to all contributors!
+
+<a href="https://github.com/Berea-Soft/time-guard/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Berea-Soft/time-guard" alt="contributors" />
+</a>
+
+---
+
 ## 📞 Support
 
 For questions, issues, or feature requests:
@@ -1266,8 +1276,6 @@ For questions, issues, or feature requests:
 - Open an issue on GitHub
 - Start a discussion
 - Check existing documentation
-
----
 
 ---
 

@@ -77,8 +77,9 @@ export default defineConfig(({ mode }): UserConfig => {
         rollupOptions: {
           external: ["@js-temporal/polyfill"],
           output: {
-            exports: "named" as const,
             banner,
+            exports: "named" as const,
+            globals: { "@js-temporal/polyfill": "temporal" },
           },
         },
         emptyOutDir: false,
@@ -86,6 +87,13 @@ export default defineConfig(({ mode }): UserConfig => {
         minify: "oxc",
         reportCompressedSize: true,
       },
+      plugins: [
+        dts({
+          rollupTypes: true,
+          tsconfigPath: resolve(__dirname, "tsconfig.json"),
+          outDir: "dist/types",
+        }),
+      ],
     };
   }
 
@@ -96,17 +104,17 @@ export default defineConfig(({ mode }): UserConfig => {
       lib: {
         entry: {
           "time-guard": resolve(__dirname, "src/index.ts"),
-          locales: resolve(__dirname, "src/locales/index.ts"),
-          calendars: resolve(__dirname, "src/calendars/index.ts"),
-          "plugin-relative-time": resolve(
+          "locales/index": resolve(__dirname, "src/locales/index.ts"),
+          "calendars/index": resolve(__dirname, "src/calendars/index.ts"),
+          "plugins/relative-time": resolve(
             __dirname,
             "src/plugins/relative-time/index.ts",
           ),
-          "plugin-duration": resolve(
+          "plugins/duration": resolve(
             __dirname,
             "src/plugins/duration/index.ts",
           ),
-          "plugin-advanced-format": resolve(
+          "plugins/advanced-format": resolve(
             __dirname,
             "src/plugins/advanced-format/index.ts",
           ),
@@ -117,8 +125,9 @@ export default defineConfig(({ mode }): UserConfig => {
       rollupOptions: {
         external: ["@js-temporal/polyfill"],
         output: {
-          exports: "named" as const,
           banner,
+          exports: "named" as const,
+          globals: { "@js-temporal/polyfill": "temporal" },
         },
       },
       emptyOutDir: true,
@@ -126,13 +135,5 @@ export default defineConfig(({ mode }): UserConfig => {
       minify: "oxc",
       reportCompressedSize: true,
     },
-    plugins: [
-      dts({
-        rollupTypes: false,
-        insertTypesEntry: true,
-        include: ["src/**/*.ts"],
-        outDir: "dist/types",
-      }),
-    ],
   };
 });
