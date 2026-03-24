@@ -90,8 +90,10 @@ export default defineConfig(({ mode }): UserConfig => {
       plugins: [
         dts({
           rollupTypes: true,
+          insertTypesEntry: true,
           tsconfigPath: resolve(__dirname, "tsconfig.json"),
           outDir: "dist/types",
+          include: ['src/**/*.ts', 'src/*/*.d.ts']
         }),
       ],
     };
