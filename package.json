@@ -1,7 +1,7 @@
 {
   "name": "@bereasoftware/time-guard",
   "private": false,
-  "version": "2.0.6",
+  "version": "2.0.7",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/time-guard.cjs",
@@ -14,10 +14,10 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/time-guard.es.js",
-      "require": "./dist/time-guard.cjs",
+      "types": "./dist/types/time-guard.d.ts",
       "browser": "./dist/time-guard.umd.js",
-      "types": "./dist/types/time-guard.d.ts"
+      "import": "./dist/time-guard.es.js",
+      "require": "./dist/time-guard.cjs"
     },
     "./locales": {
       "types": "./dist/types/locales/index.d.ts",
@@ -46,15 +46,15 @@
     },
     "./umd": {
       "types": "./dist/types/time-guard.d.ts",
+      "browser": "./dist/time-guard.umd.js",
       "import": "./dist/time-guard.umd.js",
-      "require": "./dist/time-guard.umd.js",
-      "browser": "./dist/time-guard.umd.js"
+      "require": "./dist/time-guard.umd.js"
     },
     "./iife": {
       "types": "./dist/types/time-guard.d.ts",
+      "browser": "./dist/time-guard.iife.js",
       "import": "./dist/time-guard.iife.js",
-      "require": "./dist/time-guard.iife.js",
-      "browser": "./dist/time-guard.iife.js"
+      "require": "./dist/time-guard.iife.js"
     }
   },
   "files": [
