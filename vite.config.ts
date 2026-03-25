@@ -2,17 +2,17 @@
  *
  * Three build modes (run sequentially via npm run build):
  *
- *   vite build                → core + submodules (ES + CJS) + types
- *   vite build --mode full    → full bundle (ES + CJS), self-contained
+ *   vite build                → core only (ES + CJS), fast JS build
  *   vite build --mode umd     → core only (UMD + IIFE) for CDN / <script>
+ *   vite build --mode types   → declaration files only workflow (via vite:dts)
  *
- * Separating "full" from the main build prevents Rollup from creating
- * shared chunks (the cause of locales.esm / locales2.cjs artifacts).
+ * Type generation is intentionally separated to avoid slowing down
+ * regular JS builds and to reduce PLUGIN_TIMINGS warnings.
  */
 import { defineConfig, type UserConfig } from "vite";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync, rmSync } from "fs";
 import dts from "vite-plugin-dts";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,10 +24,8 @@ const pack = JSON.parse(
 const banner = `/*! time-guard v${
   pack.version
 } | (c) ${new Date().getFullYear()} Berea-Soft | MIT License | https://github.com/Berea-Soft/time-guard */`;
-
-/**
- * Naming convention:  ESM → <entry>.es.js  |  CJS → <entry>.cjs
- */
+const distTypesDir = resolve(__dirname, "dist", "types");
+const distTypesSrcDir = resolve(__dirname, "dist", "types", "src");
 const fileName = (format: string, entryName: string) =>
   format === "cjs" ? `${entryName}.cjs` : `${entryName}.${format}.js`;
 
@@ -35,8 +33,6 @@ export default defineConfig(({ mode }): UserConfig => {
   const shared = {
     define: { __VERSION__: JSON.stringify(pack.version) },
   };
-
-  // ── UMD / IIFE (core only, for CDN / <script>) ───────────────
   if (mode === "umd") {
     return {
       ...shared,
@@ -46,33 +42,7 @@ export default defineConfig(({ mode }): UserConfig => {
           name: "BereasoftTimeGuard",
           fileName: (format: string) =>
             format === "cjs" ? "time-guard.cjs" : `time-guard.${format}.js`,
-          formats: ["umd", "iife"],
-        },
-        rollupOptions: {
-          external: ["@js-temporal/polyfill"],
-          output: {
-            banner,
-            exports: "named" as const,
-            globals: { "@js-temporal/polyfill": "temporal" },
-          },
-        },
-        emptyOutDir: false,
-        sourcemap: false,
-        minify: "oxc",
-        reportCompressedSize: true,
-      },
-    };
-  }
-
-  // ── Full bundle (standalone, all-inclusive entry) ─────────────
-  if (mode === "full") {
-    return {
-      ...shared,
-      build: {
-        lib: {
-          entry: { full: resolve(__dirname, "src/full.ts") },
-          fileName,
-          formats: ["es", "cjs"],
+          formats: ["umd", "iife", "es", "cjs"],
         },
         rollupOptions: {
           external: ["@js-temporal/polyfill"],
@@ -89,23 +59,35 @@ export default defineConfig(({ mode }): UserConfig => {
       },
       plugins: [
         dts({
-          rollupTypes: true,
+          rollupTypes: false,
           insertTypesEntry: true,
-          tsconfigPath: resolve(__dirname, "tsconfig.json"),
+          copyDtsFiles: true,
+          entryRoot: "src",
+          strictOutput: true,
           outDir: "dist/types",
-          include: ['src/**/*.ts', 'src/*/*.d.ts']
+          include: ["src/**/*.ts"],
+          exclude: ["src/**/*.test.ts", "src/**/*.spec.ts"],
+          beforeWriteFile: (filePath, content) => {
+            const normalizedPath = filePath.replace(
+              /([\\/])dist\1types\1src(?=[\\/])/,
+              "$1dist$1types",
+            );
+            return { filePath: normalizedPath, content };
+          },
+          afterBuild: () => {
+            if (existsSync(distTypesSrcDir)) {
+              rmSync(distTypesSrcDir, { recursive: true, force: true });
+            }
+          },
         }),
       ],
     };
   }
-
-  // ── Default: core + on-demand submodules (ES + CJS) + types ──
   return {
     ...shared,
     build: {
       lib: {
         entry: {
-          "time-guard": resolve(__dirname, "src/index.ts"),
           "locales/index": resolve(__dirname, "src/locales/index.ts"),
           "calendars/index": resolve(__dirname, "src/calendars/index.ts"),
           "plugins/relative-time": resolve(

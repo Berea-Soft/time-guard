@@ -112,9 +112,6 @@ TimeGuard uses a modular architecture inspired by dayjs. The **core** weighs ~5K
 // Lightweight core (~5KB gzip) - EN/ES only
 import { TimeGuard } from '@bereasoftware/time-guard';
 
-// Full bundle (core + polyfill + all locales/plugins/calendars)
-import { TimeGuard } from '@bereasoftware/time-guard/full';
-
 // On-demand modules
 import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
 import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
@@ -1206,7 +1203,6 @@ npm run dev
 time-guard/
 ├── src/
 │   ├── index.ts                 # Lightweight core (~5KB gzip, EN/ES)
-│   ├── full.ts                  # Full bundle (all inclusive)
 │   ├── polyfill-loader.ts       # Temporal polyfill loader
 │   ├── time-guard.ts            # Main class
 │   ├── adapters/

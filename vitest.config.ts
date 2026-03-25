@@ -13,10 +13,6 @@ export default defineConfig({
     include: ["test/**/*.test.ts"],
     setupFiles: ["test/setup.ts"],
     // Ensure polyfill loads before tests
-    pool: {
-      size: 1,
-      isolate: false,
-    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

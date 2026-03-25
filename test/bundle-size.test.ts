@@ -12,9 +12,8 @@ describe('Bundle Size Report', () => {
     // Clean dist/ completely before rebuilding
     rmSync(distDir, { recursive: true, force: true });
 
-    // Run all 3 build steps (unified vite.config.ts)
+    // Run current build steps
     execSync('npx vite build',            { cwd: root, stdio: 'pipe', timeout: 60000 });
-    execSync('npx vite build --mode full', { cwd: root, stdio: 'pipe', timeout: 60000 });
     execSync('npx vite build --mode umd',  { cwd: root, stdio: 'pipe', timeout: 60000 });
 
     const allDistFiles = readdirSync(distDir, { recursive: true })
@@ -34,7 +33,6 @@ describe('Bundle Size Report', () => {
     // ── All expected files are present ──
     const expected = [
       'time-guard.es.js', 'time-guard.cjs', 'time-guard.umd.js', 'time-guard.iife.js',
-      'full.es.js', 'full.cjs',
       'locales/index.es.js', 'locales/index.cjs',
       'calendars/index.es.js', 'calendars/index.cjs',
       'plugins/relative-time.es.js', 'plugins/relative-time.cjs',
@@ -45,13 +43,13 @@ describe('Bundle Size Report', () => {
       expect(allDistFiles, `Missing expected file: ${file}`).toContain(file);
     }
 
-    // ── Core bundle must NOT contain the polyfill import statement ──
+    // ── Main bundle should include polyfill import (backward-compatible full entry) ──
     const coreES = readFileSync(join(distDir, 'time-guard.es.js'), 'utf-8');
     const firstLine = coreES.split('\n').find(l => l.startsWith('import'));
-    expect(firstLine ?? 'no imports').not.toContain('@js-temporal/polyfill');
+    expect(firstLine ?? 'no imports').toContain('@js-temporal/polyfill');
 
-    // ── Size sanity checks (core gzip < 8 KB) ──
+    // ── Size sanity checks (full-compatible entry remains within expected budget) ──
     const coreGzip = gzipSync(readFileSync(join(distDir, 'time-guard.es.js')));
-    expect(coreGzip.length).toBeLessThan(8 * 1024);
+    expect(coreGzip.length).toBeLessThan(20 * 1024);
   }, 180000);
 });

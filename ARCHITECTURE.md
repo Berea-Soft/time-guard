@@ -322,7 +322,6 @@ tg.timezone("America/New_York"); // Nueva instancia con diferente zona horaria
 ```
 src/
 ├── index.ts                    # Core ligero (~5KB gzip, solo EN/ES)
-├── full.ts                     # Bundle completo (core + polyfill + todos locales/plugins/calendarios)
 ├── polyfill-loader.ts          # Cargador del polyfill Temporal
 ├── time-guard.ts               # Clase principal TimeGuard
 ├── adapters/
@@ -354,20 +353,18 @@ test/
 
 ### Sistema de Build Modular
 
-El build se ejecuta en 3 modos secuenciales:
+El build se ejecuta en 2 pasos:
 
 ```bash
 # npm run build ejecuta:
-vite build                  # Core + submódulos (ES + CJS) + tipos
-vite build --mode full      # Bundle completo (ES + CJS)
-vite build --mode umd       # Core (UMD + IIFE) para CDN / <script>
+vite build                  # Submódulos (ES + CJS)
+vite build --mode umd       # Core + submódulos (UMD + IIFE + ES + CJS + tipos)
 ```
 
 **Subpath exports** en `package.json`:
 
 ```typescript
 import { TimeGuard } from '@bereasoftware/time-guard'              // Core ligero
-import { TimeGuard } from '@bereasoftware/time-guard/full'         // Todo incluido
 import { ALL_LOCALES } from '@bereasoftware/time-guard/locales'    // Locales bajo demanda
 import { IslamicCalendar } from '@bereasoftware/time-guard/calendars'
 import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time'
@@ -420,8 +417,8 @@ import { ALL_LOCALES, registerAllLocales } from '@bereasoftware/time-guard/local
 import { LocaleManager } from '@bereasoftware/time-guard';
 LocaleManager.getInstance().loadLocales(ALL_LOCALES);
 
-// O usar el bundle completo que los incluye todos
-import { TimeGuard } from '@bereasoftware/time-guard/full';
+// O importar directamente desde el entry principal
+import { TimeGuard } from '@bereasoftware/time-guard';
 ```
 
 Agregar locales personalizados:

@@ -15,6 +15,15 @@ import { DateFormatter } from './formatters/date.formatter';
 import type { Temporal } from '@js-temporal/polyfill';
 
 type TemporalDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
+type DurationParts = {
+  years: number;
+  months: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  milliseconds: number;
+};
 
 /**
  * TimeGuard implementation - Main facade class
@@ -23,6 +32,32 @@ export class TimeGuard implements ITimeGuard {
   private temporal: TemporalDateTime;
   private config: Required<ITimeGuardConfig>;
   private formatterInstance: DateFormatter;
+
+  private static readonly ZERO_DURATION: DurationParts = {
+    years: 0,
+    months: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    milliseconds: 0,
+  };
+
+  private static isLeapYearValue(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  }
+
+  private static toDurationParts(duration: any): DurationParts {
+    return {
+      years: Math.floor(duration.years || 0),
+      months: Math.floor(duration.months || 0),
+      days: Math.floor(duration.days || 0),
+      hours: Math.floor(duration.hours || 0),
+      minutes: Math.floor(duration.minutes || 0),
+      seconds: Math.floor(duration.seconds || 0),
+      milliseconds: Math.floor(duration.milliseconds || 0),
+    };
+  }
 
   constructor(input?: unknown, config?: ITimeGuardConfig) {
     this.formatterInstance = new DateFormatter();
@@ -427,14 +462,12 @@ export class TimeGuard implements ITimeGuard {
 
   daysInYear(): number {
     const year = this.year();
-    const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    return isLeapYear ? 366 : 365;
+    return TimeGuard.isLeapYearValue(year) ? 366 : 365;
   }
 
   inLeapYear(): boolean {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    const year = plainDT.year;
-    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return TimeGuard.isLeapYearValue(plainDT.year);
   }
 
   // ===== Duration and Rounding methods =====
@@ -442,23 +475,15 @@ export class TimeGuard implements ITimeGuard {
   /**
    * Calculate duration until another TimeGuard
    */
-  until(other: TimeGuard): { years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number } {
+  until(other: TimeGuard): DurationParts {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
 
     try {
       const duration = (plainDT2 as any).since(plainDT1);
-      return {
-        years: Math.floor(duration.years || 0),
-        months: Math.floor(duration.months || 0),
-        days: Math.floor(duration.days || 0),
-        hours: Math.floor(duration.hours || 0),
-        minutes: Math.floor(duration.minutes || 0),
-        seconds: Math.floor(duration.seconds || 0),
-        milliseconds: Math.floor(duration.milliseconds || 0),
-      };
+      return TimeGuard.toDurationParts(duration);
     } catch {
-      return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 };
+      return { ...TimeGuard.ZERO_DURATION };
     }
   }
 
@@ -633,24 +658,16 @@ export class TimeGuard implements ITimeGuard {
    * Calculate duration from another TimeGuard (inverse of until)
    * Returns negative values if other is before this
    */
-  since(other: TimeGuard): { years: number; months: number; days: number; hours: number; minutes: number; seconds: number; milliseconds: number } {
+  since(other: TimeGuard): DurationParts {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
 
     try {
       // since() returns duration FROM point to THIS point
       const duration = (plainDT1 as any).since(plainDT2);
-      return {
-        years: Math.floor(duration.years || 0),
-        months: Math.floor(duration.months || 0),
-        days: Math.floor(duration.days || 0),
-        hours: Math.floor(duration.hours || 0),
-        minutes: Math.floor(duration.minutes || 0),
-        seconds: Math.floor(duration.seconds || 0),
-        milliseconds: Math.floor(duration.milliseconds || 0),
-      };
+      return TimeGuard.toDurationParts(duration);
     } catch {
-      return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 };
+      return { ...TimeGuard.ZERO_DURATION };
     }
   }
 
