@@ -126,6 +126,8 @@ import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-for
 
 // UMD para CDN / <script>
 // <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
+
+// Nota: los archivos UMD/IIFE son solo para CDN o <script>, no para importarlos como subpaths del paquete.
 ```
 
 ---

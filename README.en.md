@@ -110,17 +110,19 @@ TimeGuard uses a modular architecture inspired by dayjs. The **core** weighs ~5K
 
 ```typescript
 // Lightweight core (~5KB gzip) - EN/ES only
-import { TimeGuard } from '@bereasoftware/time-guard';
+import { TimeGuard } from "@bereasoftware/time-guard";
 
 // On-demand modules
-import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
-import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
-import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
-import { Duration } from '@bereasoftware/time-guard/plugins/duration';
-import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
+import { ALL_LOCALES } from "@bereasoftware/time-guard/locales";
+import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
+import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
+import { Duration } from "@bereasoftware/time-guard/plugins/duration";
+import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
 
 // UMD for CDN / <script>
 // <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
+
+// Note: UMD/IIFE files are only for CDN or <script> usage, not for package subpath imports.
 ```
 
 ---
