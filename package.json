@@ -1,7 +1,7 @@
 {
   "name": "@bereasoftware/time-guard",
   "private": false,
-  "version": "2.0.5",
+  "version": "2.0.6",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/time-guard.cjs",
@@ -19,33 +19,28 @@
       "browser": "./dist/time-guard.umd.js",
       "types": "./dist/types/time-guard.d.ts"
     },
-    "./full": {
-      "types": "./dist/types/full.d.ts",
-      "import": "./dist/full.es.js",
-      "require": "./dist/full.cjs"
-    },
     "./locales": {
-      "types": "./dist/types/locales.d.ts",
+      "types": "./dist/types/locales/index.d.ts",
       "import": "./dist/locales/index.es.js",
       "require": "./dist/locales/index.cjs"
     },
     "./calendars": {
-      "types": "./dist/types/calendars.d.ts",
+      "types": "./dist/types/calendars/index.d.ts",
       "import": "./dist/calendars/index.es.js",
       "require": "./dist/calendars/index.cjs"
     },
     "./plugins/relative-time": {
-      "types": "./dist/types/plugins/relative-time.d.ts",
+      "types": "./dist/types/plugins/relative-time/index.d.ts",
       "import": "./dist/plugins/relative-time.es.js",
       "require": "./dist/plugins/relative-time.cjs"
     },
     "./plugins/duration": {
-      "types": "./dist/types/plugins/duration.d.ts",
+      "types": "./dist/types/plugins/duration/index.d.ts",
       "import": "./dist/plugins/duration.es.js",
       "require": "./dist/plugins/duration.cjs"
     },
     "./plugins/advanced-format": {
-      "types": "./dist/types/plugins/advanced-format.d.ts",
+      "types": "./dist/types/plugins/advanced-format/index.d.ts",
       "import": "./dist/plugins/advanced-format.es.js",
       "require": "./dist/plugins/advanced-format.cjs"
     },
@@ -115,33 +110,29 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --mode full && vite build --mode umd && node generate-type-proxies.mjs",
+    "build": "vite build && vite build --mode umd",
+    "build:all": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "release": "standard-version",
     "release:major": "standard-version --release-as major",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
     "postrelease": "git push --follow-tags origin main && npm publish",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run lint && npm run test && npm run build"
+    "prepublishOnly": "npm run lint && npm run test && npm run build:all"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1"
   },
   "devDependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
-    "@microsoft/api-extractor": "^7.52.8",
     "@types/node": "^25.5.0",
+    "@vitest/ui": "^4.0.18",
     "standard-version": "^9.5.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.1.1"
-  },
-  "peerDependencies": {
-    "@js-temporal/polyfill": ">=0.5.1"
-  },
-  "peerDependenciesMeta": {
-    "@js-temporal/polyfill": {
-      "optional": true
-    }
+    "vitest": "^4.0.18"
   }
 }
