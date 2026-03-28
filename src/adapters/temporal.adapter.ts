@@ -219,4 +219,26 @@ export class TemporalAdapter {
     const Temporal = useTemporal();
     return Temporal.Now.zonedDateTimeISO(timezone);
   }
+
+  /**
+   * Compare two Temporal.PlainDateTime objects
+   * Returns: -1 if dt1 < dt2, 0 if equal, 1 if dt1 > dt2
+   * Uses ISO string comparison as fallback for polyfills that don't have Temporal.PlainDateTime.compare
+   */
+  static compare(dt1: TemporalPlainDateTime, dt2: TemporalPlainDateTime): number {
+    const Temporal = useTemporal();
+    
+    // Try using Temporal.PlainDateTime.compare if available
+    if (Temporal.PlainDateTime && typeof Temporal.PlainDateTime.compare === 'function') {
+      return Temporal.PlainDateTime.compare(dt1, dt2);
+    }
+    
+    // Fallback: compare as ISO strings (which works for PlainDateTime)
+    const iso1 = dt1.toString();
+    const iso2 = dt2.toString();
+    
+    if (iso1 < iso2) return -1;
+    if (iso1 > iso2) return 1;
+    return 0;
+  }
 }

@@ -254,18 +254,19 @@ export class TimeGuard implements ITimeGuard {
   isBefore(other: TimeGuard): boolean {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
-    return (plainDT1 as any).compare(plainDT2) < 0;
+    return TemporalAdapter.compare(plainDT1, plainDT2) < 0;
   }
 
   isAfter(other: TimeGuard): boolean {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
-    return (plainDT1 as any).compare(plainDT2) > 0;
+    return TemporalAdapter.compare(plainDT1, plainDT2) > 0;
   }
 
   isSame(other: TimeGuard, unit?: Unit): boolean {
     if (!unit) {
-      return (TemporalAdapter.toPlainDateTime(this.temporal) as any).compare(
+      return TemporalAdapter.compare(
+        TemporalAdapter.toPlainDateTime(this.temporal),
         TemporalAdapter.toPlainDateTime(other.temporal),
       ) === 0;
     }
@@ -333,18 +334,18 @@ export class TimeGuard implements ITimeGuard {
       const plainCopy = TemporalAdapter.toPlainDateTime(startCopy.temporal);
       const plainEndCopy = TemporalAdapter.toPlainDateTime(endCopy.temporal);
 
-      afterStart = (plainCopy as any).compare(plainStart) >= 0;
-      beforeEnd = (plainEndCopy as any).compare(plainEnd) <= 0;
+      afterStart = TemporalAdapter.compare(plainCopy, plainStart) >= 0;
+      beforeEnd = TemporalAdapter.compare(plainEndCopy, plainEnd) <= 0;
     } else {
-      afterStart = (plainDT as any).compare(plainStart) >= 0;
-      beforeEnd = (plainDT as any).compare(plainEnd) <= 0;
+      afterStart = TemporalAdapter.compare(plainDT, plainStart) >= 0;
+      beforeEnd = TemporalAdapter.compare(plainDT, plainEnd) <= 0;
     }
 
     const hasStartBracket = inclusivity[0] === '[';
     const hasEndBracket = inclusivity[1] === ']';
 
-    return (hasStartBracket ? afterStart : (plainDT as any).compare(plainStart) > 0)
-      && (hasEndBracket ? beforeEnd : (plainDT as any).compare(plainEnd) < 0);
+    return (hasStartBracket ? afterStart : TemporalAdapter.compare(plainDT, plainStart) > 0)
+      && (hasEndBracket ? beforeEnd : TemporalAdapter.compare(plainDT, plainEnd) < 0);
   }
 
   // ===== Manipulation methods =====
