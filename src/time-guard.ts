@@ -1715,3 +1715,5 @@ export class TimeGuard implements ITimeGuard {
     return this.isSame(TimeGuard.now().subtract({ day: 1 }), 'day');
   }
 }
+
+export { PluginManager } from './plugins/manager';
