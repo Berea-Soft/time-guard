@@ -17,7 +17,8 @@ import { LocaleManager, EN_LOCALE, ES_LOCALE } from './locales/locale.manager';
 import { ALL_LOCALES } from './locales/index';
 
 // Core exports
-export { TimeGuard };
+export { TimeGuard, TimeRange } from './time-guard';
+export { DurationResult } from './time-guard';
 
 // Type exports (zero cost — erased at build time)
 export type {
@@ -35,6 +36,13 @@ export type {
   ICalendarSystem,
   ICalendarManager,
   IRoundOptions,
+  IDurationOptions,
+  IDurationResult,
+  IDurationExplanation,
+  IHumanizeOptions,
+  IDiffResult,
+  IDiffOptions,
+  DurationParts,
   Unit,
   FormatPreset,
   ILocale,

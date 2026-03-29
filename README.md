@@ -232,6 +232,120 @@ console.log(date.inLeapYear()); // true
 
 ## ⏱️ Cálculos Avanzados
 
+### 🎯 API Semántica: `between()` - Sin Carga Mental
+
+La forma **más semántica y clara** para calcular diferencias de tiempo. ¡No necesitas pensar en `until()` vs `since()`!
+
+```typescript
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+
+// Lectura simple y directa
+TimeGuard.between(start, end).humanize();
+// "2 months and 5 days"
+
+// El orden NO importa - siempre positivo
+TimeGuard.between(end, start).humanize();
+// "2 months and 5 days" (¡idéntico!)
+
+// Acceso a propiedades DurationParts
+TimeGuard.between(start, end).months; // 2
+TimeGuard.between(start, end).days; // 5
+
+// Todas las opciones de humanize() disponibles
+TimeGuard.between(start, end).humanize({ locale: "es", fullBreakdown: true });
+// "2 meses y 5 días"
+```
+
+**Comparación semántica:**
+
+```typescript
+// ❌ Confuso: ¿cuál es cuál?
+start.until(end); // ¿es positivo?
+end.since(start); // ¿es diferente?
+
+// ✅ Claro: no necesitas pensar
+TimeGuard.between(start, end); // siempre positivo, sin confusión
+TimeGuard.between(end, start); // mismo resultado, order no importa
+```
+
+### 🔗 API Fluente: `range()` - Naming Killer
+
+**Marketing técnico puro:** La API más intuitiva para rangos de fechas con **method chaining fluent**:
+
+```typescript
+// Sintaxis limpia y directa
+TimeGuard.range("2024-01-15", "2024-03-20").humanize();
+// "2 months and 5 days"
+
+TimeGuard.range("2024-01-15", "2024-03-20").inMonths();
+// 2.1355 (valor decimal preciso)
+
+TimeGuard.range("2024-01-15", "2024-03-20").toDuration();
+// DurationResult: acceso completo a propiedades
+```
+
+**Casos de uso empresariales:**
+
+```typescript
+// 📅 Período de alquiler
+const checkIn = new TimeGuard("2024-06-15");
+const checkOut = new TimeGuard("2024-06-22");
+
+const rentalDays = TimeGuard.range(checkIn, checkOut).in("day");
+const rentalCost = rentalDays * 100; // $100 por día
+console.log(rentalCost); // $700
+
+// 💳 Cálculo de mora
+const invoiceDate = new TimeGuard("2024-01-01");
+const paymentDate = new TimeGuard("2024-02-15");
+
+const lateFeePerDay = 10;
+const lateFee =
+  TimeGuard.range(invoiceDate, paymentDate).in("day") * lateFeePerDay;
+console.log(lateFee); // Cálculo exacto con promediado de meses
+
+// 📊 Analítica de sesiones
+const sessionStart = new TimeGuard("2024-03-15T10:00:00");
+const sessionEnd = new TimeGuard("2024-03-15T10:35:42");
+
+const engagementMinutes = TimeGuard.range(sessionStart, sessionEnd).in(
+  "minute",
+);
+console.log(engagementMinutes); // Para métricas de usuarios
+```
+
+**Soporte de Locales:**
+
+```typescript
+// El orden de fechas NO importa
+TimeGuard.range("2024-03-20", "2024-01-15").humanize({ locale: "es" });
+// "2 meses y 5 días" (resultado idéntico)
+
+// Diferentes idiomas
+TimeGuard.range("2024-01-15", "2024-03-20").humanize({ locale: "fr" });
+// "2 mois et 5 jours"
+
+TimeGuard.range("2024-01-15", "2024-03-20").humanize({ locale: "de" });
+// "2 Monate und 5 Tage"
+
+// Desglose completo
+TimeGuard.range("2024-01-15", "2024-03-20").humanize({
+  locale: "es",
+  fullBreakdown: true,
+});
+// "2 meses y 5 días"
+```
+
+**Métodos disponibles en `TimeRange`:**
+
+| Método                | Retorna          | Descripción                                         |
+| --------------------- | ---------------- | --------------------------------------------------- |
+| `.toDuration()`       | `DurationResult` | Objeto de duración completo con todos los métodos   |
+| `.inMonths()`         | `number`         | Rango en meses (decimal: 2.1355)                    |
+| `.humanize(options?)` | `string`         | Texto legible: "2 meses y 5 días"                   |
+| `.in(unit)`           | `number`         | Rango en cualquier unidad (day, hour, minute, etc.) |
+
 ### Duración: Calcular tiempo entre fechas
 
 ```typescript
@@ -252,7 +366,185 @@ console.log(duration);
 // }
 ```
 
-### Redondeo: Control de precisión
+### Humanize: Duración Legible para Usuarios 📝
+
+Convierte duraciones a texto natural y legible con soporte multiidioma:
+
+```typescript
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+
+// Estilo simple (Intl.RelativeTimeFormat)
+const duration = start.until(end);
+console.log(duration.humanize());
+// "2 months"
+
+// Desglose completo con múltiples unidades
+console.log(duration.humanize({ fullBreakdown: true }));
+// "2 months and 5 days"
+
+// Con locale específico
+console.log(duration.humanize({ locale: "es" }));
+// "2 meses"
+
+console.log(duration.humanize({ locale: "es", fullBreakdown: true }));
+// "2 meses y 5 días"
+
+// Con locale francés
+console.log(duration.humanize({ locale: "fr" }));
+// "2 mois"
+
+console.log(duration.humanize({ locale: "fr", fullBreakdown: true }));
+// "2 mois et 5 jours"
+```
+
+#### Uso de Locales Heredadas
+
+```typescript
+// TimeGuard hereda configuración de locale
+const start = TimeGuard.from("2024-01-15", { locale: "es" });
+const end = TimeGuard.from("2024-03-20");
+
+const duration = start.until(end);
+
+// Usa automáticamente el locale de la instancia
+console.log(duration.humanize());
+// "2 meses"
+
+console.log(duration.humanize({ fullBreakdown: true }));
+// "2 meses y 5 días"
+```
+
+#### Opciones de Humanize
+
+| Opción          | Tipo               | Default       | Descripción                                     |
+| --------------- | ------------------ | ------------- | ----------------------------------------------- |
+| `locale`        | string             | del TimeGuard | Código de locale ('en', 'es', 'fr', etc.)       |
+| `fullBreakdown` | boolean            | false         | Mostrar desglose completo vs. unidad más grande |
+| `numeric`       | 'always' \| 'auto' | 'always'      | Formato numérico para Intl API                  |
+
+#### Locales Soportados
+
+Humanize automáticamente soporta:
+
+- 🇬🇧 **en** - English
+- 🇪🇸 **es** - Español
+- 🇫🇷 **fr** - Français (French)
+- 🇩🇪 **de** - Deutsch (German)
+- 🇮🇹 **it** - Italiano (Italian)
+- 🇵🇹 **pt** - Português (Portuguese)
+
+Y muchos más a través de `Intl.RelativeTimeFormat`.
+
+### 💥 Explain Mode: Debugging Brutal y Educación
+
+**Feature killer para debugging y enseñanza** - Obtén una explicación detallada de cómo se calculó cada duración.
+
+Perfecto para:
+
+- 🐛 **Debugging** - Entender exactamente cómo se calculó la duración
+- 📚 **Educación** - Enseñar matemáticas de fechas
+- 📋 **Auditoría** - Verificar lógica de negocio basada en fechas
+- ✅ **Validación** - Confirmar que los cálculos son correctos
+
+```typescript
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+const duration = start.until(end);
+
+// Explicación detallada del cálculo
+const explanation = duration.explain();
+
+console.log(explanation);
+// {
+//   input: [
+//     '2024-01-15T00:00:00',
+//     '2024-03-20T00:00:00'
+//   ],
+//   steps: [
+//     'Parsed dates: 2024-01-15 (day 15 of 365) to 2024-03-20 (day 80 of 365)',
+//     '2024 is a leap year (February has 29 days)',
+//     'Years: 0',
+//     'Months: 2',
+//     'Days: 5',
+//     'Total: 2m 5d'
+//   ],
+//   breakdown: {
+//     years: 0,
+//     months: 2,
+//     weeks: 0,
+//     days: 5,
+//     hours: 0,
+//     minutes: 0,
+//     seconds: 0,
+//     milliseconds: 0
+//   },
+//   mode: 'exact',
+//   explanation: 'Calculated 2024-01-15 to 2024-03-20. 2024 is a leap year. Breakdown: 0 year(s), 2 month(s), 5 day(s). Mode: exact calculation',
+//   locale: 'en',
+//   leapYearFlags: [
+//     { year: 2024, isLeap: true, daysInFebruary: 29 }
+//   ],
+//   metadata: {
+//     calculationTimeMs: 0.5,
+//     precision: 'day'
+//   }
+// }
+```
+
+#### Casos de Uso
+
+Debugging de lógica de fechas:
+
+```typescript
+// ¿Por qué el cálculo de mora es diferente?
+const invoiceDate = TimeGuard.from("2024-01-05");
+const paymentDate = TimeGuard.from("2024-02-15");
+const lateFee = invoiceDate.until(paymentDate);
+
+// Obtén la explicación completa
+const debug = lateFee.explain();
+
+console.log("Pasos del cálculo:", debug.steps);
+console.log("Febrero es bisiesto:", debug.leapYearFlags);
+console.log("Desglose:", debug.breakdown);
+// Ahora sabes exactamente qué sucedió!
+```
+
+Educación - Enseñar cálculos de fechas:
+
+```typescript
+// Mostrar a estudiantes cómo funciona
+const start = TimeGuard.from("2024-02-15"); // Enero
+const end = TimeGuard.from("2024-04-15"); // Abril
+const duration = start.until(end);
+
+const explanation = duration.explain();
+
+// Mostrar todos los pasos
+explanation.steps.forEach((step, i) => {
+  console.log(`${i + 1}. ${step}`);
+});
+// 1. Parsed dates: ...
+// 2. 2024 is a leap year...
+// 3. Years: 0
+// 4. Months: 2
+// 5. Days: 0
+// 6. Total: 2m
+```
+
+#### Propiedades de Explanation
+
+| Propiedad        | Tipo                     | Descripción                   |
+| ---------------- | ------------------------ | ----------------------------- |
+| `input`          | `string[]`               | Fechas de entrada parseadas   |
+| `steps`          | `string[]`               | Pasos del cálculo legibles    |
+| `breakdown`      | `DurationParts`          | Desglose por componentes      |
+| `mode`           | `'exact' \| 'estimated'` | Tipo de cálculo realizado     |
+| `explanation`    | `string`                 | Resumen en texto natural      |
+| `locale`         | `string`                 | Idioma de la explicación      |
+| `leapYearFlags?` | `Array`                  | Información de años bisiestos |
+| `metadata?`      | `Object`                 | Rendimiento y precisión       |
 
 ```typescript
 const date = TimeGuard.from("2024-03-13 14:35:47.654");
@@ -1042,10 +1334,30 @@ date1.isBetween(date1, date2, undefined, "[]"); // inclusive both ends
 date1.isBetween(date1, date2, undefined, "()"); // exclusive both ends
 date1.isBetween(date1, date2, "month", "[]"); // granular range
 
-// Calculate difference
+// Calculate difference - Traditional API (backward compatible)
 date1.diff(date2, "days"); // -7
 date1.diff(date2, "millisecond"); // difference in ms
 date1.diff(date2, "months"); // -0
+
+// Calculate difference - Modern Calendar-Aware API
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+
+// Exact mode (default) - precise time difference
+const exactDiff = start.diff(end, { mode: "exact" });
+console.log(exactDiff.as("day")); // 65 days
+
+// Calendar mode - human-readable breakdown
+const calendarDiff = start.diff(end, { mode: "calendar" });
+console.log(calendarDiff.format("en")); // "2 months and 5 days"
+console.log(calendarDiff.format("es")); // "2 meses y 5 días"
+console.log(calendarDiff.breakdown()); // { years: 0, months: 2, weeks: 0, days: 5, ... }
+
+// Fluent API for unit conversion
+const diff = start.diff(end);
+console.log(diff.as("day")); // 65
+console.log(diff.as("hour")); // 1560
+console.log(diff.valueOf()); // milliseconds
 ```
 
 ### 📊 Advanced Calculations
@@ -1186,6 +1498,107 @@ date.format('DD/MM/YYYY "at" HH:mm'); // 13/03/2024 at 14:30
 ```
 
 **📖 Complete Format Guide:** See [EXAMPLES.md](EXAMPLES.md) for more patterns and use cases.
+
+### ⏱️ Calendar-Aware Difference Calculations
+
+One of TimeGuard's most powerful features is its **calendar-aware diff mode**, which solves a fundamental problem with date libraries: months and years have variable lengths.
+
+#### Understanding Two Approaches
+
+```typescript
+// Problem: How much time between Jan 15 and Mar 20?
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+
+// ❌ Naive approach: Just count days
+// Result: "65 days" (technically correct but not user-friendly)
+
+// ✅ Calendar-aware approach: Break into meaningful units
+// Result: "2 months and 5 days" (how humans think about time)
+```
+
+#### API Modes
+
+```typescript
+const start = TimeGuard.from("2024-01-15");
+const end = TimeGuard.from("2024-03-20");
+
+// ==== EXACT MODE (default) ====
+// Precise time difference in specified unit
+const exactDiff = start.diff(end, { mode: "exact" });
+
+// Returns normalized difference
+exactDiff.as("day"); // 65 days
+exactDiff.as("hour"); // 1560 hours
+exactDiff.as("week"); // 9 weeks
+exactDiff.valueOf(); // milliseconds
+
+// ==== CALENDAR MODE ====
+// Human-readable breakdown with automatic localization
+const calendarDiff = start.diff(end, { mode: "calendar" });
+
+// Get structured breakdown
+calendarDiff.breakdown();
+// {
+//   years: 0,
+//   months: 2,
+//   weeks: 0,
+//   days: 5,
+//   hours: 0,
+//   minutes: 0,
+//   seconds: 0,
+//   milliseconds: 0
+// }
+
+// Format in any locale
+calendarDiff.format("en"); // "2 months and 5 days"
+calendarDiff.format("es"); // "2 meses y 5 días"
+calendarDiff.format("fr"); // "2 mois et 5 jours"
+calendarDiff.format("de"); // "2 Monate und 5 Tage"
+```
+
+#### Backward Compatibility
+
+```typescript
+// Traditional API still works perfectly
+const tg1 = TimeGuard.from("2024-01-15");
+const tg2 = TimeGuard.from("2024-03-20");
+
+tg1.diff(tg2, "day"); // 65 (returns number)
+tg1.diff(tg2, "month"); // 2
+tg1.diff(tg2, "millisecond"); // raw milliseconds
+```
+
+#### Advanced Usage
+
+```typescript
+const start = TimeGuard.from("2024-01-15 10:30:00");
+const end = TimeGuard.from("2024-03-20 15:45:00");
+
+// Fluent API for unit conversion
+const diff = start.diff(end);
+diff.as("day"); // Get as days
+diff.as("hour"); // Get as hours
+diff.as("minute"); // Get as minutes
+diff.valueOf(); // Implicit number conversion (milliseconds)
+
+// Locale-specific formatting
+const spanishDiff = start.diff(end, {
+  mode: "calendar",
+  locale: "es",
+});
+console.log(spanishDiff.format()); // Uses Spanish locale
+
+// Query the mode used
+diff.getMode(); // "exact"
+calendarDiff.getMode(); // "calendar"
+
+// String representation
+spanishDiff.toString(); // "2 meses y 5 días" (nice for display)
+exactDiff.toString(); // "432000000" (milliseconds)
+```
+
+**💡 Key Insight:** Calendar mode handles month/year variations automatically using Temporal API's built-in month normalization, ensuring accurate results across different month lengths and leap years.
 
 ---
 

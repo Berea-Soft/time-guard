@@ -51,6 +51,248 @@ export interface IRoundOptions {
 }
 
 /**
+ * Duration options for normalizing time differences
+ */
+export interface IDurationOptions {
+  largestUnit?: 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond';
+  smallestUnit?: 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond';
+}
+
+/**
+ * Diff result object that allows chaining with .as()
+ * Example: tg1.diff(tg2).as('month')
+ */
+export interface IDiffResult {
+  as(unit: Unit): number;
+  /**
+   * Get breakdown in calendar mode (e.g., "2 months 5 days")
+   * Only available when mode is 'calendar'
+   */
+  breakdown(): DurationParts | null;
+  /**
+   * Format the difference as a human-readable string
+   * @param locale Locale code (e.g., 'en', 'es', 'fr')
+   * @example
+   * diff.format('en') // "2 months and 5 days"
+   * diff.format('es') // "2 meses y 5 días"
+   */
+  format(locale?: string): string;
+  /**
+   * Get the mode used for this diff calculation
+   */
+  getMode(): 'calendar' | 'exact';
+}
+
+/**
+ * Options for diff() method
+ */
+export interface IDiffOptions {
+  /**
+   * Calculation mode:
+   * - 'calendar': Returns months/days breakdown (e.g., 65 days → 2 months 5 days)
+   * - 'exact': Returns exact time units (e.g., 65 days)
+   * @default 'exact'
+   */
+  mode?: 'calendar' | 'exact';
+  /**
+   * Unit for diff when using 'exact' mode
+   * @default 'millisecond'
+   */
+  unit?: Unit;
+  /**
+   * Locale for formatting output text
+   * @default from TimeGuard instance config
+   */
+  locale?: string;
+}
+
+/**
+ * Duration parts breakdown
+ */
+export interface DurationParts {
+  years: number;
+  months: number;
+  weeks: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  milliseconds: number;
+}
+
+/**
+ * Options for humanize() method
+ */
+export interface IHumanizeOptions {
+  /**
+   * Locale code (e.g., 'en', 'es', 'fr')
+   * @default from TimeGuard instance config
+   */
+  locale?: string;
+  /**
+   * Show full breakdown (e.g., "2 months and 5 days") 
+   * or just largest unit (e.g., "2 months")
+   * @default false (largest unit only with Intl.RelativeTimeFormat style)
+   */
+  fullBreakdown?: boolean;
+  /**
+   * Numeric format: 'always', 'auto'
+   * @default 'always'
+   */
+  numeric?: 'always' | 'auto';
+}
+
+/**
+ * Duration result with humanize and total methods
+ * Returned by until(), since(), and between()
+ * Rich object for business logic: payments, metrics, analytics
+ */
+export interface IDurationResult extends DurationParts {
+  /**
+   * Convert duration to human-readable string
+   * @example
+   * duration.humanize() // "2 months"
+   * duration.humanize({ fullBreakdown: true, locale: 'es' }) // "2 meses y 5 días"
+   */
+  humanize(options?: IHumanizeOptions): string;
+
+  /**
+   * Get total duration in specified unit (date-fns style)
+   * Perfect for business metrics: payments, analytics, calculations
+   * 
+   * Conversion factors account for:
+   * - Leap years (1 year = 365.25 days)
+   * - Average month length (1 month = 30.4375 days)
+   * 
+   * @example
+   * duration.total('days')    // 65
+   * duration.total('months')  // 2.166... (65 / 30.4375)
+   * duration.total('hours')   // 1560
+   * duration.total('seconds') // 5616000
+   * 
+   * Use cases:
+   * - Billing calculations: `duration.total('days') * dailyRate`
+   * - Performance metrics: `duration.total('milliseconds')`
+   * - Report generation: `duration.total('months')`
+   */
+  total(unit: Unit): number;
+
+  /**
+   * String representation
+   * Returns humanized format for display
+   */
+  toString(): string;
+
+  /**
+   * JSON representation
+   * Returns breakdown as object for API responses
+   */
+  toJSON(): Record<string, number>;
+
+  /**
+   * Explain the calculation - killer feature for debugging and education
+   * Returns detailed breakdown of how the duration was calculated
+   * 
+   * Perfect for:
+   * - Debugging complex date calculations
+   * - Educational purposes (showing date math)
+   * - Auditing time-based business logic
+   * 
+   * @example
+   * duration.explain()
+   * // {
+   * //   input: ['2024-01-15', '2024-03-20'],
+   * //   steps: ['...step 1...', '...step 2...'],
+   * //   breakdown: { years: 0, months: 2, days: 5, ... },
+   * //   mode: 'exact',
+   * //   explanation: '...'
+   * // }
+   */
+  explain(): IDurationExplanation;
+}
+
+/**
+ * Duration explanation object for debugging and education
+ * Provides transparent insight into calculation methodology
+ * Perfect for: debugging, auditing, educational purposes
+ * 
+ * @example
+ * duration.explain()
+ * // {
+ * //   input: ['2024-01-15', '2024-03-20'],
+ * //   steps: [
+ * //     'Parsed dates: 2024-01-15 (day 15 of 365) to 2024-03-20 (day 80 of 365)',
+ * //     '2024 is a leap year (366 days)',
+ * //     'February 2024 has 29 days',
+ * //     'Month 1: 31 - 15 = 16 days remaining',
+ * //     'Month 2: 29 days (full leap month)',
+ * //     'Month 3: 1 - 20 = 20 days',
+ * //     'Total: 16 + 29 + 20 = 65 days'
+ * //   ],
+ * //   breakdown: { years: 0, months: 2, weeks: 0, days: 5, ... },
+ * //   mode: 'exact',
+ * //   explanation: 'Calculated 2024-01-15 to 2024-03-20 including leap year adjustment'
+ * // }
+ */
+export interface IDurationExplanation {
+  /**
+   * Input dates as array of strings or formatted representations
+   */
+  input: string[];
+
+  /**
+   * Step-by-step calculation explanation
+   * Each step is human-readable and educational
+   * Useful for debugging complex date calculations
+   */
+  steps: string[];
+
+  /**
+   * Duration breakdown by component
+   * Same as the DurationResult properties
+   */
+  breakdown: DurationParts;
+
+  /**
+   * Calculation mode
+   * - 'exact': Uses Temporal API precise calculations
+   * - 'estimated': Fallback for edge cases
+   */
+  mode: 'exact' | 'estimated';
+
+  /**
+   * Human-readable explanation of the entire calculation
+   * Summarizes the approach and any special handling
+   */
+  explanation: string;
+
+  /**
+   * Locale used for explanation text
+   * Supports internationalization of step descriptions
+   */
+  locale: string;
+
+  /**
+   * Leap year flags if applicable
+   * Documents which years were leap years in the calculation
+   */
+  leapYearFlags?: {
+    year: number;
+    isLeap: boolean;
+    daysInFebruary: number;
+  }[];
+
+  /**
+   * Performance metadata
+   * For monitoring calculation complexity
+   */
+  metadata?: {
+    calculationTimeMs: number;
+    precision: 'nanosecond' | 'microsecond' | 'millisecond' | 'second' | 'day';
+  };
+}
+
+/**
  * Calendar system interface
  */
 export interface ICalendarSystem {
@@ -132,8 +374,11 @@ export interface ILocaleManager {
 export interface IDateArithmetic {
   add(units: Partial<Record<Unit, number>> | IDuration): TimeGuard;
   subtract(units: Partial<Record<Unit, number>> | IDuration): TimeGuard;
-  diff(other: TimeGuard, unit?: Unit): number;
-  until(other: TimeGuard, options?: IRoundOptions): IDuration;
+  // Overloaded diff: returns IDiffResult without unit, number with unit
+  diff(other: TimeGuard): IDiffResult;
+  diff(other: TimeGuard, unit: Unit): number;
+  until(other: TimeGuard, options?: IDurationOptions): IDurationResult;
+  since(other: TimeGuard, options?: IDurationOptions): IDurationResult;
   round(options: IRoundOptions): TimeGuard;
 }
 
@@ -290,7 +535,7 @@ export interface ITimeGuard
   /**
    * Duration from another date (inverse of until)
    */
-  since(other: TimeGuard): IDuration;
+  since(other: TimeGuard, options?: IDurationOptions): IDurationResult;
 
   /**
    * ISO 8601 duration string (P1Y2M3DT4H5M6S)
@@ -349,4 +594,56 @@ export declare class TimeGuard {
   constructor(input?: unknown, config?: ITimeGuardConfig);
 }
 
+/**
+ * Forward declaration for DurationResult class
+ * Implementation is in ./time-guard.ts, exported via ./index.ts
+ */
+export declare class DurationResult implements IDurationResult {
+  constructor(
+    parts: DurationParts,
+    locale?: string,
+    metadata?: {
+      startDate?: string;
+      endDate?: string;
+      steps?: string[];
+      mode?: 'exact' | 'estimated';
+      leapYearFlags?: Array<{ year: number; isLeap: boolean; daysInFebruary: number }>;
+      calculationTimeMs?: number;
+    }
+  );
+  years: number;
+  months: number;
+  weeks: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  milliseconds: number;
+  humanize(options?: {
+    locale?: string;
+    fullBreakdown?: boolean;
+    numeric?: 'always' | 'auto';
+  }): string;
+  total(unit: Unit): number;
+  toString(): string;
+  toJSON(): Record<string, number>;
+  explain(): IDurationExplanation;
+}
+
+/**
+ * Forward declaration for TimeRange class
+ * Fluent API for date range operations with semantic naming
+ * Implementation is in ./time-guard.ts, exported via ./index.ts
+ */
+export declare class TimeRange {
+  constructor(start: TimeGuard, end: TimeGuard);
+  toDuration(): DurationResult;
+  inMonths(): number;
+  humanize(options?: {
+    locale?: string;
+    fullBreakdown?: boolean;
+    numeric?: 'always' | 'auto';
+  }): string;
+  in(unit: Unit): number;
+}
 
