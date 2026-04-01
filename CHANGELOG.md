@@ -1,3 +1,12 @@
+## [2.2.2](https://github.com/Berea-Soft/time-guard/compare/v2.2.1...v2.2.2) (2026-04-01)
+
+
+### Bug Fixes
+
+* correcion de exportaciones y versionamiento ([b34f3cb](https://github.com/Berea-Soft/time-guard/commit/b34f3cb0e26ce590fc9fc9be0fd0b1e64aace7f7))
+* correcion de exportaciones y versionamiento ([74746a1](https://github.com/Berea-Soft/time-guard/commit/74746a198d2b215d888a87f573e80f31c622e80f))
+* correcion de exportaciones y versionamiento ([c5d90bc](https://github.com/Berea-Soft/time-guard/commit/c5d90bcd81f126a507e0b93b867db4d458e824df))
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
