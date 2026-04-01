@@ -16,9 +16,8 @@ import type { ITimeGuardConfig } from './types';
 import { LocaleManager, EN_LOCALE, ES_LOCALE } from './locales/locale.manager';
 import { ALL_LOCALES } from './locales/index';
 
-// Core exports
-export { TimeGuard, TimeRange } from './time-guard';
-export { DurationResult } from './time-guard';
+// Core exports (reexport everything from time-guard for single entry point)
+export * from './time-guard';
 
 // Type exports (zero cost — erased at build time)
 export type {
@@ -77,6 +76,7 @@ export {
 } from './calendars/index';
 
 // Plugin Manager (core infra, no built-in plugins)
+export * from './plugins/index';
 export { PluginManager } from './plugins/manager';
 
 // Plugin exports (all plugins)
