@@ -102,13 +102,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "release": "standard-version",
-    "release:major": "standard-version --release-as major",
-    "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "postrelease": "git push --follow-tags origin main && npm publish",
-    "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run lint && npm run test && npm run build:all"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"
