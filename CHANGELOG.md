@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/Berea-Soft/time-guard/compare/v2.2.3...v2.3.0) (2026-04-06)
+
+
+### Features
+
+* configuracion para modulos nuxt ([a30ad34](https://github.com/Berea-Soft/time-guard/commit/a30ad343417b23df67cfdfddcc96c7fc24480c9b))
+
 ## [2.2.3](https://github.com/Berea-Soft/time-guard/compare/v2.2.2...v2.2.3) (2026-04-02)
 
 
