@@ -1,3 +1,10 @@
+## [2.2.3](https://github.com/Berea-Soft/time-guard/compare/v2.2.2...v2.2.3) (2026-04-02)
+
+
+### Bug Fixes
+
+* use OIDC for npm publishing ([4fd309c](https://github.com/Berea-Soft/time-guard/commit/4fd309c2347ecb2ddebd6d978337a8f93ae38d49))
+
 ## [2.2.2](https://github.com/Berea-Soft/time-guard/compare/v2.2.1...v2.2.2) (2026-04-01)
 
 
