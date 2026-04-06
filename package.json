@@ -16,32 +16,38 @@
     ".": {
       "types": "./dist/types/time-guard.d.ts",
       "import": "./dist/time-guard.es.js",
-      "require": "./dist/time-guard.cjs"
+      "require": "./dist/time-guard.cjs",
+      "default": "./dist/time-guard.es.js"
     },
     "./locales": {
       "types": "./dist/types/locales/index.d.ts",
       "import": "./dist/locales/index.es.js",
-      "require": "./dist/locales/index.cjs"
+      "require": "./dist/locales/index.cjs",
+      "default": "./dist/locales/index.es.js"
     },
     "./calendars": {
       "types": "./dist/types/calendars/index.d.ts",
       "import": "./dist/calendars/index.es.js",
-      "require": "./dist/calendars/index.cjs"
+      "require": "./dist/calendars/index.cjs",
+      "default": "./dist/calendars/index.es.js"
     },
     "./plugins/relative-time": {
       "types": "./dist/types/plugins/relative-time/index.d.ts",
       "import": "./dist/plugins/relative-time.es.js",
-      "require": "./dist/plugins/relative-time.cjs"
+      "require": "./dist/plugins/relative-time.cjs",
+      "default": "./dist/plugins/relative-time.es.js"
     },
     "./plugins/duration": {
       "types": "./dist/types/plugins/duration/index.d.ts",
       "import": "./dist/plugins/duration.es.js",
-      "require": "./dist/plugins/duration.cjs"
+      "require": "./dist/plugins/duration.cjs",
+      "default": "./dist/plugins/duration.es.js"
     },
     "./plugins/advanced-format": {
       "types": "./dist/types/plugins/advanced-format/index.d.ts",
       "import": "./dist/plugins/advanced-format.es.js",
-      "require": "./dist/plugins/advanced-format.cjs"
+      "require": "./dist/plugins/advanced-format.cjs",
+      "default": "./dist/plugins/advanced-format.es.js"
     }
   },
   "files": [
