@@ -1,3 +1,11 @@
+# [2.4.0](https://github.com/Berea-Soft/time-guard/compare/v2.3.0...v2.4.0) (2026-04-13)
+
+
+### Features
+
+* add configuration files and enhance duration formatting utilities ([1b885ff](https://github.com/Berea-Soft/time-guard/commit/1b885ff772184d769590d292e042bc19b5b24651))
+* **tests:** enhance coverage tests for various calendar and duration functionalities ([f745425](https://github.com/Berea-Soft/time-guard/commit/f745425894f813fa04c3a524078a7ecc2dc07d1b))
+
 # [2.3.0](https://github.com/Berea-Soft/time-guard/compare/v2.2.3...v2.3.0) (2026-04-06)
 
 
