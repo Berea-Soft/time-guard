@@ -45,10 +45,17 @@ export default defineConfig(({ mode }): UserConfig => {
           formats: ["umd", "iife", "es", "cjs"],
         },
         rollupOptions: {
-          output: {
-            banner,
-            exports: "named" as const,
-          },
+            // Treat the Temporal polyfill as a peer dependency / external
+            // so the ES build keeps the side-effect import line and consumers
+            // can provide the polyfill themselves.
+            external: ["@js-temporal/polyfill"],
+            output: {
+              banner,
+              exports: "named" as const,
+              globals: {
+                "@js-temporal/polyfill": "Temporal",
+              },
+            },
         },
         emptyOutDir: false,
         sourcemap: true,

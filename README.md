@@ -62,21 +62,21 @@ Una biblioteca moderna y de nivel producción para manipulación de fechas/horas
 ## 🚀 Inicio Rápido
 
 ```typescript
-import { TimeGuard } from "@bereasoftware/time-guard";
+import { TimeGuard } from '@bereasoftware/time-guard';
 
 // Crear una fecha
 const now = TimeGuard.now();
-const date = TimeGuard.from("2024-03-13");
+const date = TimeGuard.from('2024-03-13');
 
 // Manipular fechas
-const tomorrow = date.add(1, "day");
-const nextMonth = date.add(1, "month");
+const tomorrow = date.add(1, 'day');
+const nextMonth = date.add(1, 'month');
 
 // Formatear con locales
-const spanish = date.locale("es").format("dddd, DD MMMM YYYY");
+const spanish = date.locale('es').format('dddd, DD MMMM YYYY');
 // Resultado: miércoles, 13 marzo 2024
 
-const japanese = date.locale("ja").format("YYYY年M月D日");
+const japanese = date.locale('ja').format('YYYY年M月D日');
 // Resultado: 2024年3月13日
 
 // Obtener componentes
@@ -88,7 +88,7 @@ console.log(date.dayOfWeek()); // 3 (miércoles)
 // Comparar fechas
 console.log(date.isBefore(tomorrow)); // true
 console.log(date.isSame(date.clone())); // true
-console.log(date.isAfter(new Date("2020-01-01"))); // true
+console.log(date.isAfter(new Date('2020-01-01'))); // true
 ```
 
 ---
@@ -115,14 +115,14 @@ TimeGuard usa una arquitectura modular inspirada en dayjs. El **core** pesa ~5KB
 
 ```typescript
 // Core ligero (~5KB gzip) - solo EN/ES
-import { TimeGuard } from "@bereasoftware/time-guard";
+import { TimeGuard } from '@bereasoftware/time-guard';
 
 // Módulos bajo demanda
-import { ALL_LOCALES } from "@bereasoftware/time-guard/locales";
-import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
-import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
-import { Duration } from "@bereasoftware/time-guard/plugins/duration";
-import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
+import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
+import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
+import { Duration } from '@bereasoftware/time-guard/plugins/duration';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
 
 // UMD para CDN / <script>
 // <script src="unpkg.com/@bereasoftware/time-guard/dist/time-guard.umd.js"></script>
@@ -139,8 +139,8 @@ import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-for
 Todas las instancias de TimeGuard son inmutables. Cada operación devuelve una nueva instancia:
 
 ```typescript
-const date = TimeGuard.from("2024-03-13");
-const modified = date.add(1, "day");
+const date = TimeGuard.from('2024-03-13');
+const modified = date.add(1, 'day');
 
 console.log(date.day()); // 13 (sin cambios)
 console.log(modified.day()); // 14 (nueva instancia)
@@ -151,14 +151,14 @@ console.log(modified.day()); // 14 (nueva instancia)
 Maneja zonas horarias con soporte completo de Temporal API:
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 10:30:00");
+const date = TimeGuard.from('2024-03-13 10:30:00');
 
 // Set timezone
-const inNYC = date.timezone("America/New_York");
-const inTokyo = date.timezone("Asia/Tokyo");
+const inNYC = date.timezone('America/New_York');
+const inTokyo = date.timezone('Asia/Tokyo');
 
-console.log(inNYC.format("YYYY-MM-DD HH:mm:ss Z"));
-console.log(inTokyo.format("YYYY-MM-DD HH:mm:ss Z"));
+console.log(inNYC.format('YYYY-MM-DD HH:mm:ss Z'));
+console.log(inTokyo.format('YYYY-MM-DD HH:mm:ss Z'));
 ```
 
 ### 3. Localización
@@ -166,15 +166,15 @@ console.log(inTokyo.format("YYYY-MM-DD HH:mm:ss Z"));
 Soporte para 40+ idiomas y locales:
 
 ```typescript
-const date = TimeGuard.from("2024-03-13");
+const date = TimeGuard.from('2024-03-13');
 
-date.locale("en").format("MMMM DD, YYYY"); // March 13, 2024
-date.locale("es").format("DD MMMM YYYY"); // 13 marzo 2024
-date.locale("fr").format("DD MMMM YYYY"); // 13 mars 2024
-date.locale("de").format("DD. MMMM YYYY"); // 13. März 2024
-date.locale("ja").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("zh-cn").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("ar").format("DD MMMM YYYY"); // 13 مارس 2024
+date.locale('en').format('MMMM DD, YYYY'); // March 13, 2024
+date.locale('es').format('DD MMMM YYYY'); // 13 marzo 2024
+date.locale('fr').format('DD MMMM YYYY'); // 13 mars 2024
+date.locale('de').format('DD. MMMM YYYY'); // 13. März 2024
+date.locale('ja').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('zh-cn').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('ar').format('DD MMMM YYYY'); // 13 مارس 2024
 ```
 
 ### 4. Estrategias de Formato
@@ -182,21 +182,21 @@ date.locale("ar").format("DD MMMM YYYY"); // 13 مارس 2024
 Múltiples formatos preestablecidos y patrones personalizados:
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:45");
+const date = TimeGuard.from('2024-03-13 14:30:45');
 
 // Preestablecidos
-date.format("iso"); // 2024-03-13T14:30:45
-date.format("date"); // 2024-03-13
-date.format("time"); // 14:30:45
-date.format("datetime"); // 2024-03-13 14:30:45
-date.format("rfc2822"); // Wed, 13 Mar 2024 14:30:45 GMT
-date.format("rfc3339"); // 2024-03-13T14:30:45Z
-date.format("utc"); // 2024-03-13T14:30:45Z
+date.format('iso'); // 2024-03-13T14:30:45
+date.format('date'); // 2024-03-13
+date.format('time'); // 14:30:45
+date.format('datetime'); // 2024-03-13 14:30:45
+date.format('rfc2822'); // Wed, 13 Mar 2024 14:30:45 GMT
+date.format('rfc3339'); // 2024-03-13T14:30:45Z
+date.format('utc'); // 2024-03-13T14:30:45Z
 
 // Patrones personalizados
-date.format("YYYY-MM-DD HH:mm:ss");
-date.format("dddd, MMMM DD, YYYY");
-date.format("MM/DD/YYYY");
+date.format('YYYY-MM-DD HH:mm:ss');
+date.format('dddd, MMMM DD, YYYY');
+date.format('MM/DD/YYYY');
 ```
 
 ---
@@ -206,7 +206,7 @@ date.format("MM/DD/YYYY");
 Acceso rápido a componentes individuales de la fecha:
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:45.123");
+const date = TimeGuard.from('2024-03-13 14:30:45.123');
 
 // Componentes individuales
 console.log(date.year()); // 2024
@@ -237,8 +237,8 @@ console.log(date.inLeapYear()); // true
 La forma **más semántica y clara** para calcular diferencias de tiempo. ¡No necesitas pensar en `until()` vs `since()`!
 
 ```typescript
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 // Lectura simple y directa
 TimeGuard.between(start, end).humanize();
@@ -253,7 +253,7 @@ TimeGuard.between(start, end).months; // 2
 TimeGuard.between(start, end).days; // 5
 
 // Todas las opciones de humanize() disponibles
-TimeGuard.between(start, end).humanize({ locale: "es", fullBreakdown: true });
+TimeGuard.between(start, end).humanize({ locale: 'es', fullBreakdown: true });
 // "2 meses y 5 días"
 ```
 
@@ -275,13 +275,13 @@ TimeGuard.between(end, start); // mismo resultado, order no importa
 
 ```typescript
 // Sintaxis limpia y directa
-TimeGuard.range("2024-01-15", "2024-03-20").humanize();
+TimeGuard.range('2024-01-15', '2024-03-20').humanize();
 // "2 months and 5 days"
 
-TimeGuard.range("2024-01-15", "2024-03-20").inMonths();
+TimeGuard.range('2024-01-15', '2024-03-20').inMonths();
 // 2.1355 (valor decimal preciso)
 
-TimeGuard.range("2024-01-15", "2024-03-20").toDuration();
+TimeGuard.range('2024-01-15', '2024-03-20').toDuration();
 // DurationResult: acceso completo a propiedades
 ```
 
@@ -289,28 +289,28 @@ TimeGuard.range("2024-01-15", "2024-03-20").toDuration();
 
 ```typescript
 // 📅 Período de alquiler
-const checkIn = new TimeGuard("2024-06-15");
-const checkOut = new TimeGuard("2024-06-22");
+const checkIn = new TimeGuard('2024-06-15');
+const checkOut = new TimeGuard('2024-06-22');
 
-const rentalDays = TimeGuard.range(checkIn, checkOut).in("day");
+const rentalDays = TimeGuard.range(checkIn, checkOut).in('day');
 const rentalCost = rentalDays * 100; // $100 por día
 console.log(rentalCost); // $700
 
 // 💳 Cálculo de mora
-const invoiceDate = new TimeGuard("2024-01-01");
-const paymentDate = new TimeGuard("2024-02-15");
+const invoiceDate = new TimeGuard('2024-01-01');
+const paymentDate = new TimeGuard('2024-02-15');
 
 const lateFeePerDay = 10;
 const lateFee =
-  TimeGuard.range(invoiceDate, paymentDate).in("day") * lateFeePerDay;
+  TimeGuard.range(invoiceDate, paymentDate).in('day') * lateFeePerDay;
 console.log(lateFee); // Cálculo exacto con promediado de meses
 
 // 📊 Analítica de sesiones
-const sessionStart = new TimeGuard("2024-03-15T10:00:00");
-const sessionEnd = new TimeGuard("2024-03-15T10:35:42");
+const sessionStart = new TimeGuard('2024-03-15T10:00:00');
+const sessionEnd = new TimeGuard('2024-03-15T10:35:42');
 
 const engagementMinutes = TimeGuard.range(sessionStart, sessionEnd).in(
-  "minute",
+  'minute',
 );
 console.log(engagementMinutes); // Para métricas de usuarios
 ```
@@ -319,19 +319,19 @@ console.log(engagementMinutes); // Para métricas de usuarios
 
 ```typescript
 // El orden de fechas NO importa
-TimeGuard.range("2024-03-20", "2024-01-15").humanize({ locale: "es" });
+TimeGuard.range('2024-03-20', '2024-01-15').humanize({ locale: 'es' });
 // "2 meses y 5 días" (resultado idéntico)
 
 // Diferentes idiomas
-TimeGuard.range("2024-01-15", "2024-03-20").humanize({ locale: "fr" });
+TimeGuard.range('2024-01-15', '2024-03-20').humanize({ locale: 'fr' });
 // "2 mois et 5 jours"
 
-TimeGuard.range("2024-01-15", "2024-03-20").humanize({ locale: "de" });
+TimeGuard.range('2024-01-15', '2024-03-20').humanize({ locale: 'de' });
 // "2 Monate und 5 Tage"
 
 // Desglose completo
-TimeGuard.range("2024-01-15", "2024-03-20").humanize({
-  locale: "es",
+TimeGuard.range('2024-01-15', '2024-03-20').humanize({
+  locale: 'es',
   fullBreakdown: true,
 });
 // "2 meses y 5 días"
@@ -349,8 +349,8 @@ TimeGuard.range("2024-01-15", "2024-03-20").humanize({
 ### Duración: Calcular tiempo entre fechas
 
 ```typescript
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 const duration = start.until(end);
 
@@ -371,8 +371,8 @@ console.log(duration);
 Convierte duraciones a texto natural y legible con soporte multiidioma:
 
 ```typescript
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 // Estilo simple (Intl.RelativeTimeFormat)
 const duration = start.until(end);
@@ -384,17 +384,17 @@ console.log(duration.humanize({ fullBreakdown: true }));
 // "2 months and 5 days"
 
 // Con locale específico
-console.log(duration.humanize({ locale: "es" }));
+console.log(duration.humanize({ locale: 'es' }));
 // "2 meses"
 
-console.log(duration.humanize({ locale: "es", fullBreakdown: true }));
+console.log(duration.humanize({ locale: 'es', fullBreakdown: true }));
 // "2 meses y 5 días"
 
 // Con locale francés
-console.log(duration.humanize({ locale: "fr" }));
+console.log(duration.humanize({ locale: 'fr' }));
 // "2 mois"
 
-console.log(duration.humanize({ locale: "fr", fullBreakdown: true }));
+console.log(duration.humanize({ locale: 'fr', fullBreakdown: true }));
 // "2 mois et 5 jours"
 ```
 
@@ -402,8 +402,8 @@ console.log(duration.humanize({ locale: "fr", fullBreakdown: true }));
 
 ```typescript
 // TimeGuard hereda configuración de locale
-const start = TimeGuard.from("2024-01-15", { locale: "es" });
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15', { locale: 'es' });
+const end = TimeGuard.from('2024-03-20');
 
 const duration = start.until(end);
 
@@ -448,8 +448,8 @@ Perfecto para:
 - ✅ **Validación** - Confirmar que los cálculos son correctos
 
 ```typescript
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 const duration = start.until(end);
 
 // Explicación detallada del cálculo
@@ -498,16 +498,16 @@ Debugging de lógica de fechas:
 
 ```typescript
 // ¿Por qué el cálculo de mora es diferente?
-const invoiceDate = TimeGuard.from("2024-01-05");
-const paymentDate = TimeGuard.from("2024-02-15");
+const invoiceDate = TimeGuard.from('2024-01-05');
+const paymentDate = TimeGuard.from('2024-02-15');
 const lateFee = invoiceDate.until(paymentDate);
 
 // Obtén la explicación completa
 const debug = lateFee.explain();
 
-console.log("Pasos del cálculo:", debug.steps);
-console.log("Febrero es bisiesto:", debug.leapYearFlags);
-console.log("Desglose:", debug.breakdown);
+console.log('Pasos del cálculo:', debug.steps);
+console.log('Febrero es bisiesto:', debug.leapYearFlags);
+console.log('Desglose:', debug.breakdown);
 // Ahora sabes exactamente qué sucedió!
 ```
 
@@ -515,8 +515,8 @@ Educación - Enseñar cálculos de fechas:
 
 ```typescript
 // Mostrar a estudiantes cómo funciona
-const start = TimeGuard.from("2024-02-15"); // Enero
-const end = TimeGuard.from("2024-04-15"); // Abril
+const start = TimeGuard.from('2024-02-15'); // Enero
+const end = TimeGuard.from('2024-04-15'); // Abril
 const duration = start.until(end);
 
 const explanation = duration.explain();
@@ -547,18 +547,18 @@ explanation.steps.forEach((step, i) => {
 | `metadata?`      | `Object`                 | Rendimiento y precisión       |
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:35:47.654");
+const date = TimeGuard.from('2024-03-13 14:35:47.654');
 
 // Redondear a diferentes unidades
-date.round({ smallestUnit: "second" }); // 2024-03-13 14:35:48
-date.round({ smallestUnit: "minute" }); // 2024-03-13 14:36:00
-date.round({ smallestUnit: "hour" }); // 2024-03-13 15:00:00
-date.round({ smallestUnit: "day" }); // 2024-03-14 00:00:00
+date.round({ smallestUnit: 'second' }); // 2024-03-13 14:35:48
+date.round({ smallestUnit: 'minute' }); // 2024-03-13 14:36:00
+date.round({ smallestUnit: 'hour' }); // 2024-03-13 15:00:00
+date.round({ smallestUnit: 'day' }); // 2024-03-14 00:00:00
 
 // Modos de redondeo: 'ceil', 'floor', 'trunc', 'half' (predeterminado)
 date.round({
-  smallestUnit: "minute",
-  roundingMode: "ceil",
+  smallestUnit: 'minute',
+  roundingMode: 'ceil',
 });
 ```
 
@@ -571,14 +571,14 @@ TimeGuard incluye soporte para múltiples sistemas de calendario, extensible a t
 ### Calendarios Soportados
 
 ```typescript
-import { TimeGuard, CalendarManager } from "@bereasoftware/time-guard";
+import { TimeGuard, CalendarManager } from '@bereasoftware/time-guard';
 import {
   IslamicCalendar,
   HebrewCalendar,
   ChineseCalendar,
   JapaneseCalendar,
   BuddhistCalendar,
-} from "@bereasoftware/time-guard/calendars";
+} from '@bereasoftware/time-guard/calendars';
 
 // Get calendar manager
 const calendarMgr = CalendarManager.getInstance();
@@ -592,7 +592,7 @@ const islamic = new IslamicCalendar();
 calendarMgr.register(islamic);
 
 // Get calendar info
-const gregorian = calendarMgr.get("gregory");
+const gregorian = calendarMgr.get('gregory');
 console.log(gregorian.getMonthName(3)); // "March"
 console.log(gregorian.getMonthName(3, true)); // "Mar"
 console.log(gregorian.getWeekdayName(1)); // "Sunday"
@@ -604,7 +604,7 @@ console.log(gregorian.isLeapYear(2024)); // true
 #### Calendario Gregoriano
 
 ```typescript
-import { GregorianCalendar } from "@bereasoftware/time-guard/calendars";
+import { GregorianCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new GregorianCalendar();
 console.log(calendar.daysInMonth(2024, 2)); // 29 (leap year)
@@ -614,7 +614,7 @@ console.log(calendar.daysInYear(2024)); // 366
 #### Calendario Islámico (Hijri)
 
 ```typescript
-import { IslamicCalendar } from "@bereasoftware/time-guard/calendars";
+import { IslamicCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new IslamicCalendar();
 console.log(calendar.getMonthName(9)); // "Ramadan"
@@ -624,7 +624,7 @@ console.log(calendar.isLeapYear(1445)); // true
 #### Calendario Hebreo
 
 ```typescript
-import { HebrewCalendar } from "@bereasoftware/time-guard/calendars";
+import { HebrewCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new HebrewCalendar();
 console.log(calendar.getMonthName(1)); // "Tishrei"
@@ -634,7 +634,7 @@ console.log(calendar.isLeapYear(5784)); // true
 #### Calendario Chino
 
 ```typescript
-import { ChineseCalendar } from "@bereasoftware/time-guard/calendars";
+import { ChineseCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new ChineseCalendar();
 const zodiac = calendar.getZodiacSign(2024); // "龙" (Dragon)
@@ -643,7 +643,7 @@ const zodiac = calendar.getZodiacSign(2024); // "龙" (Dragon)
 #### Calendario Japonés
 
 ```typescript
-import { JapaneseCalendar } from "@bereasoftware/time-guard/calendars";
+import { JapaneseCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new JapaneseCalendar();
 console.log(calendar.getMonthName(3)); // "3月"
@@ -652,7 +652,7 @@ console.log(calendar.getMonthName(3)); // "3月"
 #### Calendario Budista
 
 ```typescript
-import { BuddhistCalendar } from "@bereasoftware/time-guard/calendars";
+import { BuddhistCalendar } from '@bereasoftware/time-guard/calendars';
 
 const calendar = new BuddhistCalendar();
 // Year 2567 BE = 2024 CE
@@ -670,21 +670,21 @@ TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 1. **Plugin de Tiempo Relativo** - Diferencias de tiempo legibles para humanos
 
    ```typescript
-   import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
-   import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
+   import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+   import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
 
    PluginManager.use(relativeTimePlugin, TimeGuard);
 
-   TimeGuard.from("2024-01-01").fromNow(); // "2 months ago"
-   TimeGuard.from("2024-04-01").toNow(); // "in 19 days"
+   TimeGuard.from('2024-01-01').fromNow(); // "2 months ago"
+   TimeGuard.from('2024-04-01').toNow(); // "in 19 days"
    ```
 
 2. **Plugin de Duración** - Soporte de duración ISO 8601
 
    ```typescript
-   import { Duration } from "@bereasoftware/time-guard/plugins/duration";
+   import { Duration } from '@bereasoftware/time-guard/plugins/duration';
 
-   const duration = Duration.fromISO("P2Y3M4D");
+   const duration = Duration.fromISO('P2Y3M4D');
    duration.humanize(); // "2 years, 3 months, 4 days"
    duration.asDays(); // 1159
    ```
@@ -692,12 +692,12 @@ TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 3. **Plugin de Formato Avanzado** - Tokens de formato extendidos
 
    ```typescript
-   import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
+   import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
 
    PluginManager.use(advancedFormatPlugin, TimeGuard);
 
-   date.format("Do MMMM YYYY"); // "13th March 2024"
-   date.format("Q [Q] YYYY"); // "1 Q 2024"
+   date.format('Do MMMM YYYY'); // "13th March 2024"
+   date.format('Q [Q] YYYY'); // "1 Q 2024"
    ```
 
 **📖 Full Details:** See [PLUGINS.md](PLUGINS.md) for complete plugin documentation.
@@ -806,131 +806,131 @@ Los códigos de locale siguen el patrón estándar `[language]-[region]`:
 #### Configuración de Locales
 
 ```typescript
-import { TimeGuard } from "@bereasoftware/time-guard";
+import { TimeGuard } from '@bereasoftware/time-guard';
 
-const date = TimeGuard.from("2024-03-13 14:30:00");
+const date = TimeGuard.from('2024-03-13 14:30:00');
 
 // Get current locale
 const currentLocale = date.locale(); // "en"
 
 // Change locale (returns new instance)
-const spanish = date.locale("es");
-const french = date.locale("fr");
-const japanese = date.locale("ja");
-const arabic = date.locale("ar");
+const spanish = date.locale('es');
+const french = date.locale('fr');
+const japanese = date.locale('ja');
+const arabic = date.locale('ar');
 
 // Chain operations
-date.locale("es").format("dddd, DD MMMM YYYY"); // miércoles, 13 marzo 2024
+date.locale('es').format('dddd, DD MMMM YYYY'); // miércoles, 13 marzo 2024
 
 // Or use constructor config
-TimeGuard.from("2024-03-13", { locale: "de" });
-TimeGuard.now({ locale: "ja" });
+TimeGuard.from('2024-03-13', { locale: 'de' });
+TimeGuard.now({ locale: 'ja' });
 ```
 
 #### Formateo en Diferentes Locales
 
 ```typescript
-const date = TimeGuard.from("2024-03-13");
+const date = TimeGuard.from('2024-03-13');
 
 // English variants
-date.locale("en").format("MMMM DD, YYYY"); // March 13, 2024
-date.locale("en-gb").format("DD MMMM YYYY"); // 13 March 2024
-date.locale("en-au").format("DD/MM/YYYY"); // 13/03/2024
-date.locale("en-ca").format("YYYY-MM-DD"); // 2024-03-13
+date.locale('en').format('MMMM DD, YYYY'); // March 13, 2024
+date.locale('en-gb').format('DD MMMM YYYY'); // 13 March 2024
+date.locale('en-au').format('DD/MM/YYYY'); // 13/03/2024
+date.locale('en-ca').format('YYYY-MM-DD'); // 2024-03-13
 
 // Spanish variants
-date.locale("es").format("DD MMMM YYYY"); // 13 marzo 2024
-date.locale("es-mx").format("DD/MM/YYYY"); // 13/03/2024
-date.locale("es-us").format("MMMM D"); // marzo 13
+date.locale('es').format('DD MMMM YYYY'); // 13 marzo 2024
+date.locale('es-mx').format('DD/MM/YYYY'); // 13/03/2024
+date.locale('es-us').format('MMMM D'); // marzo 13
 
 // Romance languages
-date.locale("fr").format("dddd D MMMM YYYY"); // mercredi 13 mars 2024
-date.locale("it").format("dddd, D MMMM YYYY"); // mercoledì, 13 marzo 2024
-date.locale("pt").format("dddd, D MMMM YYYY"); // quarta-feira, 13 de março de 2024
-date.locale("pt-br").format("DD/MM/YYYY"); // 13/03/2024
-date.locale("ro").format("DD MMMM YYYY"); // 13 martie 2024
+date.locale('fr').format('dddd D MMMM YYYY'); // mercredi 13 mars 2024
+date.locale('it').format('dddd, D MMMM YYYY'); // mercoledì, 13 marzo 2024
+date.locale('pt').format('dddd, D MMMM YYYY'); // quarta-feira, 13 de março de 2024
+date.locale('pt-br').format('DD/MM/YYYY'); // 13/03/2024
+date.locale('ro').format('DD MMMM YYYY'); // 13 martie 2024
 
 // Slavic languages
-date.locale("ru").format("DD MMMM YYYY"); // 13 марта 2024
-date.locale("pl").format("DD MMMM YYYY"); // 13 marca 2024
-date.locale("cs").format("DD. MMMM YYYY"); // 13. března 2024
-date.locale("sk").format("DD. MMMM YYYY"); // 13. marca 2024
+date.locale('ru').format('DD MMMM YYYY'); // 13 марта 2024
+date.locale('pl').format('DD MMMM YYYY'); // 13 marca 2024
+date.locale('cs').format('DD. MMMM YYYY'); // 13. března 2024
+date.locale('sk').format('DD. MMMM YYYY'); // 13. marca 2024
 
 // Nordic languages
-date.locale("sv").format("DD MMMM YYYY"); // 13 mars 2024
-date.locale("nb").format("DD. MMMM YYYY"); // 13. mars 2024
-date.locale("da").format("DD. MMMM YYYY"); // 13. marts 2024
-date.locale("fi").format("DD. MMMM YYYY"); // 13. maaliskuuta 2024
+date.locale('sv').format('DD MMMM YYYY'); // 13 mars 2024
+date.locale('nb').format('DD. MMMM YYYY'); // 13. mars 2024
+date.locale('da').format('DD. MMMM YYYY'); // 13. marts 2024
+date.locale('fi').format('DD. MMMM YYYY'); // 13. maaliskuuta 2024
 
 // Asian languages
-date.locale("ja").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("zh-cn").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("zh-tw").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("ko").format("YYYY년 M월 D일"); // 2024년 3월 13일
-date.locale("th").format("DD MMMM YYYY"); // 13 มีนาคม 2567 (BE)
-date.locale("vi").format("DD/MM/YYYY"); // 13/03/2024
-date.locale("id").format("DD MMMM YYYY"); // 13 Maret 2024
+date.locale('ja').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('zh-cn').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('zh-tw').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('ko').format('YYYY년 M월 D일'); // 2024년 3월 13일
+date.locale('th').format('DD MMMM YYYY'); // 13 มีนาคม 2567 (BE)
+date.locale('vi').format('DD/MM/YYYY'); // 13/03/2024
+date.locale('id').format('DD MMMM YYYY'); // 13 Maret 2024
 
 // European languages
-date.locale("de").format("DD. MMMM YYYY"); // 13. März 2024
-date.locale("nl").format("DD MMMM YYYY"); // 13 maart 2024
-date.locale("el").format("DD MMMM YYYY"); // 13 Μαρτίου 2024
-date.locale("hu").format("YYYY. MMMM DD."); // 2024. március 13.
-date.locale("eu").format("YYYY[ko] MMMM[ren] DD"); // 2024ko martsaren 13
-date.locale("ca").format("DD MMMM YYYY"); // 13 de març de 2024
-date.locale("tr").format("DD MMMM YYYY"); // 13 Mart 2024
+date.locale('de').format('DD. MMMM YYYY'); // 13. März 2024
+date.locale('nl').format('DD MMMM YYYY'); // 13 maart 2024
+date.locale('el').format('DD MMMM YYYY'); // 13 Μαρτίου 2024
+date.locale('hu').format('YYYY. MMMM DD.'); // 2024. március 13.
+date.locale('eu').format('YYYY[ko] MMMM[ren] DD'); // 2024ko martsaren 13
+date.locale('ca').format('DD MMMM YYYY'); // 13 de març de 2024
+date.locale('tr').format('DD MMMM YYYY'); // 13 Mart 2024
 
 // Middle Eastern & South Asian
-date.locale("ar").format("DD MMMM YYYY"); // 13 مارس 2024
-date.locale("he").format("DD.MM.YYYY"); // 13.03.2024
-date.locale("hi").format("DD MMMM YYYY"); // 13 मार्च 2024
+date.locale('ar').format('DD MMMM YYYY'); // 13 مارس 2024
+date.locale('he').format('DD.MM.YYYY'); // 13.03.2024
+date.locale('hi').format('DD MMMM YYYY'); // 13 मार्च 2024
 ```
 
 #### Nombres de Día y Mes
 
 ```typescript
 // Get localized day names
-date.locale("es").format("dddd"); // miércoles
-date.locale("es").format("ddd"); // mié
-date.locale("fr").format("dddd"); // mercredi
-date.locale("de").format("dddd"); // Mittwoch
-date.locale("ja").format("dddd"); // 水曜日
+date.locale('es').format('dddd'); // miércoles
+date.locale('es').format('ddd'); // mié
+date.locale('fr').format('dddd'); // mercredi
+date.locale('de').format('dddd'); // Mittwoch
+date.locale('ja').format('dddd'); // 水曜日
 
 // Get localized month names
-date.locale("es").format("MMMM"); // marzo
-date.locale("es").format("MMM"); // mar
-date.locale("fr").format("MMMM"); // mars
-date.locale("de").format("MMMM"); // März
-date.locale("ru").format("MMMM"); // марта
+date.locale('es').format('MMMM'); // marzo
+date.locale('es').format('MMM'); // mar
+date.locale('fr').format('MMMM'); // mars
+date.locale('de').format('MMMM'); // März
+date.locale('ru').format('MMMM'); // марта
 ```
 
 #### Aplicaciones Multilocale
 
 ```typescript
 // Switch language at runtime (user preference)
-let currentLocale = "en";
+let currentLocale = 'en';
 
 function formatUserDate(
   date: TimeGuard,
   locale: string = currentLocale,
 ): string {
-  return date.locale(locale).format("dddd, MMMM D, YYYY [at] HH:mm");
+  return date.locale(locale).format('dddd, MMMM D, YYYY [at] HH:mm');
 }
 
 const date = TimeGuard.now();
 
 // English user
-console.log(formatUserDate(date, "en")); // Wednesday, March 13, 2024 at 14:30
+console.log(formatUserDate(date, 'en')); // Wednesday, March 13, 2024 at 14:30
 
 // Spanish user
-currentLocale = "es";
-console.log(formatUserDate(date, "es")); // miércoles, 13 de marzo de 2024 a las 14:30
+currentLocale = 'es';
+console.log(formatUserDate(date, 'es')); // miércoles, 13 de marzo de 2024 a las 14:30
 
 // French user
-console.log(formatUserDate(date, "fr")); // mercredi, 13 mars 2024 à 14:30
+console.log(formatUserDate(date, 'fr')); // mercredi, 13 mars 2024 à 14:30
 
 // Japanese user
-console.log(formatUserDate(date, "ja")); // 水曜日、2024年3月13日 14:30
+console.log(formatUserDate(date, 'ja')); // 水曜日、2024年3月13日 14:30
 ```
 
 #### Obtener Locales Disponibles Programáticamente
@@ -941,10 +941,10 @@ const locales = TimeGuard.getAvailableLocales();
 // Returns: ['en', 'en-au', 'en-gb', 'en-ca', 'es', 'es-mx', 'es-us', ...]
 
 // Filter by prefix
-const englishLocales = locales.filter((l) => l.startsWith("en"));
-const spanishLocales = locales.filter((l) => l.startsWith("es"));
+const englishLocales = locales.filter((l) => l.startsWith('en'));
+const spanishLocales = locales.filter((l) => l.startsWith('es'));
 const asianLocales = locales.filter((l) =>
-  ["ja", "zh-cn", "zh-tw", "ko"].includes(l),
+  ['ja', 'zh-cn', 'zh-tw', 'ko'].includes(l),
 );
 
 // Create locale selector UI
@@ -952,7 +952,7 @@ function createLocaleSelector() {
   const locales = TimeGuard.getAvailableLocales();
   return locales.map((locale) => ({
     code: locale,
-    label: new Intl.DisplayNames("en", { type: "language" }).of(locale),
+    label: new Intl.DisplayNames('en', { type: 'language' }).of(locale),
   }));
 }
 ```
@@ -968,7 +968,7 @@ TimeGuard includes a powerful plugin system for extending functionality. Plugins
 ### Plugin Manager
 
 ```typescript
-import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
 
 // Use a plugin
 PluginManager.use(myPlugin, TimeGuard);
@@ -985,14 +985,14 @@ PluginManager.listInstalled();
 Añade diferencias de tiempo legibles como "hace 2 horas" o "en 3 días".
 
 ```typescript
-import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
-import relativeTimePlugin from "@bereasoftware/time-guard/plugins/relative-time";
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time';
 
 // Install plugin once
 PluginManager.use(relativeTimePlugin, TimeGuard);
 
 // Now use relative time methods
-const date = TimeGuard.from("2024-01-15");
+const date = TimeGuard.from('2024-01-15');
 
 // Relative to now
 date.fromNow(); // "2 months ago"
@@ -1003,7 +1003,7 @@ date.fromNow(true); // "2 months"
 date.toNow(true); // "2 months"
 
 // Relative to another date
-const other = TimeGuard.from("2024-02-15");
+const other = TimeGuard.from('2024-02-15');
 date.from(other); // "a month ago"
 date.to(other); // "in a month"
 
@@ -1036,12 +1036,12 @@ date.humanize(other, true); // "a month" (exact mode)
 Soporte de duración ISO 8601 con cálculos avanzados.
 
 ```typescript
-import { TimeGuard } from "@bereasoftware/time-guard";
+import { TimeGuard } from '@bereasoftware/time-guard';
 import {
   Duration,
   durationPlugin,
-} from "@bereasoftware/time-guard/plugins/duration";
-import { PluginManager } from "@bereasoftware/time-guard";
+} from '@bereasoftware/time-guard/plugins/duration';
+import { PluginManager } from '@bereasoftware/time-guard';
 
 // Install plugin
 PluginManager.use(durationPlugin, TimeGuard);
@@ -1058,7 +1058,7 @@ const duration1 = new Duration({
 });
 
 // From ISO 8601 string
-const duration2 = Duration.fromISO("P3Y6M4DT12H30M5S");
+const duration2 = Duration.fromISO('P3Y6M4DT12H30M5S');
 // P = Period marker
 // 3Y = 3 years
 // 6M = 6 months
@@ -1069,8 +1069,8 @@ const duration2 = Duration.fromISO("P3Y6M4DT12H30M5S");
 // 5S = 5 seconds
 
 // From TimeGuard dates
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-05-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-05-20');
 const between = Duration.between(start, end);
 // { years: 0, months: 4, days: 5, ... }
 
@@ -1087,8 +1087,8 @@ duration1.asMilliseconds(); // Total milliseconds
 
 // Humanize
 duration1.humanize(); // "2 years, 3 months, 4 days, 12 hours, 30 minutes"
-duration1.humanize("es"); // Spanish: "2 años, 3 meses..."
-duration1.humanize("fr"); // French: "2 ans, 3 mois..."
+duration1.humanize('es'); // Spanish: "2 años, 3 meses..."
+duration1.humanize('fr'); // French: "2 ans, 3 mois..."
 
 // Get components
 duration1.years;
@@ -1112,15 +1112,15 @@ duration1.negate(); // Reverse direction
 **ISO 8601 Duration Examples:**
 
 ```typescript
-Duration.fromISO("P1Y"); // 1 year
-Duration.fromISO("P3M"); // 3 months
-Duration.fromISO("P1W"); // 1 week (7 days)
-Duration.fromISO("P1D"); // 1 day
-Duration.fromISO("PT1H"); // 1 hour
-Duration.fromISO("PT30M"); // 30 minutes
-Duration.fromISO("PT45S"); // 45 seconds
-Duration.fromISO("P1Y2M3DT4H5M6S"); // Complex: 1 year, 2 months, ...
-Duration.fromISO("-P1D"); // Negative: -1 day
+Duration.fromISO('P1Y'); // 1 year
+Duration.fromISO('P3M'); // 3 months
+Duration.fromISO('P1W'); // 1 week (7 days)
+Duration.fromISO('P1D'); // 1 day
+Duration.fromISO('PT1H'); // 1 hour
+Duration.fromISO('PT30M'); // 30 minutes
+Duration.fromISO('PT45S'); // 45 seconds
+Duration.fromISO('P1Y2M3DT4H5M6S'); // Complex: 1 year, 2 months, ...
+Duration.fromISO('-P1D'); // Negative: -1 day
 ```
 
 ---
@@ -1130,31 +1130,31 @@ Duration.fromISO("-P1D"); // Negative: -1 day
 Tokens de formato extendidos para necesidades de formateo especializadas.
 
 ```typescript
-import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
-import advancedFormatPlugin from "@bereasoftware/time-guard/plugins/advanced-format";
+import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
 
 // Install plugin
 PluginManager.use(advancedFormatPlugin, TimeGuard);
 
-const date = TimeGuard.from("2024-03-13 14:30:00");
+const date = TimeGuard.from('2024-03-13 14:30:00');
 
 // Advanced tokens become available
-date.format("Do MMMM YYYY"); // "13th March 2024"
-date.format("Q [Q] YYYY"); // "1 Q 2024"
-date.format("[Week] w, YYYY"); // "Week 11, 2024"
-date.format("W [of] ww"); // "11 of 11"
-date.format("gggg-[W]ww"); // "2024-W11" (ISO week)
-date.format("GGGG-[W]WW"); // 2024-W11 (alternative)
+date.format('Do MMMM YYYY'); // "13th March 2024"
+date.format('Q [Q] YYYY'); // "1 Q 2024"
+date.format('[Week] w, YYYY'); // "Week 11, 2024"
+date.format('W [of] ww'); // "11 of 11"
+date.format('gggg-[W]ww'); // "2024-W11" (ISO week)
+date.format('GGGG-[W]WW'); // 2024-W11 (alternative)
 
 // Timezone abbreviation
-date.format("HH:mm zzz"); // "14:30 UTC"
+date.format('HH:mm zzz'); // "14:30 UTC"
 
 // 24-hour (k = 1-24 instead of 0-23)
-date.format("k:mm"); // "14:30"
+date.format('k:mm'); // "14:30"
 
 // Unix timestamps
-date.format("X"); // Unix seconds
-date.format("x"); // Unix milliseconds
+date.format('X'); // Unix seconds
+date.format('x'); // Unix milliseconds
 ```
 
 **Advanced Format Tokens:**
@@ -1190,17 +1190,17 @@ interface ITimeGuardPlugin {
 ### Creating Custom Plugins
 
 ```typescript
-import { TimeGuard } from "@bereasoftware/time-guard";
-import type { ITimeGuardPlugin } from "@bereasoftware/time-guard/types";
+import { TimeGuard } from '@bereasoftware/time-guard';
+import type { ITimeGuardPlugin } from '@bereasoftware/time-guard/types';
 
 class MyCustomPlugin implements ITimeGuardPlugin {
-  name = "my-plugin";
-  version = "1.0.0";
+  name = 'my-plugin';
+  version = '1.0.0';
 
   install(TimeGuardClass: typeof TimeGuard): void {
     // Add method to TimeGuard prototype
     (TimeGuardClass.prototype as any).myMethod = function () {
-      return "Hello from my plugin!";
+      return 'Hello from my plugin!';
     };
   }
 }
@@ -1225,15 +1225,15 @@ date.myMethod(); // "Hello from my plugin!"
 ```typescript
 // Create current date/time
 TimeGuard.now();
-TimeGuard.now({ locale: "es", timezone: "America/Mexico_City" });
+TimeGuard.now({ locale: 'es', timezone: 'America/Mexico_City' });
 
 // Create from various inputs
-TimeGuard.from("2024-03-13");
-TimeGuard.from("2024-03-13T14:30:00");
+TimeGuard.from('2024-03-13');
+TimeGuard.from('2024-03-13T14:30:00');
 TimeGuard.from(new Date());
 TimeGuard.from(1234567890000); // milliseconds
-TimeGuard.from(1234567890, { timezone: "UTC" }); // seconds
-TimeGuard.from("2024-03-13", { locale: "es" });
+TimeGuard.from(1234567890, { timezone: 'UTC' }); // seconds
+TimeGuard.from('2024-03-13', { locale: 'es' });
 
 // Create from Temporal object
 TimeGuard.fromTemporal(temporalPlainDateTime, config);
@@ -1242,7 +1242,7 @@ TimeGuard.fromTemporal(temporalPlainDateTime, config);
 ### 🔄 Conversion Methods
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:45");
+const date = TimeGuard.from('2024-03-13 14:30:45');
 
 date.toDate(); // Convert to JavaScript Date
 date.toTemporal(); // Get underlying Temporal object
@@ -1257,7 +1257,7 @@ date.unix(); // Seconds since epoch
 ### ➕ Manipulation Methods
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:00");
+const date = TimeGuard.from('2024-03-13 14:30:00');
 
 // Add time - accepts partial record of units
 date.add({ days: 5 });
@@ -1274,12 +1274,12 @@ date.set({ hour: 10, minute: 0 });
 date.set({ year: 2025, month: 1, day: 1 });
 
 // Start/End of period
-date.startOf("year"); // 2024-01-01 00:00:00
-date.startOf("month"); // 2024-03-01 00:00:00
-date.startOf("day"); // 2024-03-13 00:00:00
-date.startOf("hour"); // 2024-03-13 14:00:00
-date.endOf("year"); // 2024-12-31 23:59:59
-date.endOf("month"); // 2024-03-31 23:59:59
+date.startOf('year'); // 2024-01-01 00:00:00
+date.startOf('month'); // 2024-03-01 00:00:00
+date.startOf('day'); // 2024-03-13 00:00:00
+date.startOf('hour'); // 2024-03-13 14:00:00
+date.endOf('year'); // 2024-12-31 23:59:59
+date.endOf('month'); // 2024-03-31 23:59:59
 
 date.clone(); // Create independent copy
 ```
@@ -1287,7 +1287,7 @@ date.clone(); // Create independent copy
 ### 🔍 Component Accessors (Getters)
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:45.123");
+const date = TimeGuard.from('2024-03-13 14:30:45.123');
 
 // Date components
 date.year(); // 2024
@@ -1315,8 +1315,8 @@ date.inLeapYear(); // true
 ### ⚖️ Comparison Methods
 
 ```typescript
-const date1 = TimeGuard.from("2024-03-13");
-const date2 = TimeGuard.from("2024-03-20");
+const date1 = TimeGuard.from('2024-03-13');
+const date2 = TimeGuard.from('2024-03-20');
 
 // Direct comparison
 date1.isBefore(date2); // true
@@ -1324,99 +1324,99 @@ date1.isAfter(date2); // false
 date1.isSame(date1); // true
 
 // Unit-specific comparison
-date1.isSame(date2, "month"); // true (same month)
-date1.isSame(date2, "year"); // true (same year)
-date1.isSame(date2, "day"); // false (different day)
+date1.isSame(date2, 'month'); // true (same month)
+date1.isSame(date2, 'year'); // true (same year)
+date1.isSame(date2, 'day'); // false (different day)
 
 // Range checking
 date1.isBetween(date1, date2); // true
-date1.isBetween(date1, date2, undefined, "[]"); // inclusive both ends
-date1.isBetween(date1, date2, undefined, "()"); // exclusive both ends
-date1.isBetween(date1, date2, "month", "[]"); // granular range
+date1.isBetween(date1, date2, undefined, '[]'); // inclusive both ends
+date1.isBetween(date1, date2, undefined, '()'); // exclusive both ends
+date1.isBetween(date1, date2, 'month', '[]'); // granular range
 
 // Calculate difference - Traditional API (backward compatible)
-date1.diff(date2, "days"); // -7
-date1.diff(date2, "millisecond"); // difference in ms
-date1.diff(date2, "months"); // -0
+date1.diff(date2, 'days'); // -7
+date1.diff(date2, 'millisecond'); // difference in ms
+date1.diff(date2, 'months'); // -0
 
 // Calculate difference - Modern Calendar-Aware API
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 // Exact mode (default) - precise time difference
-const exactDiff = start.diff(end, { mode: "exact" });
-console.log(exactDiff.as("day")); // 65 days
+const exactDiff = start.diff(end, { mode: 'exact' });
+console.log(exactDiff.as('day')); // 65 days
 
 // Calendar mode - human-readable breakdown
-const calendarDiff = start.diff(end, { mode: "calendar" });
-console.log(calendarDiff.format("en")); // "2 months and 5 days"
-console.log(calendarDiff.format("es")); // "2 meses y 5 días"
+const calendarDiff = start.diff(end, { mode: 'calendar' });
+console.log(calendarDiff.format('en')); // "2 months and 5 days"
+console.log(calendarDiff.format('es')); // "2 meses y 5 días"
 console.log(calendarDiff.breakdown()); // { years: 0, months: 2, weeks: 0, days: 5, ... }
 
 // Fluent API for unit conversion
 const diff = start.diff(end);
-console.log(diff.as("day")); // 65
-console.log(diff.as("hour")); // 1560
+console.log(diff.as('day')); // 65
+console.log(diff.as('hour')); // 1560
 console.log(diff.valueOf()); // milliseconds
 ```
 
 ### 📊 Advanced Calculations
 
 ```typescript
-const date = TimeGuard.from("2024-01-15");
-const future = TimeGuard.from("2024-05-20");
+const date = TimeGuard.from('2024-01-15');
+const future = TimeGuard.from('2024-05-20');
 
 // Duration: Get complete breakdown
 const duration = date.until(future);
 // { years: 0, months: 4, days: 5, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }
 
 // Rounding: Precision control
-date.round({ smallestUnit: "millisecond" }); // Default, no change
-date.round({ smallestUnit: "second" }); // Removes milliseconds
-date.round({ smallestUnit: "minute" }); // 2024-03-13 14:30:00
-date.round({ smallestUnit: "hour" }); // 2024-03-13 14:00:00
-date.round({ smallestUnit: "day" }); // 2024-03-13 00:00:00
+date.round({ smallestUnit: 'millisecond' }); // Default, no change
+date.round({ smallestUnit: 'second' }); // Removes milliseconds
+date.round({ smallestUnit: 'minute' }); // 2024-03-13 14:30:00
+date.round({ smallestUnit: 'hour' }); // 2024-03-13 14:00:00
+date.round({ smallestUnit: 'day' }); // 2024-03-13 00:00:00
 
 // Rounding modes
 date.round({
-  smallestUnit: "minute",
-  roundingMode: "halfExpand", // Default: round to nearest
+  smallestUnit: 'minute',
+  roundingMode: 'halfExpand', // Default: round to nearest
 });
 
 date.round({
-  smallestUnit: "minute",
-  roundingMode: "ceil", // Always round up
+  smallestUnit: 'minute',
+  roundingMode: 'ceil', // Always round up
 });
 ```
 
 ### 🌍 Locale & Timezone
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:00");
+const date = TimeGuard.from('2024-03-13 14:30:00');
 
 // Get/Set locale
 date.locale(); // Returns current locale: 'en'
-date.locale("es"); // Set locale, returns new instance
+date.locale('es'); // Set locale, returns new instance
 
 // Format in different locales
-date.format("YYYY-MM-DD"); // 2024-03-13
-date.locale("es").format("DD MMMM YYYY"); // 13 marzo 2024
-date.locale("es-mx").format("DD/MM/YYYY"); // 13/03/2024
-date.locale("fr").format("dddd, DD MMMM YYYY"); // mercredi, 13 mars 2024
-date.locale("de").format("DD. MMMM YYYY"); // 13. März 2024
-date.locale("ja").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("zh-cn").format("YYYY年M月D日"); // 2024年3月13日
-date.locale("ar").format("DD MMMM YYYY"); // 13 مارس 2024
+date.format('YYYY-MM-DD'); // 2024-03-13
+date.locale('es').format('DD MMMM YYYY'); // 13 marzo 2024
+date.locale('es-mx').format('DD/MM/YYYY'); // 13/03/2024
+date.locale('fr').format('dddd, DD MMMM YYYY'); // mercredi, 13 mars 2024
+date.locale('de').format('DD. MMMM YYYY'); // 13. März 2024
+date.locale('ja').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('zh-cn').format('YYYY年M月D日'); // 2024年3月13日
+date.locale('ar').format('DD MMMM YYYY'); // 13 مارس 2024
 
 // Get/Set timezone
 date.timezone(); // Returns current timezone: 'UTC'
-const inNYC = date.timezone("America/New_York");
-const inTokyo = date.timezone("Asia/Tokyo");
-const inDubai = date.timezone("Asia/Dubai");
+const inNYC = date.timezone('America/New_York');
+const inTokyo = date.timezone('Asia/Tokyo');
+const inDubai = date.timezone('Asia/Dubai');
 
 // Format with timezone info
-inNYC.format("YYYY-MM-DD HH:mm:ss Z"); // 2024-03-13 10:30:00 -04:00
-inTokyo.format("YYYY-MM-DD HH:mm:ss Z"); // 2024-03-13 23:30:00 +09:00
+inNYC.format('YYYY-MM-DD HH:mm:ss Z'); // 2024-03-13 10:30:00 -04:00
+inTokyo.format('YYYY-MM-DD HH:mm:ss Z'); // 2024-03-13 23:30:00 +09:00
 
 // Get all available locales
 TimeGuard.getAvailableLocales(); // Array of 40+ locale codes
@@ -1427,16 +1427,16 @@ TimeGuard.getAvailableLocales(); // Array of 40+ locale codes
 #### Format Presets
 
 ```typescript
-const date = TimeGuard.from("2024-03-13 14:30:45.123");
+const date = TimeGuard.from('2024-03-13 14:30:45.123');
 
 // Built-in presets
-date.format("iso"); // 2024-03-13T14:30:45.123Z
-date.format("date"); // 2024-03-13
-date.format("time"); // 14:30:45
-date.format("datetime"); // 2024-03-13 14:30:45
-date.format("rfc2822"); // Wed, 13 Mar 2024 14:30:45 +0000
-date.format("rfc3339"); // 2024-03-13T14:30:45Z
-date.format("utc"); // 2024-03-13T14:30:45.123Z
+date.format('iso'); // 2024-03-13T14:30:45.123Z
+date.format('date'); // 2024-03-13
+date.format('time'); // 14:30:45
+date.format('datetime'); // 2024-03-13 14:30:45
+date.format('rfc2822'); // Wed, 13 Mar 2024 14:30:45 +0000
+date.format('rfc3339'); // 2024-03-13T14:30:45Z
+date.format('utc'); // 2024-03-13T14:30:45.123Z
 ```
 
 #### Format Tokens
@@ -1485,15 +1485,15 @@ date.format("utc"); // 2024-03-13T14:30:45.123Z
 #### Custom Format Examples
 
 ```typescript
-date.format("YYYY-MM-DD"); // 2024-03-13
-date.format("DD/MM/YYYY"); // 13/03/2024
-date.format("MMMM D, YYYY"); // March 13, 2024
-date.format("dddd, MMMM D, YYYY"); // Wednesday, March 13, 2024
-date.format("DD-MMMM-YY"); // 13-Mar-24
-date.format("h:mm A"); // 2:30 PM
-date.format("HH:mm:ss"); // 14:30:45
-date.format("[Today is] dddd"); // Today is Wednesday
-date.format("HH:mm [UTC]"); // 14:30 UTC
+date.format('YYYY-MM-DD'); // 2024-03-13
+date.format('DD/MM/YYYY'); // 13/03/2024
+date.format('MMMM D, YYYY'); // March 13, 2024
+date.format('dddd, MMMM D, YYYY'); // Wednesday, March 13, 2024
+date.format('DD-MMMM-YY'); // 13-Mar-24
+date.format('h:mm A'); // 2:30 PM
+date.format('HH:mm:ss'); // 14:30:45
+date.format('[Today is] dddd'); // Today is Wednesday
+date.format('HH:mm [UTC]'); // 14:30 UTC
 date.format('DD/MM/YYYY "at" HH:mm'); // 13/03/2024 at 14:30
 ```
 
@@ -1507,8 +1507,8 @@ One of TimeGuard's most powerful features is its **calendar-aware diff mode**, w
 
 ```typescript
 // Problem: How much time between Jan 15 and Mar 20?
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 // ❌ Naive approach: Just count days
 // Result: "65 days" (technically correct but not user-friendly)
@@ -1520,22 +1520,22 @@ const end = TimeGuard.from("2024-03-20");
 #### API Modes
 
 ```typescript
-const start = TimeGuard.from("2024-01-15");
-const end = TimeGuard.from("2024-03-20");
+const start = TimeGuard.from('2024-01-15');
+const end = TimeGuard.from('2024-03-20');
 
 // ==== EXACT MODE (default) ====
 // Precise time difference in specified unit
-const exactDiff = start.diff(end, { mode: "exact" });
+const exactDiff = start.diff(end, { mode: 'exact' });
 
 // Returns normalized difference
-exactDiff.as("day"); // 65 days
-exactDiff.as("hour"); // 1560 hours
-exactDiff.as("week"); // 9 weeks
+exactDiff.as('day'); // 65 days
+exactDiff.as('hour'); // 1560 hours
+exactDiff.as('week'); // 9 weeks
 exactDiff.valueOf(); // milliseconds
 
 // ==== CALENDAR MODE ====
 // Human-readable breakdown with automatic localization
-const calendarDiff = start.diff(end, { mode: "calendar" });
+const calendarDiff = start.diff(end, { mode: 'calendar' });
 
 // Get structured breakdown
 calendarDiff.breakdown();
@@ -1551,41 +1551,41 @@ calendarDiff.breakdown();
 // }
 
 // Format in any locale
-calendarDiff.format("en"); // "2 months and 5 days"
-calendarDiff.format("es"); // "2 meses y 5 días"
-calendarDiff.format("fr"); // "2 mois et 5 jours"
-calendarDiff.format("de"); // "2 Monate und 5 Tage"
+calendarDiff.format('en'); // "2 months and 5 days"
+calendarDiff.format('es'); // "2 meses y 5 días"
+calendarDiff.format('fr'); // "2 mois et 5 jours"
+calendarDiff.format('de'); // "2 Monate und 5 Tage"
 ```
 
 #### Backward Compatibility
 
 ```typescript
 // Traditional API still works perfectly
-const tg1 = TimeGuard.from("2024-01-15");
-const tg2 = TimeGuard.from("2024-03-20");
+const tg1 = TimeGuard.from('2024-01-15');
+const tg2 = TimeGuard.from('2024-03-20');
 
-tg1.diff(tg2, "day"); // 65 (returns number)
-tg1.diff(tg2, "month"); // 2
-tg1.diff(tg2, "millisecond"); // raw milliseconds
+tg1.diff(tg2, 'day'); // 65 (returns number)
+tg1.diff(tg2, 'month'); // 2
+tg1.diff(tg2, 'millisecond'); // raw milliseconds
 ```
 
 #### Advanced Usage
 
 ```typescript
-const start = TimeGuard.from("2024-01-15 10:30:00");
-const end = TimeGuard.from("2024-03-20 15:45:00");
+const start = TimeGuard.from('2024-01-15 10:30:00');
+const end = TimeGuard.from('2024-03-20 15:45:00');
 
 // Fluent API for unit conversion
 const diff = start.diff(end);
-diff.as("day"); // Get as days
-diff.as("hour"); // Get as hours
-diff.as("minute"); // Get as minutes
+diff.as('day'); // Get as days
+diff.as('hour'); // Get as hours
+diff.as('minute'); // Get as minutes
 diff.valueOf(); // Implicit number conversion (milliseconds)
 
 // Locale-specific formatting
 const spanishDiff = start.diff(end, {
-  mode: "calendar",
-  locale: "es",
+  mode: 'calendar',
+  locale: 'es',
 });
 console.log(spanishDiff.format()); // Uses Spanish locale
 
