@@ -116,13 +116,8 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "prepublishOnly": "npm run build"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"
-  },
-  "peerDependenciesMeta": {
-    "@js-temporal/polyfill": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@js-temporal/polyfill": "^0.5.1",
