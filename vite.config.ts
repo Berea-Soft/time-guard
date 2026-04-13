@@ -45,15 +45,13 @@ export default defineConfig(({ mode }): UserConfig => {
           formats: ["umd", "iife", "es", "cjs"],
         },
         rollupOptions: {
-          external: ["@js-temporal/polyfill"],
           output: {
             banner,
             exports: "named" as const,
-            globals: { "@js-temporal/polyfill": "temporal" },
           },
         },
         emptyOutDir: false,
-        sourcemap: false,
+        sourcemap: true,
         minify: "oxc",
         reportCompressedSize: true,
       },
@@ -107,15 +105,13 @@ export default defineConfig(({ mode }): UserConfig => {
         formats: ["es", "cjs"],
       },
       rollupOptions: {
-        external: ["@js-temporal/polyfill"],
         output: {
           banner,
           exports: "named" as const,
-          globals: { "@js-temporal/polyfill": "temporal" },
         },
       },
       emptyOutDir: true,
-      sourcemap: false,
+      sourcemap: true,
       minify: "oxc",
       reportCompressedSize: true,
     },

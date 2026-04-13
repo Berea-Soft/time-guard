@@ -18,8 +18,27 @@ import type {
 import { TemporalAdapter } from './adapters/temporal.adapter';
 import { DateFormatter } from './formatters/date.formatter';
 import type { Temporal } from '@js-temporal/polyfill';
+import {
+  formatZeroDuration,
+  joinDurationParts,
+  getDurationUnitLabel,
+} from './utils/duration-locale';
 
 type TemporalDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
+
+// Hoisted constants to avoid repeated allocation
+const ZERO_DIFF_DAYS = ' days';
+
+// Time conversion constants (hoisted to avoid recalculation)
+const MS_PER_SECOND = 1000;
+const MS_PER_MINUTE = MS_PER_SECOND * 60;
+const MS_PER_HOUR = MS_PER_MINUTE * 60;
+const MS_PER_DAY = MS_PER_HOUR * 24;
+const MS_PER_WEEK = MS_PER_DAY * 7;
+const DAYS_PER_YEAR = 365.25; // accounting for leap years
+const DAYS_PER_MONTH = DAYS_PER_YEAR / 12; // 30.4375
+const MS_PER_MONTH = DAYS_PER_MONTH * MS_PER_DAY;
+const MS_PER_YEAR = DAYS_PER_YEAR * MS_PER_DAY;
 
 /**
  * Diff result object that allows chaining with .as()
@@ -76,76 +95,27 @@ class DiffResult implements IDiffResult {
    */
   format(locale?: string): string {
     const l = locale || this._locale;
-    
+
     if (!this._breakdownData) {
       // Fallback for exact mode - show in days
-      return `${Math.abs(this._tg1.diff(this._tg2, 'day'))} days`;
+      return `${Math.abs(this._tg1.diff(this._tg2, 'day'))}${ZERO_DIFF_DAYS}`;
     }
 
     const parts: string[] = [];
     const bd = this._breakdownData;
 
-    // Helper to format a single part
-    const formatPart = (value: number, unit: string, localeCode: string): string | null => {
-      if (value === 0) return null;
-      
-      // Simple label mapping - in production, use full locale data
-      const labels: Record<string, Record<string, string>> = {
-        en: {
-          year: value === 1 ? 'year' : 'years',
-          month: value === 1 ? 'month' : 'months',
-          week: value === 1 ? 'week' : 'weeks',
-          day: value === 1 ? 'day' : 'days',
-          hour: value === 1 ? 'hour' : 'hours',
-          minute: value === 1 ? 'minute' : 'minutes',
-          second: value === 1 ? 'second' : 'seconds',
-        },
-        es: {
-          year: value === 1 ? 'año' : 'años',
-          month: value === 1 ? 'mes' : 'meses',
-          week: value === 1 ? 'semana' : 'semanas',
-          day: value === 1 ? 'día' : 'días',
-          hour: value === 1 ? 'hora' : 'horas',
-          minute: value === 1 ? 'minuto' : 'minutos',
-          second: value === 1 ? 'segundo' : 'segundos',
-        },
-        fr: {
-          year: value === 1 ? 'année' : 'années',
-          month: value === 1 ? 'mois' : 'mois',
-          week: value === 1 ? 'semaine' : 'semaines',
-          day: value === 1 ? 'jour' : 'jours',
-          hour: value === 1 ? 'heure' : 'heures',
-          minute: value === 1 ? 'minute' : 'minutes',
-          second: value === 1 ? 'seconde' : 'secondes',
-        },
-      };
-
-      const labelMap = labels[localeCode] || labels.en;
-      const label = labelMap[unit as keyof typeof labelMap] || unit;
-      return `${value} ${label}`;
-    };
-
     // Build parts array in logical order
-    if (bd.years !== 0) parts.push(formatPart(bd.years, 'year', l)!);
-    if (bd.months !== 0) parts.push(formatPart(bd.months, 'month', l)!);
-    if (bd.weeks !== 0) parts.push(formatPart(bd.weeks, 'week', l)!);
-    if (bd.days !== 0) parts.push(formatPart(bd.days, 'day', l)!);
-    if (bd.hours !== 0) parts.push(formatPart(bd.hours, 'hour', l)!);
-    if (bd.minutes !== 0) parts.push(formatPart(bd.minutes, 'minute', l)!);
-    if (bd.seconds !== 0) parts.push(formatPart(bd.seconds, 'second', l)!);
+    if (bd.years !== 0) parts.push(`${bd.years} ${getDurationUnitLabel('year', l, bd.years)}`);
+    if (bd.months !== 0) parts.push(`${bd.months} ${getDurationUnitLabel('month', l, bd.months)}`);
+    if (bd.weeks !== 0) parts.push(`${bd.weeks} ${getDurationUnitLabel('week', l, bd.weeks)}`);
+    if (bd.days !== 0) parts.push(`${bd.days} ${getDurationUnitLabel('day', l, bd.days)}`);
+    if (bd.hours !== 0) parts.push(`${bd.hours} ${getDurationUnitLabel('hour', l, bd.hours)}`);
+    if (bd.minutes !== 0) parts.push(`${bd.minutes} ${getDurationUnitLabel('minute', l, bd.minutes)}`);
+    if (bd.seconds !== 0) parts.push(`${bd.seconds} ${getDurationUnitLabel('second', l, bd.seconds)}`);
 
-    if (parts.length === 0) return '0 ' + (l === 'es' ? 'segundos' : l === 'fr' ? 'secondes' : 'seconds');
+    if (parts.length === 0) return formatZeroDuration(l);
 
-    // Join with locale-appropriate conjunctions
-    const conjunctions: Record<string, string> = {
-      en: ' and ',
-      es: ' y ',
-      fr: ' et ',
-    };
-    const conj = conjunctions[l] || ' and ';
-
-    if (parts.length === 1) return parts[0];
-    return parts.slice(0, -1).join(', ') + conj + parts[parts.length - 1];
+    return joinDurationParts(parts, l);
   }
 
   /**
@@ -286,59 +256,12 @@ export class DurationResult implements DurationParts {
     }
 
     // Full breakdown with multiple units
-    const labels: Record<string, Record<string, [string, string]>> = {
-      en: {
-        year: ['year', 'years'],
-        month: ['month', 'months'],
-        week: ['week', 'weeks'],
-        day: ['day', 'days'],
-        hour: ['hour', 'hours'],
-        minute: ['minute', 'minutes'],
-        second: ['second', 'seconds'],
-        millisecond: ['millisecond', 'milliseconds'],
-      },
-      es: {
-        year: ['año', 'años'],
-        month: ['mes', 'meses'],
-        week: ['semana', 'semanas'],
-        day: ['día', 'días'],
-        hour: ['hora', 'horas'],
-        minute: ['minuto', 'minutos'],
-        second: ['segundo', 'segundos'],
-        millisecond: ['milisegundo', 'milisegundos'],
-      },
-      fr: {
-        year: ['année', 'années'],
-        month: ['mois', 'mois'],
-        week: ['semaine', 'semaines'],
-        day: ['jour', 'jours'],
-        hour: ['heure', 'heures'],
-        minute: ['minute', 'minutes'],
-        second: ['seconde', 'secondes'],
-        millisecond: ['milliseconde', 'millisecondes'],
-      },
-    };
-
-    const langLabels = labels[locale] || labels['en'];
-    const conjunction = this.getConjunction(locale);
-
     const formatted = nonZeroParts.map((p) => {
-      const label = langLabels[p.unit] || [p.unit, p.unit + 's'];
-      const text = label[p.value === 1 ? 0 : 1];
-      return `${p.value} ${text}`;
+      const label = getDurationUnitLabel(p.unit, locale, p.value);
+      return `${p.value} ${label}`;
     });
 
-    // Join with conjunctions
-    if (formatted.length === 1) {
-      return formatted[0];
-    }
-
-    if (formatted.length === 2) {
-      return `${formatted[0]} ${conjunction} ${formatted[1]}`;
-    }
-
-    // 3+ parts: "part1, part2, and part3" (en) or similar
-    return formatted.slice(0, -1).join(', ') + ` ${conjunction} ${formatted[formatted.length - 1]}`;
+    return joinDurationParts(formatted, locale);
   }
 
   /**
@@ -357,19 +280,7 @@ export class DurationResult implements DurationParts {
    * duration.total('seconds') // 5616000 (65 * 24 * 60 * 60)
    */
   total(unit: Unit): number {
-    // Conversion factors to milliseconds (baseline)
-    const MS_PER_SECOND = 1000;
-    const MS_PER_MINUTE = MS_PER_SECOND * 60;
-    const MS_PER_HOUR = MS_PER_MINUTE * 60;
-    const MS_PER_DAY = MS_PER_HOUR * 24;
-    const MS_PER_WEEK = MS_PER_DAY * 7;
-    // Months & years use average days
-    const DAYS_PER_YEAR = 365.25; // accounting for leap years
-    const DAYS_PER_MONTH = DAYS_PER_YEAR / 12; // 30.4375
-    const MS_PER_MONTH = DAYS_PER_MONTH * MS_PER_DAY;
-    const MS_PER_YEAR = DAYS_PER_YEAR * MS_PER_DAY;
-
-    // Calculate total milliseconds
+    // Calculate total milliseconds using hoisted constants
     let totalMs = 0;
     totalMs += this.years * MS_PER_YEAR;
     totalMs += this.months * MS_PER_MONTH;
@@ -574,60 +485,10 @@ export class DurationResult implements DurationParts {
   }
 
   /**
-   * Get the conjunction for a locale
-   */
-  private getConjunction(locale: string): string {
-    const conjunctions: Record<string, string> = {
-      en: 'and',
-      es: 'y',
-      fr: 'et',
-      de: 'und',
-      it: 'e',
-      pt: 'e',
-    };
-    return conjunctions[locale] || 'and';
-  }
-
-  /**
-   * Pluralize a unit name
+   * Pluralize a unit name (deprecated - use utility function)
    */
   private pluralizeUnit(unit: string, count: number, locale: string): string {
-    const labels: Record<string, Record<string, [string, string]>> = {
-      en: {
-        year: ['year', 'years'],
-        month: ['month', 'months'],
-        week: ['week', 'weeks'],
-        day: ['day', 'days'],
-        hour: ['hour', 'hours'],
-        minute: ['minute', 'minutes'],
-        second: ['second', 'seconds'],
-        millisecond: ['millisecond', 'milliseconds'],
-      },
-      es: {
-        year: ['año', 'años'],
-        month: ['mes', 'meses'],
-        week: ['semana', 'semanas'],
-        day: ['día', 'días'],
-        hour: ['hora', 'horas'],
-        minute: ['minuto', 'minutos'],
-        second: ['segundo', 'segundos'],
-        millisecond: ['milisegundo', 'milisegundos'],
-      },
-      fr: {
-        year: ['année', 'années'],
-        month: ['mois', 'mois'],
-        week: ['semaine', 'semaines'],
-        day: ['jour', 'jours'],
-        hour: ['heure', 'heures'],
-        minute: ['minute', 'minutes'],
-        second: ['seconde', 'secondes'],
-        millisecond: ['milliseconde', 'millisecondes'],
-      },
-    };
-
-    const langLabels = labels[locale] || labels['en'];
-    const label = langLabels[unit] || [unit, unit + 's'];
-    return label[count === 1 ? 0 : 1];
+    return getDurationUnitLabel(unit, locale, count);
   }
 }
 

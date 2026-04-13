@@ -6,6 +6,7 @@
 /build
 /.vite
 .npmrc
+.qwen/*
 
 # Test and coverage
 coverage/

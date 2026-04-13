@@ -53,10 +53,6 @@
             "release": "patch"
           },
           {
-            "type": "revert",
-            "release": "patch"
-          },
-          {
             "type": "breaking",
             "release": "major"
           }
