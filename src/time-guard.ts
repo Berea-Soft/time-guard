@@ -14,6 +14,7 @@ import type {
   IDiffOptions,
   DurationParts,
   IDurationExplanation,
+  IFormattableDuration,
 } from './types';
 import { TemporalAdapter } from './adapters/temporal.adapter';
 import { DateFormatter } from './formatters/date.formatter';
@@ -26,30 +27,44 @@ import {
 
 type TemporalDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
 
-// Hoisted constants to avoid repeated allocation
-const ZERO_DIFF_DAYS = ' days';
-
 // Time conversion constants (hoisted to avoid recalculation)
 const MS_PER_SECOND = 1000;
 const MS_PER_MINUTE = MS_PER_SECOND * 60;
 const MS_PER_HOUR = MS_PER_MINUTE * 60;
 const MS_PER_DAY = MS_PER_HOUR * 24;
 const MS_PER_WEEK = MS_PER_DAY * 7;
-const DAYS_PER_YEAR = 365.25; // accounting for leap years
-const DAYS_PER_MONTH = DAYS_PER_YEAR / 12; // 30.4375
+const DAYS_PER_YEAR = 365.25;
+const DAYS_PER_MONTH = DAYS_PER_YEAR / 12;
 const MS_PER_MONTH = DAYS_PER_MONTH * MS_PER_DAY;
 const MS_PER_YEAR = DAYS_PER_YEAR * MS_PER_DAY;
 
+// Hoisted constants
+const ZERO_DIFF_DAYS = ' days';
+
+/**
+ * Calculate total milliseconds from duration parts using hoisted constants
+ */
+function calculateTotalMs(duration: any): number {
+  return (
+    (duration.years || 0) * MS_PER_YEAR +
+    (duration.months || 0) * MS_PER_MONTH +
+    (duration.weeks || 0) * MS_PER_WEEK +
+    (duration.days || 0) * MS_PER_DAY +
+    (duration.hours || 0) * MS_PER_HOUR +
+    (duration.minutes || 0) * MS_PER_MINUTE +
+    (duration.seconds || 0) * MS_PER_SECOND +
+    (duration.milliseconds || 0)
+  );
+}
+
 /**
  * Diff result object that allows chaining with .as()
- * Example: tg1.diff(tg2).as('month')
- * Also acts as a number value for backward compatibility
- * 
+ *
  * Supports two modes:
- * - 'exact': Returns precise time differences (e.g., 65 days)
- * - 'calendar': Returns calendar-aware breakdown (e.g., 2 months 5 days)
+ * - 'exact': Returns precise time differences
+ * - 'calendar': Returns calendar-aware breakdown
  */
-class DiffResult implements IDiffResult {
+class DiffResult implements IDiffResult, IFormattableDuration {
   private _value: number;
   private _tg1: TimeGuard;
   private _tg2: TimeGuard;
@@ -73,26 +88,14 @@ class DiffResult implements IDiffResult {
     this._locale = locale || 'en';
   }
 
-  /**
-   * Convert the diff to a different unit
-   * Example: diff.as('month') returns the difference in months
-   */
   as(unit: Unit): number {
     return this._tg1.diff(this._tg2, unit);
   }
 
-  /**
-   * Get breakdown in calendar mode (months, days, etc.)
-   * Returns null for 'exact' mode
-   */
   breakdown(): DurationParts | null {
     return this._breakdownData;
   }
 
-  /**
-   * Format as human-readable string
-   * Example: "2 months and 5 days"
-   */
   format(locale?: string): string {
     const l = locale || this._locale;
 
@@ -118,34 +121,21 @@ class DiffResult implements IDiffResult {
     return joinDurationParts(parts, l);
   }
 
-  /**
-   * Get the calculation mode used for this diff
-   */
   getMode(): 'calendar' | 'exact' {
     return this._mode;
   }
 
-  /**
-   * Allow implicit numeric conversion for backward compatibility
-   */
   valueOf(): number {
     return this._value;
   }
 
-  /**
-   * String representation
-   */
   toString(): string {
-    // If calendar mode, format nicely; otherwise just show number
     if (this._mode === 'calendar' && this._breakdownData) {
       return this.format();
     }
     return this._value.toString();
   }
 
-  /**
-   * JSON representation
-   */
   toJSON(): number {
     return this._value;
   }
@@ -153,12 +143,9 @@ class DiffResult implements IDiffResult {
 
 /**
  * DurationResult class - Represents a duration breakdown with humanize support
- * Example: start.until(end).humanize() → "2 months and 5 days"
- * 
- * Public class available for type checking and extending
  * Returned by until(), since(), and between() methods
  */
-export class DurationResult implements DurationParts {
+export class DurationResult implements DurationParts, IFormattableDuration {
   years: number;
   months: number;
   weeks: number;
@@ -196,8 +183,7 @@ export class DurationResult implements DurationParts {
     this.seconds = parts.seconds;
     this.milliseconds = parts.milliseconds;
     this._locale = locale;
-    
-    // Optional metadata for explain()
+
     if (metadata) {
       this._startDate = metadata.startDate;
       this._endDate = metadata.endDate;
@@ -208,13 +194,6 @@ export class DurationResult implements DurationParts {
     }
   }
 
-  /**
-   * Convert duration to human-readable string
-   * Supports multiple humanization styles using Intl API
-   * @example
-   * duration.humanize() // "2 months" (Intl.RelativeTimeFormat style)
-   * duration.humanize({ fullBreakdown: true, locale: 'es' }) // "2 meses y 5 días"
-   */
   humanize(options?: {
     locale?: string;
     fullBreakdown?: boolean;
@@ -224,7 +203,6 @@ export class DurationResult implements DurationParts {
     const fullBreakdown = options?.fullBreakdown ?? false;
     const numeric = options?.numeric ?? 'always';
 
-    // Find the largest non-zero unit
     const parts = [
       { unit: 'year', value: this.years },
       { unit: 'month', value: this.months },
@@ -239,23 +217,19 @@ export class DurationResult implements DurationParts {
     const nonZeroParts = parts.filter(p => p.value > 0);
 
     if (nonZeroParts.length === 0) {
-      return '0 seconds'; // or localized equivalent
+      return '0 seconds';
     }
 
-    // If only largest unit or fullBreakdown is false, use Intl.RelativeTimeFormat
     if (!fullBreakdown || nonZeroParts.length === 1) {
       const largest = nonZeroParts[0];
       try {
         const rtf = new Intl.RelativeTimeFormat(locale, { numeric, style: 'long' });
-        // Intl.RelativeTimeFormat expects negative values for past
         return rtf.format(largest.value, largest.unit as any);
       } catch {
-        // Fallback to manual formatting
         return `${largest.value} ${this.pluralizeUnit(largest.unit, largest.value, locale)}`;
       }
     }
 
-    // Full breakdown with multiple units
     const formatted = nonZeroParts.map((p) => {
       const label = getDurationUnitLabel(p.unit, locale, p.value);
       return `${p.value} ${label}`;
@@ -264,23 +238,7 @@ export class DurationResult implements DurationParts {
     return joinDurationParts(formatted, locale);
   }
 
-  /**
-   * Get total duration in specified unit (date-fns style)
-   * Useful for business logic: payments, metrics, analytics
-   * 
-   * Conversion factors:
-   * - 1 year = 365.25 days (accounting for leap years)
-   * - 1 month = 365.25/12 days = 30.4375 days
-   * - 1 week = 7 days
-   * 
-   * @example
-   * duration.total('days')    // 65
-   * duration.total('months')  // 2.166... (65 / 30.4375)
-   * duration.total('hours')   // 1560 (65 * 24)
-   * duration.total('seconds') // 5616000 (65 * 24 * 60 * 60)
-   */
   total(unit: Unit): number {
-    // Calculate total milliseconds using hoisted constants
     let totalMs = 0;
     totalMs += this.years * MS_PER_YEAR;
     totalMs += this.months * MS_PER_MONTH;
@@ -291,7 +249,6 @@ export class DurationResult implements DurationParts {
     totalMs += this.seconds * MS_PER_SECOND;
     totalMs += this.milliseconds;
 
-    // Convert to target unit
     switch (unit) {
       case 'millisecond':
         return totalMs;
@@ -312,24 +269,16 @@ export class DurationResult implements DurationParts {
       case 'microsecond':
         return totalMs * 1000; // milliseconds to microseconds
       case 'nanosecond':
-        return totalMs * 1_000_000; // milliseconds to nanoseconds
+        return totalMs * 1_000_000;
       default:
         throw new Error(`Unsupported unit: ${unit}`);
     }
   }
 
-  /**
-   * String representation
-   * Returns humanized format by default, or numeric if in exact mode
-   */
   toString(): string {
     return this.humanize({ fullBreakdown: true });
   }
 
-  /**
-   * JSON representation
-   * Returns the breakdown as object for serialization
-   */
   toJSON(): Record<string, number> {
     return {
       years: this.years,
@@ -343,43 +292,15 @@ export class DurationResult implements DurationParts {
     };
   }
 
-  /**
-   * Explain the calculation - killer feature for debugging and education
-   * Returns detailed breakdown of how the duration was calculated
-   * 
-   * Perfect for:
-   * - Debugging complex date calculations
-   * - Educational purposes (showing date math)
-   * - Auditing time-based business logic
-   * - Verification of calculation methodology
-   * 
-   * @example
-   * start.until(end).explain()
-   * // {
-   * //   input: ['2024-01-15', '2024-03-20'],
-   * //   steps: [
-   * //     'Parsed dates: 2024-01-15 to 2024-03-20',
-   * //     '2024 is a leap year (366 days)',
-   * //     'February 2024 has 29 days',
-   * //     'Total calculated: 65 days'
-   * //   ],
-   * //   breakdown: { years: 0, months: 2, weeks: 0, days: 5, ... },
-   * //   mode: 'exact',
-   * //   explanation: 'Calculated 2024-01-15 to 2024-03-20...'
-   * // }
-   */
   explain(): IDurationExplanation {
-    // Build steps if not already provided
     let steps = [...this._steps];
-    
+
     if (steps.length === 0) {
-      // Auto-generate steps if not provided during construction
       steps = this.generateExplanationSteps();
     }
 
-    // Build explanation text
     const explanationParts: string[] = [];
-    
+
     if (this._startDate && this._endDate) {
       explanationParts.push(`Calculated duration from ${this._startDate} to ${this._endDate}`);
     }
@@ -418,14 +339,9 @@ export class DurationResult implements DurationParts {
     };
   }
 
-  /**
-   * Generate explanation steps for the calculation
-   * Used when steps weren't provided during construction
-   */
   private generateExplanationSteps(): string[] {
     const steps: string[] = [];
 
-    // Start with input summary
     if (this._startDate && this._endDate) {
       steps.push(`Input: ${this._startDate} to ${this._endDate}`);
     } else {
@@ -458,7 +374,6 @@ export class DurationResult implements DurationParts {
       steps.push(`Milliseconds: ${this.milliseconds}`);
     }
 
-    // Add leap year information if available
     if (this._leapYearFlags && this._leapYearFlags.length > 0) {
       for (const flag of this._leapYearFlags) {
         if (flag.isLeap) {
@@ -467,7 +382,6 @@ export class DurationResult implements DurationParts {
       }
     }
 
-    // Summary
     const totalParts = [
       this.years > 0 ? `${this.years}y` : '',
       this.months > 0 ? `${this.months}m` : '',
@@ -484,9 +398,6 @@ export class DurationResult implements DurationParts {
     return steps;
   }
 
-  /**
-   * Pluralize a unit name (deprecated - use utility function)
-   */
   private pluralizeUnit(unit: string, count: number, locale: string): string {
     return getDurationUnitLabel(unit, locale, count);
   }
@@ -497,17 +408,11 @@ export class DurationResult implements DurationParts {
  */
 /**
  * TimeRange - Fluent API for date range operations
- * Semantic naming that eliminates confusion about date order
- * 
+ *
  * @example
  * TimeGuard.range('2024-01-15', '2024-03-20')
- *   .toDuration()        // Returns DurationResult
- *   .humanize()          // "2 months and 5 days"
- * 
- * TimeGuard.range('2024-01-15', '2024-03-20')
- *   .inMonths()          // 2.1355 (precise decimal)
- * 
- * These methods work regardless of date order
+ *   .toDuration().humanize()        // "2 months and 5 days"
+ *   .inMonths()                     // 2.1355 (precise decimal)
  */
 export class TimeRange {
   private _start: TimeGuard;
@@ -518,37 +423,14 @@ export class TimeRange {
     this._end = end;
   }
 
-  /**
-   * Get the duration between the two dates
-   * @returns DurationResult with all duration properties and methods
-   * @example
-   * const duration = TimeGuard.range(start, end).toDuration();
-   * duration.humanize();  // "2 months and 5 days"
-   * duration.total('day'); // 65.875
-   */
   toDuration(): DurationResult {
     return TimeGuard.between(this._start, this._end);
   }
 
-  /**
-   * Get the range expressed in months (as decimal)
-   * Accounts for leap years and average month lengths
-   * @returns Number of months (can be decimal like 2.1355)
-   * @example
-   * TimeGuard.range('2024-01-15', '2024-03-20').inMonths(); // ~2.1355
-   */
   inMonths(): number {
     return this.toDuration().total('month');
   }
 
-  /**
-   * Get human-readable representation of the range
-   * Semantic naming that emphasizes what the range represents
-   * @returns String like "2 months and 5 days"
-   * @example
-   * TimeGuard.range(start, end).humanize(); // "2 months and 5 days"
-   * TimeGuard.range(start, end).humanize({ locale: 'es' }); // "2 meses y 5 días"
-   */
   humanize(options?: {
     locale?: string;
     fullBreakdown?: boolean;
@@ -557,12 +439,6 @@ export class TimeRange {
     return this.toDuration().humanize(options);
   }
 
-  /**
-   * Get duration in specific unit
-   * Chainable with other TimeRange methods
-   * @example
-   * TimeGuard.range(start, end).in('day'); // 65.875
-   */
   in(unit: Unit): number {
     return this.toDuration().total(unit);
   }
@@ -604,14 +480,12 @@ export class TimeGuard implements ITimeGuard {
   constructor(input?: unknown, config?: ITimeGuardConfig) {
     this.formatterInstance = new DateFormatter();
 
-    // Set default config
     this.config = {
       locale: config?.locale || 'en',
       timezone: config?.timezone || 'UTC',
       strict: config?.strict ?? false,
     };
 
-    // Parse input to Temporal
     this.temporal = TemporalAdapter.parseToPlainDateTime(input);
 
     // Convert to ZonedDateTime if timezone is specified
@@ -624,9 +498,6 @@ export class TimeGuard implements ITimeGuard {
     }
   }
 
-  /**
-   * Static factory methods
-   */
   static now(config?: ITimeGuardConfig): TimeGuard {
     return new TimeGuard(undefined, config);
   }
@@ -645,33 +516,18 @@ export class TimeGuard implements ITimeGuard {
   }
 
   /**
-   * Calculate duration between two dates - semantic API eliminating until/since confusion
-   * 
-   * Always returns positive duration regardless of date order.
-   * Use .humanize() for user-friendly output.
-   * 
+   * Calculate duration between two dates - always returns positive duration
+   *
    * @example
-   * const start = TimeGuard.from("2024-01-15");
-   * const end = TimeGuard.from("2024-03-20");
-   * 
-   * TimeGuard.between(start, end).humanize();
-   * // "2 months and 5 days"
-   * 
-   * // Order doesn't matter - semantic clarity!
-   * TimeGuard.between(end, start).humanize();
-   * // "2 months and 5 days" (still positive)
-   * 
-   * // Has all DurationParts properties
-   * TimeGuard.between(start, end).months; // 2
-   * TimeGuard.between(start, end).days;   // 5
+   * TimeGuard.between(start, end).humanize() // "2 months and 5 days"
+   * TimeGuard.between(end, start).humanize() // "2 months and 5 days" (still positive)
    */
   static between(date1: TimeGuard, date2: TimeGuard): DurationResult {
     const t1 = TemporalAdapter.toPlainDateTime(date1.temporal);
     const t2 = TemporalAdapter.toPlainDateTime(date2.temporal);
 
-    // Always calculate from earlier to later for semantic clarity
-    const [earlier, later] = TemporalAdapter.compare(t1, t2) <= 0 
-      ? [date1, date2] 
+    const [earlier, later] = TemporalAdapter.compare(t1, t2) <= 0
+      ? [date1, date2]
       : [date2, date1];
 
     return earlier.until(later);
@@ -679,17 +535,9 @@ export class TimeGuard implements ITimeGuard {
 
   /**
    * Create a TimeRange for fluent duration calculations
-   * Marketing-friendly naming that emphasizes range semantics
-   * 
+   *
    * @example
-   * TimeGuard.range("2024-01-15", "2024-03-20")
-   *   .humanize() // "2 months and 5 days"
-   * 
-   * TimeGuard.range("2024-01-15", "2024-03-20")
-   *   .inMonths() // 2.1355
-   * 
-   * TimeGuard.range("2024-01-15", "2024-03-20")
-   *   .toDuration() // DurationResult object
+   * TimeGuard.range("2024-01-15", "2024-03-20").humanize() // "2 months and 5 days"
    */
   static range(start: unknown, end: unknown): TimeRange {
     const startTg = start instanceof TimeGuard ? start : new TimeGuard(start);
@@ -697,9 +545,7 @@ export class TimeGuard implements ITimeGuard {
     return new TimeRange(startTg, endTg);
   }
 
-  // ===== Conversion methods =====
-
-  toTemporal(): any { // Temporal.PlainDateTime | Temporal.ZonedDateTime
+  toTemporal(): any {
     return this.temporal;
   }
 
@@ -727,8 +573,6 @@ export class TimeGuard implements ITimeGuard {
     return this.format('YYYY-MM-DD HH:mm:ss');
   }
 
-  // ===== Locale methods =====
-
   locale(): string;
   locale(locale: string): TimeGuard;
   locale(locale?: string): string | TimeGuard {
@@ -739,8 +583,6 @@ export class TimeGuard implements ITimeGuard {
     cloned.config.locale = locale;
     return cloned;
   }
-
-  // ===== Timezone methods =====
 
   timezone(): string | null;
   timezone(timezone: string): TimeGuard;
@@ -759,19 +601,14 @@ export class TimeGuard implements ITimeGuard {
     return cloned;
   }
 
-  // ===== Format methods =====
-
   format(pattern: string | FormatPreset): string {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    // Check if it's a known preset
     const knownPresets = ['iso', 'date', 'time', 'datetime', 'rfc2822', 'rfc3339', 'utc'];
     const formatPattern = knownPresets.includes(pattern as string)
       ? this.formatterInstance.getPreset(pattern as FormatPreset)
       : (pattern as string);
     return this.formatterInstance.format(plainDT, formatPattern, this.config.locale);
   }
-
-  // ===== Get methods =====
 
   get(component: Unit): number {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
@@ -796,16 +633,13 @@ export class TimeGuard implements ITimeGuard {
     return (plainDT as Record<string, any>)[unitMap[component]] as number;
   }
 
-  // ===== Arithmetic methods =====
-
   add(units: Partial<Record<Unit, number>>): TimeGuard {
     let plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
 
-    // Map unit names to Temporal duration
     const duration: any = {};
     Object.entries(units).forEach(([unit, value]) => {
       if (value !== undefined && value !== 0) {
-        duration[unit + 's'] = value; // Convert 'day' to 'days', etc.
+        duration[unit + 's'] = value;
       }
     });
 
@@ -832,14 +666,9 @@ export class TimeGuard implements ITimeGuard {
    * 
    * @example
    * // Exact mode (default)
-   * tg1.diff(tg2).as('day') // Get as number: 65
-   * 
-   * // Calendar mode - shows normalized breakdown
-   * tg1.diff(tg2, { mode: 'calendar' }).format('en')
-   * // Output: "2 months and 5 days"
-   * 
-   * // With custom unit
-   * tg1.diff(tg2, { unit: 'hour' }).as('hour') // 1560
+   * tg1.diff(tg2).as('day') // 65
+   * // Calendar mode
+   * tg1.diff(tg2, { mode: 'calendar' }).format('en') // "2 months and 5 days"
    */
   diff(other: TimeGuard): DiffResult;
   diff(other: TimeGuard, unit: Unit): number;
@@ -864,53 +693,37 @@ export class TimeGuard implements ITimeGuard {
       nanosecond: 'nanoseconds',
     };
 
-    // Case 1: unitOrOptions is a Unit (string) - backward compatible mode
     if (typeof unitOrOptions === 'string') {
       const unit = unitOrOptions;
       const mappedUnit = unitMap[unit];
       const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: unit });
-      const result = Math.round((duration as any)[mappedUnit] || 0);
-      return result;
+      return Math.round((duration as any)[mappedUnit] || 0);
     }
 
-    // Case 2: unitOrOptions is undefined or IDiffOptions object
     const options = (unitOrOptions as IDiffOptions) || {};
     const mode = options.mode || 'exact';
     const unit = options.unit || 'millisecond';
     const locale = options.locale || this.config.locale;
 
-    // For exact mode: Calculate in the specified unit
     if (mode === 'exact') {
       const mappedUnit = unitMap[unit];
       const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: unit });
       const result = Math.round((duration as any)[mappedUnit] || 0);
-      
-      // Return DiffResult when no specific unit provided, or when options passed
+
       if (unitOrOptions === undefined || typeof unitOrOptions === 'object') {
-        // Default to milliseconds for implicit conversion
-        const totalMs = 
-          (duration.years || 0) * 365.25 * 24 * 60 * 60 * 1000 +
-          (duration.months || 0) * 30.44 * 24 * 60 * 60 * 1000 +
-          (duration.weeks || 0) * 7 * 24 * 60 * 60 * 1000 +
-          (duration.days || 0) * 24 * 60 * 60 * 1000 +
-          (duration.hours || 0) * 60 * 60 * 1000 +
-          (duration.minutes || 0) * 60 * 1000 +
-          (duration.seconds || 0) * 1000 +
-          (duration.milliseconds || 0);
-        
+        const totalMs = calculateTotalMs(duration);
         return new DiffResult(Math.round(totalMs), this, other, mode, undefined, locale);
       }
-      
+
       return result;
     }
 
-    // Case 3: Calendar mode - get breakdown with largest unit as 'month'
     if (mode === 'calendar') {
-      const duration = (plainDT1 as any).since(plainDT2, { 
+      const duration = (plainDT1 as any).since(plainDT2, {
         largestUnit: 'month',
         smallestUnit: 'millisecond'
       });
-      
+
       const breakdownData: DurationParts = {
         years: Math.floor(duration.years || 0),
         months: Math.floor(duration.months || 0),
@@ -922,36 +735,14 @@ export class TimeGuard implements ITimeGuard {
         milliseconds: Math.floor(duration.milliseconds || 0),
       };
 
-      // Calculate total milliseconds for numeric operations
-      const totalMs = 
-        (duration.years || 0) * 365.25 * 24 * 60 * 60 * 1000 +
-        (duration.months || 0) * 30.44 * 24 * 60 * 60 * 1000 +
-        (duration.weeks || 0) * 7 * 24 * 60 * 60 * 1000 +
-        (duration.days || 0) * 24 * 60 * 60 * 1000 +
-        (duration.hours || 0) * 60 * 60 * 1000 +
-        (duration.minutes || 0) * 60 * 1000 +
-        (duration.seconds || 0) * 1000 +
-        (duration.milliseconds || 0);
-      
+      const totalMs = calculateTotalMs(duration);
       return new DiffResult(Math.round(totalMs), this, other, mode, breakdownData, locale);
     }
 
-    // Fallback: return as exact mode with milliseconds
     const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: 'millisecond' });
-    const totalMs = 
-      (duration.years || 0) * 365.25 * 24 * 60 * 60 * 1000 +
-      (duration.months || 0) * 30.44 * 24 * 60 * 60 * 1000 +
-      (duration.weeks || 0) * 7 * 24 * 60 * 60 * 1000 +
-      (duration.days || 0) * 24 * 60 * 60 * 1000 +
-      (duration.hours || 0) * 60 * 60 * 1000 +
-      (duration.minutes || 0) * 60 * 1000 +
-      (duration.seconds || 0) * 1000 +
-      (duration.milliseconds || 0);
-
+    const totalMs = calculateTotalMs(duration);
     return new DiffResult(Math.round(totalMs), this, other, mode, undefined, locale);
   }
-
-  // ===== Query methods =====
 
   isBefore(other: TimeGuard): boolean {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);

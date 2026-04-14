@@ -85,12 +85,19 @@ src/locales/
 
 ## 🛠️ Usage
 
-### Import individual locales
+### Import from public API
 
 ```typescript
-import { EN_LOCALE_DATA } from "./locales/english.locale";
-import { ES_LOCALE_DATA, SPANISH_LOCALES } from "./locales/spanish.locale";
-import { ASIAN_LOCALES } from "./locales/asian.locale";
+import {
+  ALL_LOCALES,
+  getAvailableLocales,
+  LOCALES_COUNT,
+  registerAllLocales,
+} from "@bereasoftware/time-guard";
+
+// Access specific locale
+const englishLocale = ALL_LOCALES["en"];
+const spanishLocale = ALL_LOCALES["es"];
 ```
 
 ### Use with TimeGuard

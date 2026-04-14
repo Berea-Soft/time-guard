@@ -97,7 +97,11 @@ Interfaces pequeñas y enfocadas en lugar de interfaces grandes:
 interface IDateArithmetic {
   add(units: Partial<Record<Unit, number>>): TimeGuard;
   subtract(units: Partial<Record<Unit, number>>): TimeGuard;
+  diff(other: TimeGuard): DiffResult;
   diff(other: TimeGuard, unit: Unit): number;
+  diff(other: TimeGuard, options: IDiffOptions): DiffResult;
+  until(other: TimeGuard, options?: IDurationOptions): DurationResult;
+  since(other: TimeGuard, options?: IDurationOptions): DurationResult;
 }
 
 interface IDateQuery {

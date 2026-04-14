@@ -957,8 +957,10 @@ console.log(formatUserDate(date, 'ja')); // 水曜日、2024年3月13日 14:30
 #### Obtener Locales Disponibles Programáticamente
 
 ```typescript
+import { getAvailableLocales } from "@bereasoftware/time-guard";
+
 // Get all available locales
-const locales = TimeGuard.getAvailableLocales();
+const locales = getAvailableLocales();
 // Returns: ['en', 'en-au', 'en-gb', 'en-ca', 'es', 'es-mx', 'es-us', ...]
 
 // Filter by prefix
@@ -970,7 +972,7 @@ const asianLocales = locales.filter((l) =>
 
 // Create locale selector UI
 function createLocaleSelector() {
-  const locales = TimeGuard.getAvailableLocales();
+  const locales = getAvailableLocales();
   return locales.map((locale) => ({
     code: locale,
     label: new Intl.DisplayNames('en', { type: 'language' }).of(locale),
@@ -1440,7 +1442,8 @@ inNYC.format('YYYY-MM-DD HH:mm:ss Z'); // 2024-03-13 10:30:00 -04:00
 inTokyo.format('YYYY-MM-DD HH:mm:ss Z'); // 2024-03-13 23:30:00 +09:00
 
 // Get all available locales
-TimeGuard.getAvailableLocales(); // Array of 40+ locale codes
+import { getAvailableLocales } from "@bereasoftware/time-guard";
+getAvailableLocales(); // Array of 40+ locale codes
 ```
 
 ### 🎨 Format Patterns

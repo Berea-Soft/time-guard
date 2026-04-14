@@ -120,7 +120,7 @@ Implements ISO 8601 duration support for time spans and calculations.
 #### Installation
 
 ```typescript
-import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+import { TimeGuard, PluginManager, Duration } from "@bereasoftware/time-guard";
 import durationPlugin from "@bereasoftware/time-guard/plugins/duration";
 
 PluginManager.use(durationPlugin, TimeGuard);
@@ -128,24 +128,11 @@ PluginManager.use(durationPlugin, TimeGuard);
 
 #### Methods
 
-**`.duration(other: TimeGuard): Duration`**
-Get duration between two dates.
-
-```typescript
-const start = TimeGuard.from("2024-03-13");
-const end = TimeGuard.from("2024-03-20");
-const duration = start.duration(end);
-
-console.log(duration.asDays()); // 7
-console.log(duration.asHours()); // 168
-console.log(duration.humanize()); // "7 days"
-```
-
 **`Duration.fromISO(iso: string): Duration`**
 Create duration from ISO 8601 string.
 
 ```typescript
-const duration = TimeGuard.Duration.fromISO("P3Y6M4DT12H30M5S");
+const duration = Duration.fromISO("P3Y6M4DT12H30M5S");
 console.log(duration.humanize()); // "3 years, 6 months, 4 days, 12 hours, 30 minutes, 5 seconds"
 ```
 
@@ -155,16 +142,24 @@ Get duration between two dates.
 ```typescript
 const from = TimeGuard.from("2024-01-01");
 const to = TimeGuard.from("2024-12-31");
-const duration = TimeGuard.Duration.between(from, to);
+const duration = Duration.between(from, to);
 
 console.log(duration.asDays()); // 364
 console.log(duration.toISO()); // "P364D"
 ```
 
+**`Duration.fromMilliseconds(ms: number): Duration`**
+Create duration from milliseconds.
+
+```typescript
+const duration = Duration.fromMilliseconds(86400000);
+console.log(duration.asDays()); // 1
+```
+
 #### Duration Methods
 
 ```typescript
-const duration = TimeGuard.Duration.fromISO("P2Y3M4DT5H6M7S");
+const duration = Duration.fromISO("P2Y3M4DT5H6M7S");
 
 // Get in specific units
 duration.as("years"); // ~2.25
@@ -201,20 +196,20 @@ duration.abs(); // Returns absolute duration
 // Calculate durations
 const birthday = TimeGuard.from("1990-03-13");
 const today = TimeGuard.now();
-const age = birthday.duration(today);
+const age = Duration.between(birthday, today);
 
 console.log(age.asYears()); // ~34.something
 
 // Compare durations
 const projectStart = TimeGuard.from("2024-01-01");
 const projectEnd = TimeGuard.from("2024-06-30");
-const projectDuration = projectStart.duration(projectEnd);
+const projectDuration = Duration.between(projectStart, projectEnd);
 
 console.log(projectDuration.asDays()); // 182
 console.log(projectDuration.humanize()); // "6 months, 4 days"
 
 // Parse ISO 8601
-const sprint = TimeGuard.Duration.fromISO("P2W3D");
+const sprint = Duration.fromISO("P2W3D");
 console.log(sprint.asDays()); // 17
 console.log(sprint.humanize()); // "2 weeks, 3 days"
 ```
@@ -442,7 +437,29 @@ console.log(date2.fromNow()); // Also works
 
 ## 📚 Creating Custom Plugins
 
-See [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) for guidance on creating your own plugins.
+To create a custom plugin, implement the `ITimeGuardPlugin` interface:
+
+```typescript
+import type { ITimeGuardPlugin } from "@bereasoftware/time-guard";
+import type { TimeGuard } from "@bereasoftware/time-guard";
+
+export class MyPlugin implements ITimeGuardPlugin {
+  name = "my-plugin";
+  version = "1.0.0";
+
+  install(TimeGuardClass: typeof TimeGuard): void {
+    (TimeGuardClass.prototype as any).myMethod = function() {
+      return "Hello from my plugin!";
+    };
+  }
+}
+```
+
+Then register:
+
+```typescript
+PluginManager.use(new MyPlugin(), TimeGuard);
+```
 
 ---
 
@@ -451,7 +468,7 @@ See [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) for guidance on creating your
 Full API reference for each plugin:
 
 - **RelativeTimePlugin**: `.fromNow()`, `.toNow()`, `.humanize()`
-- **DurationPlugin**: `.duration()`, `Duration.fromISO()`, `Duration.between()`
+- **DurationPlugin**: `Duration.fromISO()`, `Duration.between()`, `Duration.fromMilliseconds()`
 - **AdvancedFormatPlugin**: Advanced format tokens (Q, Do, w, W, etc.)
 
 ---

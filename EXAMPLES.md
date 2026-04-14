@@ -11,13 +11,13 @@ Ejemplos comprensivos mostrando casos de uso comunes y patrones de uso de la lib
 Crear instancias de TimeGuard:
 
 ```typescript
-import { TimeGuard, timeGuard } from "./index";
+import { TimeGuard, timeGuard } from "@bereasoftware/time-guard";
 
 // Crear instancias
 const now = TimeGuard.now();
-const specificDate = new TimeGuard("2024-03-13");
-const fromTimestamp = new TimeGuard(Date.now());
-const withConfig = new TimeGuard("2024-03-13", { locale: "es" });
+const specificDate = TimeGuard.from("2024-03-13");
+const fromTimestamp = TimeGuard.from(Date.now());
+const withConfig = TimeGuard.from("2024-03-13", { locale: "es" });
 
 console.log("Uso Básico:");
 console.log(now.toString()); // Fecha/hora actual
@@ -29,7 +29,7 @@ console.log(specificDate.format("YYYY-MM-DD HH:mm:ss")); // 2024-03-13 00:00:00
 Agregar y restar tiempo:
 
 ```typescript
-const date = new TimeGuard("2024-03-13");
+const date = TimeGuard.from("2024-03-13");
 
 console.log("\nAritmética:");
 console.log("Agregar 5 días:", date.add({ day: 5 }).format("YYYY-MM-DD"));
@@ -57,7 +57,7 @@ console.log(
 Varios formatos de salida:
 
 ```typescript
-const dateTime = new TimeGuard("2024-03-13T14:30:45.123");
+const dateTime = TimeGuard.from("2024-03-13T14:30:45.123");
 
 console.log("\nFormateo:");
 console.log("ISO:", dateTime.format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
@@ -81,9 +81,9 @@ console.log("Preset hora:", dateTime.format("time"));
 Comparación entre fechas:
 
 ```typescript
-const date1 = new TimeGuard("2024-03-13");
-const date2 = new TimeGuard("2024-03-20");
-const date3 = new TimeGuard("2024-03-13");
+const date1 = TimeGuard.from("2024-03-13");
+const date2 = TimeGuard.from("2024-03-20");
+const date3 = TimeGuard.from("2024-03-13");
 
 console.log("\nOperaciones de Consulta:");
 console.log("date1 < date2:", date1.isBefore(date2)); // true
@@ -93,9 +93,9 @@ console.log("Mismo mes:", date1.isSame(date2, "month")); // true
 console.log("Mismo año:", date1.isSame(date2, "year")); // true
 
 // Verificar si está entre
-const start = new TimeGuard("2024-03-01");
-const middle = new TimeGuard("2024-03-15");
-const end = new TimeGuard("2024-03-31");
+const start = TimeGuard.from("2024-03-01");
+const middle = TimeGuard.from("2024-03-15");
+const end = TimeGuard.from("2024-03-31");
 console.log("Está entre:", middle.isBetween(start, end)); // true
 ```
 
@@ -104,7 +104,7 @@ console.log("Está entre:", middle.isBetween(start, end)); // true
 Operaciones de manipulación de fechas:
 
 ```typescript
-const original = new TimeGuard("2024-03-13T14:30:45");
+const original = TimeGuard.from("2024-03-13T14:30:45");
 
 console.log("\nManipulación:");
 console.log("Original:", original.format("YYYY-MM-DD HH:mm:ss"));
@@ -136,8 +136,8 @@ console.log(
 Calcular diferencias entre fechas:
 
 ```typescript
-const pastDate = new TimeGuard("2024-01-01");
-const futureDate = new TimeGuard("2024-12-31");
+const pastDate = TimeGuard.from("2024-01-01");
+const futureDate = TimeGuard.from("2024-12-31");
 
 console.log("\nDiferencias:");
 console.log("Días entre:", futureDate.diff(pastDate, "day"));
@@ -151,7 +151,7 @@ console.log("Horas entre:", futureDate.diff(pastDate, "hour"));
 Usar diferentes idiomas:
 
 ```typescript
-const englishDate = new TimeGuard("2024-03-13", { locale: "en" });
+const englishDate = TimeGuard.from("2024-03-13", { locale: "en" });
 const spanishDate = englishDate.locale("es");
 
 console.log("\nSoporte de Locales:");
@@ -166,7 +166,7 @@ console.log("Día semana ES:", spanishDate.format("dddd"));
 Conversiones a diferentes formatos:
 
 ```typescript
-const testDate = new TimeGuard("2024-03-13T14:30:45.123");
+const testDate = TimeGuard.from("2024-03-13T14:30:45.123");
 
 console.log("\nConversión:");
 console.log("A Date:", testDate.toDate());
@@ -182,7 +182,7 @@ console.log("A String:", testDate.toString());
 Obtener componentes de una fecha:
 
 ```typescript
-const fullDate = new TimeGuard("2024-03-13T14:30:45.789");
+const fullDate = TimeGuard.from("2024-03-13T14:30:45.789");
 
 console.log("\nGetters:");
 console.log("Año:", fullDate.get("year"));
@@ -200,7 +200,7 @@ API fluida para múltiples operaciones:
 
 ```typescript
 console.log("\nEncadenamiento:");
-const result = new TimeGuard("2024-03-13")
+const result = TimeGuard.from("2024-03-13")
   .add({ month: 1 })
   .add({ day: 5 })
   .startOf("day")
@@ -215,7 +215,7 @@ console.log("Resultado encadenado:", result);
 ### Programación de Reuniones
 
 ```typescript
-const meetingDate = new TimeGuard("2024-03-15T09:00:00");
+const meetingDate = TimeGuard.from("2024-03-15T09:00:00");
 const nextWeekMeeting = meetingDate.add({ week: 1 });
 const recurringMeeting = meetingDate.add({ week: 2 });
 
@@ -233,7 +233,7 @@ console.log(
 ### Cálculo de Edad
 
 ```typescript
-const birthDate = new TimeGuard("1990-05-15");
+const birthDate = TimeGuard.from("1990-05-15");
 const today = TimeGuard.now();
 const age = today.diff(birthDate, "year");
 console.log(`Nacido: ${birthDate.format("MMMM D, YYYY")}`);
@@ -243,7 +243,7 @@ console.log(`Edad: ${age} años`);
 ### Plazos de Proyecto
 
 ```typescript
-const projectStart = new TimeGuard("2024-03-01");
+const projectStart = TimeGuard.from("2024-03-01");
 const milestone1 = projectStart.add({ month: 1 });
 const milestone2 = milestone1.add({ month: 1 });
 const deadline = projectStart.add({ month: 3 });
@@ -268,7 +268,7 @@ console.log("Mes finaliza:", monthEnd.format("YYYY-MM-DD"));
 ### Verificación de Expiración
 
 ```typescript
-const subscriptionDate = new TimeGuard("2024-03-13");
+const subscriptionDate = TimeGuard.from("2024-03-13");
 const expirationDate = subscriptionDate.add({ year: 1 });
 const isExpired = TimeGuard.now().isAfter(expirationDate);
 const daysUntilExpiry = expirationDate.diff(TimeGuard.now(), "day");
@@ -282,9 +282,9 @@ console.log("Días hasta expiración:", daysUntilExpiry);
 ### Consultas de Rango de Fechas
 
 ```typescript
-const quarterStart = new TimeGuard("2024-01-01");
-const quarterEnd_check = new TimeGuard("2024-03-31");
-const testDate_check = new TimeGuard("2024-02-15");
+const quarterStart = TimeGuard.from("2024-01-01");
+const quarterEnd_check = TimeGuard.from("2024-03-31");
+const testDate_check = TimeGuard.from("2024-02-15");
 
 const isInQuarter = testDate_check.isBetween(quarterStart, quarterEnd_check);
 console.log(
@@ -298,7 +298,7 @@ console.log(`¿2024-02-15 está en Q1?: ${isInQuarter}`);
 TimeGuard es inmutable - las operaciones devuelven nuevas instancias:
 
 ```typescript
-const original_check = new TimeGuard("2024-03-13");
+const original_check = TimeGuard.from("2024-03-13");
 const modified = original_check.add({ day: 5 });
 
 console.log("Original sin cambios:", original_check.format("YYYY-MM-DD"));
@@ -311,7 +311,7 @@ console.log("¿Son lo mismo?", original_check === modified);
 Todas las operaciones están completamente tipadas en TypeScript:
 
 ```typescript
-const tg: TimeGuard = new TimeGuard("2024-03-13");
+const tg: TimeGuard = TimeGuard.from("2024-03-13");
 const formatted: string = tg.format("YYYY-MM-DD");
 const diff: number = tg.diff(TimeGuard.now(), "day");
 const isBefore: boolean = tg.isBefore(TimeGuard.now());

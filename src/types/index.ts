@@ -121,6 +121,15 @@ export interface DurationParts {
 }
 
 /**
+ * Base interface for formattable duration-like objects
+ * Common functionality shared by DiffResult and DurationResult
+ */
+export interface IFormattableDuration {
+  toString(): string;
+  toJSON(): Record<string, number> | number;
+}
+
+/**
  * Options for humanize() method
  */
 export interface IHumanizeOptions {
