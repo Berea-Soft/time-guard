@@ -3,13 +3,7 @@
   "private": false,
   "version": "2.5.1",
   "type": "module",
-  "sideEffects": [
-    "./dist/time-guard.es.js",
-    "./dist/time-guard.cjs",
-    "./dist/time-guard.umd.js",
-    "./dist/time-guard.iife.js",
-    "@js-temporal/polyfill"
-  ],
+  "sideEffects": false,
   "main": "./dist/time-guard.cjs",
   "module": "./dist/time-guard.es.js",
   "types": "./dist/types/time-guard.d.ts",
