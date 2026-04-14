@@ -7,8 +7,24 @@
  * @license MIT
  */
 
-// Initialize Temporal polyfill
+// Initialize Temporal polyfill and assign to globalThis
+// The polyfill uses side-effect imports to register Temporal on globalThis
 import '@js-temporal/polyfill';
+
+// Fallback: If Temporal is not on globalThis after import, try to load it manually
+if (typeof globalThis !== 'undefined' && !((globalThis as any).Temporal)) {
+  // Try loading in Node.js environments
+  if (typeof process !== 'undefined' && typeof globalThis.require === 'function') {
+    try {
+      globalThis.require('@js-temporal/polyfill');
+      // The polyfill should have registered Temporal on globalThis
+    } catch (_error) {
+      // Silently fail - the polyfill-loader will handle warnings
+    }
+  }
+}
+
+// Also run the polyfill-loader as additional fallback
 import './polyfill-loader';
 
 import { TimeGuard } from './time-guard';
