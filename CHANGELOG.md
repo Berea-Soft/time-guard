@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/Berea-Soft/time-guard/compare/v2.4.1...v2.5.0) (2026-04-14)
+
+
+### Features
+
+* auto-load polyfill without manual user setup ([ab73462](https://github.com/Berea-Soft/time-guard/commit/ab73462ba3df43974bb9c871e30f03daed22fac8))
+
 ## [2.4.1](https://github.com/Berea-Soft/time-guard/compare/v2.4.0...v2.4.1) (2026-04-13)
 
 
