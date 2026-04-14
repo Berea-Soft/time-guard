@@ -16,7 +16,7 @@ Una librería moderna y completamente tipada en TypeScript para manejo de fecha/
 - 🔄 **Inmutable** - Todas las operaciones devuelven nuevas instancias
 - 🪝 **Sistema de Plugins** - Extiende funcionalidad con plugins personalizados
 - 📦 **Bundle Modular** - Core ligero (~5KB gzip), carga locales/plugins/calendarios bajo demanda
-- 🔗 **Peer Dependency** - Requiere `@js-temporal/polyfill` como peer dependency
+- 🔗 **Polyfill Auto-cargado** - `@js-temporal/polyfill` se instala y carga automáticamente
 
 ## 📦 Instalación
 
@@ -490,7 +490,7 @@ const temporal = tg.toTemporal();
 - Sobrecarga mínima a través del patrón adaptador
 - Evaluación perezosa donde es posible
 - Caché eficiente de locales
-- `@js-temporal/polyfill` como peer dependency (no incluido en el bundle)
+- `@js-temporal/polyfill` como dependency (instalado automáticamente)
 
 ## 📄 Licencia
 

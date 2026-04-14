@@ -107,7 +107,28 @@ pnpm add @bereasoftware/time-guard
 
 - **Node.js** 20.18.0+ (soporte de Temporal API)
 - **TypeScript** 5.0+ (opcional pero recomendado)
-- **@js-temporal/polyfill** >=0.5.0 (peer dependency)
+- **@js-temporal/polyfill** >=0.5.0 (instalado automáticamente como dependencia)
+
+### 🚀 Uso en Nest.js / Backend
+
+**¡No necesitas hacer nada especial!** TimeGuard carga el polyfill automáticamente:
+
+```typescript
+// Solo importa TimeGuard y funciona!
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// ✅ El polyfill se carga automáticamente
+const now = TimeGuard.now();
+```
+
+**No necesitas importar manualmente:**
+```typescript
+// ❌ NO NECESARIO - TimeGuard lo carga automáticamente
+// import { Temporal } from '@js-temporal/polyfill';
+// if (typeof (globalThis as any).Temporal === 'undefined') {
+//   (globalThis as any).Temporal = Temporal;
+// }
+```
 
 ### Bundle Modular
 

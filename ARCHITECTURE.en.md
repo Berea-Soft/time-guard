@@ -16,7 +16,7 @@ A modern, fully-typed TypeScript date/time library built using the **Temporal AP
 - 🔄 **Immutable** - All operations return new instances
 - 🪝 **Plugin System** - Extend functionality with custom plugins
 - 📦 **Modular Bundle** - Lightweight core (~5KB gzip), load locales/plugins/calendars on demand
-- 🔗 **Peer Dependency** - Requires `@js-temporal/polyfill` as peer dependency
+- 🔗 **Auto-loaded Polyfill** - `@js-temporal/polyfill` installed and loaded automatically
 
 ## 📦 Installation
 
@@ -490,7 +490,7 @@ const temporal = tg.toTemporal();
 - Minimal overhead through adapter pattern
 - Lazy evaluation where possible
 - Efficient locale caching
-- `@js-temporal/polyfill` as peer dependency (not included in bundle)
+- `@js-temporal/polyfill` as dependency (installed automatically)
 
 ## 📄 License
 

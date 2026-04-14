@@ -36,6 +36,12 @@ export default defineConfig(({ mode }): UserConfig => {
   if (mode === "umd") {
     return {
       ...shared,
+      resolve: {
+        // Ensure the Temporal polyfill is resolved and bundled
+        alias: {
+          '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.cjs'),
+        },
+      },
       build: {
         lib: {
           entry: resolve(__dirname, "src/index.ts"),
@@ -45,16 +51,11 @@ export default defineConfig(({ mode }): UserConfig => {
           formats: ["umd", "iife", "es", "cjs"],
         },
         rollupOptions: {
-            // Treat the Temporal polyfill as a peer dependency / external
-            // so the ES build keeps the side-effect import line and consumers
-            // can provide the polyfill themselves.
-            external: ["@js-temporal/polyfill"],
+            // Bundle the Temporal polyfill completely so consumers
+            // don't need to install it manually
             output: {
               banner,
               exports: "named" as const,
-              globals: {
-                "@js-temporal/polyfill": "Temporal",
-              },
             },
         },
         emptyOutDir: false,
@@ -90,6 +91,12 @@ export default defineConfig(({ mode }): UserConfig => {
   }
   return {
     ...shared,
+    resolve: {
+      // Ensure the Temporal polyfill is resolved and bundled
+      alias: {
+        '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.cjs'),
+      },
+    },
     build: {
       lib: {
         entry: {
