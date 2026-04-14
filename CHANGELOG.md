@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/Berea-Soft/time-guard/compare/v2.5.0...v2.5.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* ensure polyfill loads in Node.js/Nest environments ([05f3945](https://github.com/Berea-Soft/time-guard/commit/05f3945cc957347644f3f69dd36ee8e3cdfed7c9))
+
 # [2.5.0](https://github.com/Berea-Soft/time-guard/compare/v2.4.1...v2.5.0) (2026-04-14)
 
 
