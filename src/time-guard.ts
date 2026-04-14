@@ -17,7 +17,7 @@ import type {
 } from './types';
 import { TemporalAdapter } from './adapters/temporal.adapter';
 import { DateFormatter } from './formatters/date.formatter';
-import type { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from '@js-temporal/polyfill';
 import {
   formatZeroDuration,
   joinDurationParts,

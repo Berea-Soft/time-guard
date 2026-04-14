@@ -37,9 +37,9 @@ export default defineConfig(({ mode }): UserConfig => {
     return {
       ...shared,
       resolve: {
-        // Ensure the Temporal polyfill is resolved and bundled
+        // Ensure the Temporal polyfill is resolved and bundled (use ESM build)
         alias: {
-          '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.cjs'),
+          '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.esm.js'),
         },
       },
       build: {
@@ -92,9 +92,9 @@ export default defineConfig(({ mode }): UserConfig => {
   return {
     ...shared,
     resolve: {
-      // Ensure the Temporal polyfill is resolved and bundled
+      // Ensure the Temporal polyfill is resolved and bundled (use ESM build)
       alias: {
-        '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.cjs'),
+        '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.esm.js'),
       },
     },
     build: {

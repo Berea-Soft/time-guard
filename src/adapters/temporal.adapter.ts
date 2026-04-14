@@ -11,10 +11,9 @@ type TemporalZonedDateTime = Temporal.ZonedDateTime;
 
 // Cache to prevent repeated loading attempts
 let temporalCache: any = null;
-let polyfillLoaded = false;
 
 /**
- * Synchronous version that assumes Temporal is already loaded or loads it
+ * Get Temporal from globalThis or imported module
  */
 function useTemporal(): any {
   // Return cached value if available
@@ -22,29 +21,14 @@ function useTemporal(): any {
     return temporalCache;
   }
 
-  const Temporal = (globalThis as any).Temporal;
+  const TemporalLoaded = (globalThis as any).Temporal || Temporal;
 
-  if (!Temporal) {
-    // Try to load polyfill synchronously in Node.js
-    if (!polyfillLoaded && typeof globalThis.require === 'function') {
-      try {
-        globalThis.require('@js-temporal/polyfill');
-        polyfillLoaded = true;
-        const TemporalLoaded = (globalThis as any).Temporal;
-        if (TemporalLoaded) {
-          temporalCache = TemporalLoaded;
-          return TemporalLoaded;
-        }
-      } catch (e) {
-        // Fall through to error
-      }
-    }
-    
+  if (!TemporalLoaded) {
     throw new Error('Temporal API not loaded. Make sure @js-temporal/polyfill is imported in your app.');
   }
 
-  temporalCache = Temporal;
-  return Temporal;
+  temporalCache = TemporalLoaded;
+  return TemporalLoaded;
 }
 
 /**
