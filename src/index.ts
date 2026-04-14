@@ -16,9 +16,6 @@ if (typeof globalThis !== 'undefined' && !((globalThis as any).Temporal)) {
   (globalThis as any).Temporal = Temporal;
 }
 
-// Also run the polyfill-loader as additional fallback
-import './polyfill-loader';
-
 import { TimeGuard } from './time-guard';
 import type { ITimeGuardConfig } from './types';
 import { LocaleManager, EN_LOCALE, ES_LOCALE } from './locales/locale.manager';

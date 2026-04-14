@@ -36,12 +36,6 @@ export default defineConfig(({ mode }): UserConfig => {
   if (mode === "umd") {
     return {
       ...shared,
-      resolve: {
-        // Ensure the Temporal polyfill is resolved and bundled (use ESM build)
-        alias: {
-          '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.esm.js'),
-        },
-      },
       build: {
         lib: {
           entry: resolve(__dirname, "src/index.ts"),
@@ -91,12 +85,6 @@ export default defineConfig(({ mode }): UserConfig => {
   }
   return {
     ...shared,
-    resolve: {
-      // Ensure the Temporal polyfill is resolved and bundled (use ESM build)
-      alias: {
-        '@js-temporal/polyfill': resolve(__dirname, 'node_modules/@js-temporal/polyfill/dist/index.esm.js'),
-      },
-    },
     build: {
       lib: {
         entry: {
