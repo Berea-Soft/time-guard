@@ -597,7 +597,7 @@ export interface ITimeGuardFactory {
 
 /**
  * Forward declaration for TimeGuard class
- * Implementation is in ./time-guard.ts, exported via ./index.ts
+ * Implementation is in ./index.ts, exported via ./index.ts
  */
 export declare class TimeGuard {
   constructor(input?: unknown, config?: ITimeGuardConfig);
@@ -605,7 +605,7 @@ export declare class TimeGuard {
 
 /**
  * Forward declaration for DurationResult class
- * Implementation is in ./time-guard.ts, exported via ./index.ts
+ * Implementation is in ./index.ts, exported via ./index.ts
  */
 export declare class DurationResult implements IDurationResult {
   constructor(
@@ -642,7 +642,7 @@ export declare class DurationResult implements IDurationResult {
 /**
  * Forward declaration for TimeRange class
  * Fluent API for date range operations with semantic naming
- * Implementation is in ./time-guard.ts, exported via ./index.ts
+ * Implementation is in ./index.ts, exported via ./index.ts
  */
 export declare class TimeRange {
   constructor(start: TimeGuard, end: TimeGuard);

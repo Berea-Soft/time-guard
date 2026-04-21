@@ -1708,7 +1708,7 @@ time-guard/
 ├── src/
 │   ├── index.ts                 # Core ligero (~5KB gzip, EN/ES)
 │   ├── polyfill-loader.ts       # Cargador del polyfill Temporal
-│   ├── time-guard.ts            # Clase principal
+│   ├── index.ts                 # Clase principal y punto de entrada
 │   ├── adapters/
 │   │   └── temporal.adapter.ts  # Wrapper del API Temporal
 │   ├── calendars/               # 6 sistemas de calendario

@@ -327,7 +327,7 @@ tg.timezone("America/New_York"); // Nueva instancia con diferente zona horaria
 src/
 ├── index.ts                    # Core ligero (~5KB gzip, solo EN/ES)
 ├── polyfill-loader.ts          # Cargador del polyfill Temporal
-├── time-guard.ts               # Clase principal TimeGuard
+├── index.ts               # Clase principal y punto de entrada
 ├── adapters/
 │   └── temporal.adapter.ts     # Adaptador del API Temporal
 ├── calendars/

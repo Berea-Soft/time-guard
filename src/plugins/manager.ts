@@ -5,7 +5,7 @@
  */
 
 import type { ITimeGuardPlugin } from '../types';
-import type { TimeGuard } from '../time-guard';
+import type { TimeGuard } from '../index';
 
 /**
  * Plugin Manager - handles plugin registration and initialization

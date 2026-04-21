@@ -1524,7 +1524,7 @@ time-guard/
 ├── src/
 │   ├── index.ts                 # Lightweight core (~5KB gzip, EN/ES)
 │   ├── polyfill-loader.ts       # Temporal polyfill loader
-│   ├── time-guard.ts            # Main class
+│   ├── index.ts                 # Main class and entry point
 │   ├── adapters/
 │   │   └── temporal.adapter.ts  # Temporal API wrapper
 │   ├── calendars/               # 6 calendar systems

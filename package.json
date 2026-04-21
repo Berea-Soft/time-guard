@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "./dist/time-guard.cjs",
   "module": "./dist/time-guard.es.js",
-  "types": "./dist/types/time-guard.d.ts",
+  "types": "./dist/types/index.d.ts",
   "unpkg": "./dist/time-guard.umd.js",
   "browser": {
     "./dist/time-guard.umd.js": "./dist/time-guard.umd.js",
@@ -14,7 +14,7 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/types/time-guard.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/time-guard.es.js",
       "require": "./dist/time-guard.cjs",
       "default": "./dist/time-guard.es.js"
@@ -32,19 +32,19 @@
       "default": "./dist/calendars/index.es.js"
     },
     "./plugins/relative-time": {
-      "types": "./dist/types/plugins/relative-time/index.d.ts",
+      "types": "./dist/types/plugins/relative-time.d.ts",
       "import": "./dist/plugins/relative-time.es.js",
       "require": "./dist/plugins/relative-time.cjs",
       "default": "./dist/plugins/relative-time.es.js"
     },
     "./plugins/duration": {
-      "types": "./dist/types/plugins/duration/index.d.ts",
+      "types": "./dist/types/plugins/duration.d.ts",
       "import": "./dist/plugins/duration.es.js",
       "require": "./dist/plugins/duration.cjs",
       "default": "./dist/plugins/duration.es.js"
     },
     "./plugins/advanced-format": {
-      "types": "./dist/types/plugins/advanced-format/index.d.ts",
+      "types": "./dist/types/plugins/advanced-format.d.ts",
       "import": "./dist/plugins/advanced-format.es.js",
       "require": "./dist/plugins/advanced-format.cjs",
       "default": "./dist/plugins/advanced-format.es.js"

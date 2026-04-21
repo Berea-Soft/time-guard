@@ -5,7 +5,7 @@
  */
 
 import type { ITimeGuardPlugin } from '../../types';
-import type { TimeGuard } from '../../time-guard';
+import type { TimeGuard } from '../../index';
 import type { RelativeTimeConfig, RelativeTimeFormats, RelativeTimeThreshold } from './types';
 
 const DEFAULT_THRESHOLDS: RelativeTimeThreshold[] = [
