@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/Berea-Soft/time-guard/compare/v2.5.3...v2.5.4) (2026-04-21)
+
+
+### Bug Fixes
+
+* update dts plugin configuration for type generation paths ([12052e3](https://github.com/Berea-Soft/time-guard/commit/12052e37b4fbf9279828db0e793251729d0718be))
+
 ## [2.5.3](https://github.com/Berea-Soft/time-guard/compare/v2.5.2...v2.5.3) (2026-04-21)
 
 
