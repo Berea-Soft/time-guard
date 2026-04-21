@@ -76,14 +76,21 @@ export default defineConfig(({ mode }): UserConfig => {
     },
     plugins: [
       dts({
-        rollupTypes: false, // Ahora queremos tipos individuales para cada entrada
+        rollupTypes: false,
         insertTypesEntry: true,
         copyDtsFiles: true,
-        entryRoot: 'src',
+        entryRoot: resolve(__dirname, 'src'),
+        outDir: resolve(__dirname, 'dist/types'),
         strictOutput: true,
-        outDir: 'dist/types',
         include: ['src/**/*.ts'],
         exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+        beforeWriteFile: (filePath, content) => {
+          const normalizedPath = filePath.replace(
+            /([\\/])dist\1types\1src(?=[\\/])/,
+            '$1dist$1types',
+          );
+          return { filePath: normalizedPath, content };
+        },
         afterBuild: () => {
           if (existsSync(distTypesSrcDir)) {
             rmSync(distTypesSrcDir, { recursive: true, force: true });
