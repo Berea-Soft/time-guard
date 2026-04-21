@@ -1,3 +1,10 @@
+## [2.5.3](https://github.com/Berea-Soft/time-guard/compare/v2.5.2...v2.5.3) (2026-04-21)
+
+
+### Bug Fixes
+
+* update TimeGuard and DurationResult class documentation paths in index.ts ([6d04bfe](https://github.com/Berea-Soft/time-guard/commit/6d04bfe1a0dfc8869d6d5679d9da5b48ab2b3e18))
+
 ## [2.5.2](https://github.com/Berea-Soft/time-guard/compare/v2.5.1...v2.5.2) (2026-04-14)
 
 ## [2.5.1](https://github.com/Berea-Soft/time-guard/compare/v2.5.0...v2.5.1) (2026-04-14)
