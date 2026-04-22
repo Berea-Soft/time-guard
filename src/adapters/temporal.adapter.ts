@@ -133,13 +133,13 @@ export class TemporalAdapter {
     const millisecond = obj.millisecond || 0;
 
     return Temporal.PlainDateTime.from({
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
+      year: this.toFiniteInteger(year),
+      month: this.toFiniteInteger(month),
+      day: this.toFiniteInteger(day),
+      hour: this.toFiniteInteger(hour),
+      minute: this.toFiniteInteger(minute),
+      second: this.toFiniteInteger(second),
+      millisecond: this.toFiniteInteger(millisecond),
     });
   }
 
@@ -205,6 +205,30 @@ export class TemporalAdapter {
   }
 
   /**
+   * Convert a value to a finite integer for Temporal fields
+   */
+  private static toFiniteInteger(value: any): number {
+    const num = Number(value);
+    if (!Number.isFinite(num)) {
+      throw new Error(`Temporal error: Expected finite integer, got ${value}`);
+    }
+    return Math.trunc(num);
+  }
+
+  /**
+   * Validate that a PlainDateTime has finite integer components
+   */
+  private static validatePlainDateTime(dt: TemporalPlainDateTime): void {
+    const fields = ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'] as const;
+    for (const field of fields) {
+      const value = (dt as any)[field];
+      if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+        throw new Error(`Temporal error: Expected finite integer for ${field}, got ${value}`);
+      }
+    }
+  }
+
+  /**
    * Get current time as PlainDateTime
    */
   static now(): TemporalPlainDateTime {
@@ -227,6 +251,10 @@ export class TemporalAdapter {
    */
   static compare(dt1: TemporalPlainDateTime, dt2: TemporalPlainDateTime): number {
     const Temporal = useTemporal();
+    
+    // Validate both date times have finite integer components
+    this.validatePlainDateTime(dt1);
+    this.validatePlainDateTime(dt2);
     
     // Try using Temporal.PlainDateTime.compare if available
     if (Temporal.PlainDateTime && typeof Temporal.PlainDateTime.compare === 'function') {

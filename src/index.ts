@@ -586,6 +586,17 @@ export class TimeGuard implements ITimeGuard {
     return this.toISOString();
   }
 
+  [Symbol.toPrimitive](hint: 'default' | 'string' | 'number'): string | number {
+    if (hint === 'number') {
+      return this.valueOf();
+    }
+    if (hint === 'string') {
+      return this.toISOString();
+    }
+    // default hint (e.g., when using == or + operator)
+    return this.toISOString();
+  }
+
   toString(): string {
     return this.format('YYYY-MM-DD HH:mm:ss');
   }
@@ -654,11 +665,21 @@ export class TimeGuard implements ITimeGuard {
     let plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
 
     const duration: any = {};
+    let hasValidFields = false;
+    
     Object.entries(units).forEach(([unit, value]) => {
       if (value !== undefined && value !== 0) {
-        duration[unit + 's'] = value;
+        const num = Number(value);
+        if (Number.isFinite(num)) {
+          duration[unit + 's'] = Math.trunc(num);
+          hasValidFields = true;
+        }
       }
     });
+
+    if (!hasValidFields) {
+      return this;
+    }
 
     plainDT = (plainDT as any).add(duration);
     return TimeGuard.fromTemporal(plainDT, this.config);
