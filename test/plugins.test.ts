@@ -23,7 +23,7 @@ describe('Plugin System', () => {
     it('should list registered plugins', () => {
       PluginManager.use(relativeTimePlugin, TimeGuard);
       PluginManager.use(durationPlugin, TimeGuard);
-      
+
       const plugins = PluginManager.listPlugins();
       expect(plugins).toContain('relative-time');
       expect(plugins).toContain('duration');
@@ -39,7 +39,7 @@ describe('Plugin System', () => {
     it('should unregister a plugin', () => {
       PluginManager.use(relativeTimePlugin, TimeGuard);
       expect(PluginManager.hasPlugin('relative-time')).toBe(true);
-      
+
       PluginManager.unuse('relative-time');
       expect(PluginManager.hasPlugin('relative-time')).toBe(false);
     });
@@ -47,7 +47,7 @@ describe('Plugin System', () => {
     it('should clear all plugins', () => {
       PluginManager.use(relativeTimePlugin, TimeGuard);
       PluginManager.use(durationPlugin, TimeGuard);
-      
+
       PluginManager.clear();
       expect(PluginManager.listPlugins()).toHaveLength(0);
     });
@@ -113,7 +113,7 @@ describe('Plugin System', () => {
       const start = TimeGuard.from('2024-03-13');
       const end = TimeGuard.from('2024-03-20');
       const duration = (start as any).duration(end);
-      
+
       expect(duration).toBeDefined();
       expect(duration.asDays()).toBe(7);
     });
@@ -141,7 +141,7 @@ describe('Plugin System', () => {
         minutes: 6,
         seconds: 7,
       });
-      
+
       const iso = duration.toISO();
       expect(iso).toContain('P');
       expect(iso).toContain('2Y');
@@ -151,7 +151,7 @@ describe('Plugin System', () => {
 
     it('should calculate duration in different units', () => {
       const duration = Duration.fromMilliseconds(1000 * 60 * 60 * 24 * 7); // 7 days
-      
+
       expect(duration.asDays()).toBe(7);
       expect(duration.asWeeks()).toBe(1);
       expect(duration.asHours()).toBe(168);
@@ -166,7 +166,7 @@ describe('Plugin System', () => {
     it('should detect negative durations', () => {
       const positive = new Duration({ days: 5 });
       const negative = new Duration({ days: -5 });
-      
+
       expect(positive.isNegative()).toBe(false);
       expect(negative.isNegative()).toBe(true);
     });
@@ -188,7 +188,7 @@ describe('Plugin System', () => {
       const date = TimeGuard.from('2024-03-13');
       const result = date.format('Q');
       expect(result).toBe('1');
-      
+
       const dateQ3 = TimeGuard.from('2024-09-13');
       const resultQ3 = dateQ3.format('Q');
       expect(resultQ3).toBe('3');
@@ -198,15 +198,15 @@ describe('Plugin System', () => {
       const date = TimeGuard.from('2024-03-13');
       const result = date.format('Do');
       expect(result).toBe('13th');
-      
+
       const date1st = TimeGuard.from('2024-03-01');
       const result1st = date1st.format('Do');
       expect(result1st).toBe('1st');
-      
+
       const date21st = TimeGuard.from('2024-03-21');
       const result21st = date21st.format('Do');
       expect(result21st).toBe('21st');
-      
+
       const date2nd = TimeGuard.from('2024-03-02');
       const result2nd = date2nd.format('Do');
       expect(result2nd).toBe('2nd');
@@ -250,18 +250,18 @@ describe('Plugin System', () => {
       PluginManager.use(advancedFormatPlugin, TimeGuard);
 
       const date = TimeGuard.from('2024-03-13 14:30:45');
-      
+
       // Test relative time
       expect(typeof (date as any).fromNow).toBe('function');
-      
+
       // Test duration
       expect(typeof (date as any).duration).toBe('function');
-      
+
       // Test advanced format - quotes should be protected and not processed as tokens
       const formatted = date.format('Q ["Q"] YYYY - Do MMMM');
       expect(formatted).toContain('13th');
       expect(formatted).toContain('2024');
-      expect(formatted).toMatch(/\d+/);  // Should have at least one digit
+      expect(formatted).toMatch(/\d+/); // Should have at least one digit
     });
 
     it('should not interfere with core functionality', () => {
@@ -270,7 +270,7 @@ describe('Plugin System', () => {
       PluginManager.use(advancedFormatPlugin, TimeGuard);
 
       const date = TimeGuard.from('2024-03-13');
-      
+
       // Core methods should still work
       expect(date.get('year')).toBe(2024);
       expect(date.get('month')).toBe(3);

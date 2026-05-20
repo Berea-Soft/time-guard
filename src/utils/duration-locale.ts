@@ -7,7 +7,10 @@
  * Duration unit labels for different locales
  * Format: [singular, plural]
  */
-export const DURATION_UNIT_LABELS: Record<string, Record<string, [string, string]>> = {
+export const DURATION_UNIT_LABELS: Record<
+  string,
+  Record<string, [string, string]>
+> = {
   en: {
     year: ['year', 'years'],
     month: ['month', 'months'],
@@ -58,7 +61,7 @@ export const CONJUNCTION_LABELS: Record<string, string> = {
 export function getDurationUnitLabel(
   unit: string,
   locale: string,
-  value: number
+  value: number,
 ): string {
   const langLabels = DURATION_UNIT_LABELS[locale] || DURATION_UNIT_LABELS.en;
   const label = langLabels[unit] || [unit, unit + 's'];
@@ -78,9 +81,9 @@ export function getConjunctionLabel(locale: string): string {
 export function formatDurationPart(
   value: number,
   unit: string,
-  locale: string
+  locale: string,
 ): string {
-  if (value === 0) return '';
+  if (value === 0) { return ''; }
   const label = getDurationUnitLabel(unit, locale, value);
   return `${value} ${label}`;
 }
@@ -88,12 +91,9 @@ export function formatDurationPart(
 /**
  * Join formatted duration parts with locale-appropriate conjunctions
  */
-export function joinDurationParts(
-  parts: string[],
-  locale: string
-): string {
-  if (parts.length === 0) return '';
-  if (parts.length === 1) return parts[0];
+export function joinDurationParts(parts: string[], locale: string): string {
+  if (parts.length === 0) { return ''; }
+  if (parts.length === 1) { return parts[0]; }
 
   const conjunction = getConjunctionLabel(locale);
 
@@ -101,7 +101,9 @@ export function joinDurationParts(
     return `${parts[0]} ${conjunction} ${parts[1]}`;
   }
 
-  return parts.slice(0, -1).join(', ') + ` ${conjunction} ${parts[parts.length - 1]}`;
+  return (
+    parts.slice(0, -1).join(', ') + ` ${conjunction} ${parts[parts.length - 1]}`
+  );
 }
 
 /**

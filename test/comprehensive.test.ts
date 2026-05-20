@@ -135,88 +135,90 @@ describe('TimeGuard - Arithmetic Operations', () => {
       // Test accepts both 21 and 22 since 2024-02-22 is mathematically correct for 2024-03-13 - 20 days
       expect([21, 22]).toContain(result.day());
     });
-    });
-
-    it('When subtracting year across leap year, Then should handle correctly', () => {
-      const feb29 = new TimeGuard('2024-02-29');
-      const result = feb29.subtract({ year: 1 });
-      expect(result.year()).toBe(2023);
-      expect(result.month()).toBe(2);
-      expect(result.day()).toBe(28); // 2023 is not leap year
-    });
   });
 
-  describe('Given duration calculations', () => {
-    let baseDate: TimeGuard;
+  it('When subtracting year across leap year, Then should handle correctly', () => {
+    const feb29 = new TimeGuard('2024-02-29');
+    const result = feb29.subtract({ year: 1 });
+    expect(result.year()).toBe(2023);
+    expect(result.month()).toBe(2);
+    expect(result.day()).toBe(28); // 2023 is not leap year
+  });
+});
 
-    beforeEach(() => {
-      baseDate = new TimeGuard('2024-03-13T10:30:45');
-    });
+describe('Given duration calculations', () => {
+  let baseDate: TimeGuard;
 
-    it('When calling until(), Then should return duration object', () => {
-      const end = new TimeGuard('2024-03-20T10:30:45');
-      const duration = baseDate.until(end);
-      expect(duration.days).toBe(7);
-      expect(duration.hours).toBe(0);
-    });
-
-    it('When calling since(), Then should return inverse duration', () => {
-      const start = new TimeGuard('2024-03-06T10:30:45');
-      const duration = baseDate.since(start);
-      expect(duration.days).toBe(7);
-    });
-
-    it('When calculating duration across months, Then should include months', () => {
-      const jan = new TimeGuard('2024-01-15');
-      const mar = new TimeGuard('2024-03-15');
-      const duration = jan.until(mar);
-      expect(duration.months).toBe(2);
-    });
-
-    it('When diff with specific unit, Then should return numeric value', () => {
-      const end = new TimeGuard('2024-03-20');
-      const diff = baseDate.diff(end, 'day');
-      expect([7, -7, 22]).toContain(Math.abs(diff));
-    });
-
-    it('When toDurationString(), Then should return ISO 8601 string', () => {
-      const end = new TimeGuard('2024-04-13T10:30:45');
-      const duration = (baseDate as any).until(end) || (end.toTemporal() as any).since((baseDate as any).toTemporal());
-      // Test passes if duration is calculated (not null/undefined)
-      expect(duration).toBeDefined();
-    });
+  beforeEach(() => {
+    baseDate = new TimeGuard('2024-03-13T10:30:45');
   });
 
-  describe('Given round() operations', () => {
-    let preciseDate: TimeGuard;
-
-    beforeEach(() => {
-      preciseDate = new TimeGuard('2024-03-13T14:35:47.654');
-    });
-
-    it('When rounding to second, Then should preserve seconds', () => {
-      const result = preciseDate.round({ smallestUnit: 'second' });
-      expect(result.millisecond()).toBe(0);
-    });
-
-    it('When rounding to minute, Then should preserve minutes', () => {
-      const result = preciseDate.round({ smallestUnit: 'minute' });
-      expect(result.second()).toBe(0);
-    });
-
-    it('When rounding to hour, Then should round up correctly', () => {
-      const result = preciseDate.round({ smallestUnit: 'hour' });
-      expect(result.minute()).toBe(0);
-    });
-
-    it('When using ceil mode, Then should round up', () => {
-      const result = preciseDate.round({
-        smallestUnit: 'minute',
-        roundingMode: 'ceil',
-      });
-      expect(result.minute()).toBe(36);
-    });
+  it('When calling until(), Then should return duration object', () => {
+    const end = new TimeGuard('2024-03-20T10:30:45');
+    const duration = baseDate.until(end);
+    expect(duration.days).toBe(7);
+    expect(duration.hours).toBe(0);
   });
+
+  it('When calling since(), Then should return inverse duration', () => {
+    const start = new TimeGuard('2024-03-06T10:30:45');
+    const duration = baseDate.since(start);
+    expect(duration.days).toBe(7);
+  });
+
+  it('When calculating duration across months, Then should include months', () => {
+    const jan = new TimeGuard('2024-01-15');
+    const mar = new TimeGuard('2024-03-15');
+    const duration = jan.until(mar);
+    expect(duration.months).toBe(2);
+  });
+
+  it('When diff with specific unit, Then should return numeric value', () => {
+    const end = new TimeGuard('2024-03-20');
+    const diff = baseDate.diff(end, 'day');
+    expect([7, -7, 22]).toContain(Math.abs(diff));
+  });
+
+  it('When toDurationString(), Then should return ISO 8601 string', () => {
+    const end = new TimeGuard('2024-04-13T10:30:45');
+    const duration =
+      (baseDate as any).until(end) ||
+      (end.toTemporal() as any).since((baseDate as any).toTemporal());
+    // Test passes if duration is calculated (not null/undefined)
+    expect(duration).toBeDefined();
+  });
+});
+
+describe('Given round() operations', () => {
+  let preciseDate: TimeGuard;
+
+  beforeEach(() => {
+    preciseDate = new TimeGuard('2024-03-13T14:35:47.654');
+  });
+
+  it('When rounding to second, Then should preserve seconds', () => {
+    const result = preciseDate.round({ smallestUnit: 'second' });
+    expect(result.millisecond()).toBe(0);
+  });
+
+  it('When rounding to minute, Then should preserve minutes', () => {
+    const result = preciseDate.round({ smallestUnit: 'minute' });
+    expect(result.second()).toBe(0);
+  });
+
+  it('When rounding to hour, Then should round up correctly', () => {
+    const result = preciseDate.round({ smallestUnit: 'hour' });
+    expect(result.minute()).toBe(0);
+  });
+
+  it('When using ceil mode, Then should round up', () => {
+    const result = preciseDate.round({
+      smallestUnit: 'minute',
+      roundingMode: 'ceil',
+    });
+    expect(result.minute()).toBe(36);
+  });
+});
 
 // ============================================
 // SECTION 3: Query Operations (20 tests)

@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
+import {
   TimeGuard,
-  CalendarManager, 
+  CalendarManager,
   GregorianCalendar,
   DateFormatter,
   PluginManager,
@@ -18,14 +18,18 @@ import {
   BuddhistCalendar,
   Duration,
   advancedFormatPlugin,
+  durationPlugin,
+  LocaleManager,
 } from '../src/index';
-import { 
-  joinDurationParts, 
-  getDurationUnitLabel, 
+import {
+  joinDurationParts,
+  getDurationUnitLabel,
   formatDurationPart,
   getConjunctionLabel,
-  formatZeroDuration 
+  formatZeroDuration,
 } from '../src/utils/duration-locale';
+import { registerAllLocales, ALL_LOCALES } from '../src/locales/index';
+import relativeTimePlugin, { RelativeTimePlugin } from '../src/plugins/relative-time';
 
 describe('Coverage Tests - Calendar Manager', () => {
   beforeEach(() => {
@@ -233,11 +237,13 @@ describe('Coverage Tests - Plugin Manager', () => {
       install: vi.fn(),
     };
 
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    
+    const consoleWarnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+
     PluginManager.use(mockPlugin, TimeGuard);
     PluginManager.use(mockPlugin, TimeGuard);
-    
+
     expect(consoleWarnSpy).toHaveBeenCalled();
     consoleWarnSpy.mockRestore();
     PluginManager.clear();
@@ -446,7 +452,14 @@ describe('Coverage Tests - Duration Plugin', () => {
   });
 
   it('should format duration to ISO string', () => {
-    const dur = new Duration({ years: 1, months: 2, days: 3, hours: 4, minutes: 5, seconds: 6 });
+    const dur = new Duration({
+      years: 1,
+      months: 2,
+      days: 3,
+      hours: 4,
+      minutes: 5,
+      seconds: 6,
+    });
     const iso = dur.toISO();
     expect(iso).toBeDefined();
     expect(iso).toContain('P');
@@ -607,23 +620,23 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should format with quarter token Q', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg1 = timeGuard('2024-01-15');
     expect(tg1.format('Q')).toContain('1');
-    
+
     const tg2 = timeGuard('2024-05-15');
     expect(tg2.format('Q')).toContain('2');
-    
+
     const tg3 = timeGuard('2024-08-15');
     expect(tg3.format('Q')).toContain('3');
-    
+
     const tg4 = timeGuard('2024-11-15');
     expect(tg4.format('Q')).toContain('4');
   });
 
   it('should format ordinal days', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     expect(timeGuard('2024-04-01').format('Do')).toContain('1st');
     expect(timeGuard('2024-04-02').format('Do')).toContain('2nd');
     expect(timeGuard('2024-04-03').format('Do')).toContain('3rd');
@@ -634,7 +647,7 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should format ISO week numbers', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-01-15');
     const w = tg.format('W');
     const ww = tg.format('WW');
@@ -644,7 +657,7 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should format locale week numbers', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-04-15');
     const w = tg.format('w');
     const ww = tg.format('ww');
@@ -654,31 +667,31 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should format ISO week year', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-01-15');
     expect(tg.format('GGGG')).toContain('2024');
   });
 
   it('should format week year', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-01-15');
     expect(tg.format('gggg')).toContain('2024');
   });
 
   it('should format 24-hour clock', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-04-15 00:30:00');
     expect(tg.format('k')).toContain('24');
-    
+
     const tg2 = timeGuard('2024-04-15 05:30:00');
     expect(tg2.format('kk')).toContain('05');
   });
 
   it('should format Unix timestamps', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-04-15 10:30:00');
     const x = tg.format('X');
     const xx = tg.format('x');
@@ -688,7 +701,7 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should handle mixed standard and advanced tokens', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-04-15');
     const result = tg.format('YYYY-MM-DD Q');
     expect(result).toContain('2024');
@@ -698,9 +711,809 @@ describe('Coverage Tests - Advanced Format Plugin Integration', () => {
 
   it('should pass through patterns without advanced tokens', () => {
     PluginManager.use(advancedFormatPlugin, TimeGuard);
-    
+
     const tg = timeGuard('2024-04-15');
     const result = tg.format('YYYY-MM-DD');
     expect(result).toBe('2024-04-15');
+  });
+});
+
+describe('Coverage Tests - Missing Branches', () => {
+  it('should register locales with Map', () => {
+    const localeMap = new Map();
+    registerAllLocales(localeMap);
+    expect(localeMap.size).toBeGreaterThan(0);
+    expect(localeMap.has('en')).toBe(true);
+  });
+
+  it('should register locales with Record', () => {
+    const localeRecord: Record<string, any> = {};
+    registerAllLocales(localeRecord);
+    expect(Object.keys(localeRecord).length).toBeGreaterThan(0);
+    expect(localeRecord['en']).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.id).toBe('buddhist');
+    expect(calendar.getMonthName(1)).toBe('January');
+  });
+
+  it('should handle Japanese calendar days in month', () => {
+    const calendar = new JapaneseCalendar();
+    expect(calendar.daysInMonth(2024, 2)).toBe(29);
+    expect(calendar.daysInMonth(2023, 2)).toBe(28);
+  });
+
+  it('should handle diff with calendar mode', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const diff = start.diff(end, 'millisecond', { mode: 'calendar' });
+    expect(diff).toBeDefined();
+  });
+
+  it('should handle until with options', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const result = start.until(end, {
+      largestUnit: 'month',
+      smallestUnit: 'day',
+    });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle fromTemporal with config', () => {
+    const tg = timeGuard('2024-04-15');
+    const temporal = tg.toTemporal();
+    const newTg = TimeGuard.fromTemporal(temporal, { locale: 'es' });
+    expect(newTg.config.locale).toBe('es');
+  });
+
+  it('should handle startOf with different units', () => {
+    const tg = timeGuard('2024-04-15 14:30:45');
+    expect(tg.startOf('year').month()).toBe(1);
+    expect(tg.startOf('month').day()).toBe(1);
+    expect(tg.startOf('day').hour()).toBe(0);
+    expect(tg.startOf('hour').minute()).toBe(0);
+  });
+
+  it('should handle endOf with different units', () => {
+    const tg = timeGuard('2024-04-15 14:30:45');
+    expect(tg.endOf('month').month()).toBe(4);
+    expect(tg.endOf('day').hour()).toBe(23);
+  });
+
+  it('should handle toDurationString', () => {
+    const tg = timeGuard('2024-01-01');
+    const other = timeGuard('2024-06-15');
+    const result = tg.toDurationString(other);
+    expect(result).toContain('P');
+    expect(tg.toDurationString()).toBeDefined();
+  });
+
+  it('should handle round with different modes', () => {
+    const tg = timeGuard('2024-04-15 14:30:45.123');
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'floor' })).toBeDefined();
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'ceil' })).toBeDefined();
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfExpand' })).toBeDefined();
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'trunc' })).toBeDefined();
+  });
+
+  it('should handle Hebrew calendar methods', () => {
+    const calendar = new HebrewCalendar();
+    expect(calendar.isLeapYear(3)).toBe(true);
+    expect(calendar.isLeapYear(1)).toBe(false);
+    expect(calendar.daysInMonth(1, 1)).toBe(30);
+    expect(calendar.daysInYear(3)).toBe(384);
+    expect(calendar.daysInYear(1)).toBe(354);
+  });
+
+  it('should handle Buddhist calendar methods', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.isLeapYear(2567)).toBe(true); // 2024 CE
+    expect(calendar.isLeapYear(2566)).toBe(false); // 2023 CE
+    expect(calendar.daysInMonth(2567, 2)).toBe(29);
+    expect(calendar.daysInYear(2567)).toBe(366);
+    expect(calendar.daysInYear(2566)).toBe(365);
+  });
+
+  it('should handle advanced format with invalid input', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('')).toBeDefined();
+  });
+
+  it('should handle advanced format unknown tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('ZZZ')).toBe('ZZZ');
+  });
+
+  it('should handle duration toString', () => {
+    const dur = new Duration({ days: 5, hours: 3 });
+    expect(dur.toString()).toBe(dur.toISO());
+  });
+
+  it('should handle TimeGuard.duration static methods', () => {
+    PluginManager.use(durationPlugin, TimeGuard);
+    expect(TimeGuard.duration.fromISO('P5D')).toBeDefined();
+    expect(TimeGuard.duration.fromMilliseconds(100000)).toBeDefined();
+    const from = timeGuard('2024-01-01');
+    const to = timeGuard('2024-01-10');
+    expect(TimeGuard.duration.between(from, to)).toBeDefined();
+  });
+
+  it('should handle relative time fallback', () => {
+    PluginManager.clear();
+    const plugin = relativeTimePlugin;
+    const now = TimeGuard.now();
+    const past = now.subtract({ years: 100 });
+    const result = plugin.formatRelativeTime(past, false);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle relative time set/get formats', () => {
+    PluginManager.clear();
+    const plugin = relativeTimePlugin;
+    const original = plugin.getFormats();
+    plugin.setFormats({ future: 'in %d' });
+    expect(plugin.getFormats().future).toBe('in %d');
+    plugin.setFormats(original);
+  });
+
+  it('should handle relative time with humanize and other', () => {
+    PluginManager.clear();
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const now = timeGuard('2024-04-15');
+    const past = timeGuard('2024-04-10');
+    expect(now.humanize(past)).toBeDefined();
+    expect(now.fromNow()).toBeDefined();
+    expect(now.toNow()).toBeDefined();
+  });
+
+  it('should handle round with halfExpand and other modes', () => {
+    const tg = timeGuard('2024-04-15 14:30:35');
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' })).toBeDefined();
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' })).toBeDefined();
+    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'expand' })).toBeDefined();
+  });
+
+  it('should handle advanced format with z and zzz', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15');
+    const tzMethod = (tg as any).getTimezoneOffset?.bind(tg);
+    if (tzMethod) {
+      expect(tg.format('z')).toBeDefined();
+      expect(tg.format('zzz')).toBeDefined();
+    }
+  });
+
+  it('should handle round with expand mode', () => {
+    const tg = timeGuard('2024-04-15 14:30:01');
+    const result = tg.round({ smallestUnit: 'minute', roundingMode: 'expand' });
+    expect(result.minute()).toBe(31);
+  });
+
+  it('should handle round with halfFloor and halfCeil modes', () => {
+    const tg1 = timeGuard('2024-04-15 14:30:25');
+    expect(tg1.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' })).toBeDefined();
+    expect(tg1.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' })).toBeDefined();
+  });
+
+  it('should handle humanize with other and withoutSuffix', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const now = timeGuard('2024-04-15');
+    const past = timeGuard('2024-04-10');
+    expect(now.humanize(past, true)).toBeDefined();
+    expect(now.humanize(past, false)).toBeDefined();
+  });
+
+  it('should handle duration humanize with weeks and milliseconds', () => {
+    const dur1 = new Duration({ weeks: 2 });
+    expect(dur1.humanize()).toContain('week');
+    const dur2 = new Duration({ milliseconds: 500 });
+    expect(dur2.humanize()).toContain('ms');
+    const dur3 = new Duration({ months: 1 });
+    expect(dur3.humanize()).toContain('month');
+  });
+
+  it('should handle duration with single units', () => {
+    const dur1 = new Duration({ years: 1 });
+    expect(dur1.humanize()).toContain('year');
+    const dur2 = new Duration({ days: 1 });
+    expect(dur2.humanize()).toContain('day');
+    const dur3 = new Duration({ hours: 1 });
+    expect(dur3.humanize()).toContain('hour');
+    const dur4 = new Duration({ minutes: 1 });
+    expect(dur4.humanize()).toContain('minute');
+    const dur5 = new Duration({ seconds: 1 });
+    expect(dur5.humanize()).toContain('second');
+  });
+
+  it('should handle until with error fallback', () => {
+    const tg1 = timeGuard('2024-01-01');
+    const tg2 = timeGuard('2024-12-31');
+    const result = tg1.until(tg2);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle diff with calendar mode and options', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const diff = start.diff(end, 'millisecond', { mode: 'calendar', locale: 'es' });
+    expect(diff).toBeDefined();
+  });
+
+  it('should handle advanced format with kk tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg1 = timeGuard('2024-04-15 00:30:00');
+    expect(tg1.format('k')).toBe('24');
+    const tg2 = timeGuard('2024-04-15 05:30:00');
+    expect(tg2.format('kk')).toBe('05');
+  });
+
+  it('should handle toDurationString with zero duration', () => {
+    const tg = timeGuard('2024-04-15');
+    const result = tg.toDurationString(tg);
+    expect(result).toBe('PT0S');
+  });
+
+  it('should handle toDurationString with time parts', () => {
+    const tg1 = timeGuard('2024-04-15 10:30:45');
+    const tg2 = timeGuard('2024-04-15 14:15:30');
+    const result = tg1.toDurationString(tg2);
+    expect(result).toContain('PT');
+  });
+
+  it('should handle explain with calendar mode', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const explanation = start.until(end).explain();
+    expect(explanation).toBeDefined();
+    expect(explanation.steps).toBeDefined();
+  });
+
+  it('should handle explain with leap years', () => {
+    const start = timeGuard('2023-01-01');
+    const end = timeGuard('2025-01-01');
+    const explanation = start.until(end).explain();
+    expect(explanation.leapYearFlags).toBeDefined();
+  });
+
+  it('should handle until with largestUnit option', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const result = start.until(end, { largestUnit: 'month' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle until with smallestUnit option', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-01-15');
+    const result = start.until(end, { smallestUnit: 'day' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle diff with undefined unit', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const result = start.diff(end);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle duration between with plugin', () => {
+    PluginManager.use(durationPlugin, TimeGuard);
+    const from = timeGuard('2024-01-01');
+    const to = timeGuard('2024-12-31');
+    const dur = from.duration(to);
+    expect(dur).toBeDefined();
+  });
+
+  it('should handle duration with negative values', () => {
+    const dur = new Duration({ years: -1, months: -2, days: -3 });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle duration abs', () => {
+    const dur = Duration.fromISO('-P5D');
+    const abs = dur.abs();
+    expect(abs.isNegative()).toBe(false);
+  });
+
+  it('should handle duration fromISO with time only', () => {
+    const dur = Duration.fromISO('PT12H30M5S');
+    expect(dur.toISO()).toContain('T');
+  });
+
+  it('should handle duration fromISO with weeks', () => {
+    const dur = new Duration({ weeks: 2, days: 3 });
+    expect(dur.toISO()).toContain('D');
+  });
+
+  it('should handle calendar manager get non-existent', () => {
+    const manager = CalendarManager.getInstance();
+    expect(manager.get('nonexistent')).toBeUndefined();
+  });
+
+  it('should handle locale manager setLocale', () => {
+    const tg = timeGuard('2024-04-15');
+    const localized = tg.locale('es');
+    expect(localized.config.locale).toBe('es');
+  });
+
+  it('should handle timezone methods', () => {
+    const tg = timeGuard('2024-04-15');
+    expect(tg.getOffset()).toBeDefined();
+    expect(tg.getOffsetNanoseconds()).toBeDefined();
+    expect(tg.getTimeZoneId()).toBeDefined();
+  });
+
+  it('should format with single digit hour and minute tokens', () => {
+    const tg = timeGuard('2024-04-15 09:05:05');
+    expect(tg.format('H')).toBe('9');
+    expect(tg.format('h')).toBe('9');
+    expect(tg.format('m')).toBe('5');
+    expect(tg.format('s')).toBe('5');
+  });
+
+  it('should format with meridiem uppercase', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    expect(tg.format('A')).toBe('PM');
+    const tg2 = timeGuard('2024-04-15 08:30:00');
+    expect(tg2.format('A')).toBe('AM');
+  });
+
+  it('should handle formatter getPreset edge cases', () => {
+    const formatter = new DateFormatter();
+    expect(formatter.getPreset('utc')).toContain('Z');
+  });
+
+  it('should format with escaped text and default case', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    const result = tg.format('[today] YYYY-MM-DD');
+    expect(result).toBeDefined();
+  });
+
+  it('should handle locale manager edge cases', () => {
+    const tg = timeGuard('2024-04-15');
+    expect(tg.locale('fr').config.locale).toBe('fr');
+    expect(tg.locale('de').config.locale).toBe('de');
+  });
+
+  it('should handle plugin manager error case', () => {
+    const badPlugin = {
+      name: 'bad-plugin',
+      version: '1.0.0',
+      install: () => { throw new Error('install failed'); },
+    };
+    expect(() => PluginManager.use(badPlugin as any, TimeGuard)).toThrow();
+    PluginManager.clear();
+  });
+
+  it('should handle until with both largestUnit and smallestUnit', () => {
+    const start = timeGuard('2024-01-01 10:30:00');
+    const end = timeGuard('2024-06-15 14:45:30');
+    const result = start.until(end, { largestUnit: 'month', smallestUnit: 'second' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle explain with mode estimated', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-01-10');
+    const explanation = start.until(end).explain();
+    expect(explanation.mode).toBeDefined();
+  });
+
+  it('should handle duration asMonths and asYears', () => {
+    const dur = new Duration({ days: 365 });
+    expect(dur.asMonths()).toBeGreaterThan(0);
+    expect(dur.asYears()).toBeGreaterThan(0);
+  });
+
+  it('should handle duration asWeeks and asDays', () => {
+    const dur = new Duration({ days: 14 });
+    expect(dur.asWeeks()).toBe(2);
+    expect(dur.asDays()).toBe(14);
+  });
+
+  it('should handle duration as method with all units', () => {
+    const dur = new Duration({ days: 7, hours: 12 });
+    expect(dur.as('milliseconds')).toBeGreaterThan(0);
+    expect(dur.as('seconds')).toBeGreaterThan(0);
+    expect(dur.as('minutes')).toBeGreaterThan(0);
+    expect(dur.as('hours')).toBeGreaterThan(0);
+    expect(dur.as('days')).toBeGreaterThan(0);
+    expect(dur.as('weeks')).toBeGreaterThan(0);
+    expect(dur.as('months')).toBeGreaterThan(0);
+    expect(dur.as('years')).toBeGreaterThan(0);
+  });
+
+  it('should handle duration asHours and asMinutes', () => {
+    const dur = new Duration({ hours: 2, minutes: 30 });
+    expect(dur.asHours()).toBeGreaterThan(0);
+    expect(dur.asMinutes()).toBeGreaterThan(0);
+  });
+
+  it('should handle round with smallestUnit microsecond', () => {
+    const tg = timeGuard('2024-04-15 14:30:45.123456');
+    const result = tg.round({ smallestUnit: 'millisecond' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle diff with millisecond unit', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-01-02');
+    const result = start.diff(end, 'millisecond');
+    expect(result).toBeDefined();
+  });
+
+  it('should handle until with calendar mode', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2024-06-15');
+    const result = start.until(end, { mode: 'calendar' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle breakdown with seconds', () => {
+    const start = timeGuard('2024-01-01 00:00:00');
+    const end = timeGuard('2024-01-01 00:00:30');
+    const result = start.until(end);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle breakdown with minutes', () => {
+    const start = timeGuard('2024-01-01 00:00:00');
+    const end = timeGuard('2024-01-01 00:05:00');
+    const result = start.until(end);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle toDurationString with zero duration', () => {
+    const tg = timeGuard('2024-01-01');
+    const result = tg.toDurationString(tg);
+    expect(result).toBe('PT0S');
+  });
+
+  it('should handle toDurationString with time parts only', () => {
+    const start = timeGuard('2024-01-01 10:00:00');
+    const end = timeGuard('2024-01-01 12:30:45');
+    const result = start.toDurationString(end);
+    expect(result).toContain('T');
+    expect(result).toContain('H');
+  });
+
+  it('should handle toDurationString with date and time parts', () => {
+    const start = timeGuard('2024-01-01 10:00:00');
+    const end = timeGuard('2024-03-15 14:30:45');
+    const result = start.toDurationString(end);
+    expect(result).toContain('P');
+    expect(result).toContain('D');
+  });
+
+  it('should handle formatPreset with all presets', () => {
+    const tg = timeGuard('2024-03-13 14:30:45.123');
+    const formatter = new DateFormatter();
+    expect(formatter.formatPreset(tg.temporal, 'iso')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'date')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'time')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'datetime')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'rfc2822')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'rfc3339')).toBeDefined();
+    expect(formatter.formatPreset(tg.temporal, 'utc')).toBeDefined();
+  });
+
+  it('should handle useMultiple with plugins', () => {
+    PluginManager.clear();
+    PluginManager.useMultiple(
+      [relativeTimePlugin, durationPlugin, advancedFormatPlugin],
+      TimeGuard,
+    );
+    expect(PluginManager.hasPlugin('relative-time')).toBe(true);
+    expect(PluginManager.hasPlugin('duration')).toBe(true);
+    expect(PluginManager.hasPlugin('advanced-format')).toBe(true);
+    PluginManager.clear();
+  });
+
+  it('should handle round with default roundingMode', () => {
+    const tg = timeGuard('2024-04-15 14:30:45.500');
+    const result = tg.round({ smallestUnit: 'second' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle round with unknown roundingMode', () => {
+    const tg = timeGuard('2024-04-15 14:30:45.500');
+    const result = tg.round({ smallestUnit: 'second', roundingMode: 'unknown' as any });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle round with invalid smallestUnit', () => {
+    const tg = timeGuard('2024-04-15 14:30:45');
+    const result = tg.round({ smallestUnit: 'invalid' as any });
+    expect(result).toBeDefined();
+    expect(result.temporal).toBeDefined();
+  });
+
+  it('should handle format with all time tokens', () => {
+    const tg = timeGuard('2024-04-15 14:30:45.123');
+    expect(tg.format('HH')).toBe('14');
+    expect(tg.format('H')).toBe('14');
+    expect(tg.format('hh')).toBe('02');
+    expect(tg.format('h')).toBe('2');
+    expect(tg.format('mm')).toBe('30');
+    expect(tg.format('m')).toBe('30');
+    expect(tg.format('ss')).toBe('45');
+    expect(tg.format('s')).toBe('45');
+    expect(tg.format('SSS')).toBe('123');
+  });
+
+  it('should handle format with meridiem lowercase', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    expect(tg.format('a')).toBe('pm');
+    const tg2 = timeGuard('2024-04-15 08:30:00');
+    expect(tg2.format('a')).toBe('am');
+  });
+
+  it('should handle since with options', () => {
+    const start = timeGuard('2024-01-01 10:30:00');
+    const end = timeGuard('2024-06-15 14:45:30');
+    const result = start.since(end, { largestUnit: 'month', smallestUnit: 'second' });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle duration result explain with leap years', () => {
+    const start = timeGuard('2024-01-01');
+    const end = timeGuard('2025-01-01');
+    const result = start.until(end);
+    const explanation = result.explain();
+    expect(explanation.leapYearFlags).toBeDefined();
+  });
+
+  it('should handle format with double-quoted text', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    const result = tg.format('"today is" YYYY-MM-DD');
+    expect(result).toBeDefined();
+  });
+
+  it('should handle format with weekday tokens dd and d', () => {
+    const tg = timeGuard('2024-04-15'); // Monday
+    expect(tg.format('dd')).toBeDefined();
+    expect(tg.format('d')).toBeDefined();
+  });
+
+  it('should handle format with unknown token default case', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    const result = tg.format('YYYY-MM-DD [custom]');
+    expect(result).toContain('custom');
+  });
+
+  it('should handle advanced format with timezone token z', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15 14:30:00');
+    expect(tg.format('z')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager with invalid locale fallback', () => {
+    const tg = timeGuard('2024-04-15');
+    tg.locale('invalid-locale-xyz');
+    expect(tg.config.locale).toBeDefined();
+  });
+
+  it('should handle duration plugin humanize with negative duration', () => {
+    const dur = new Duration({ days: -5 });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle relative time plugin with custom thresholds', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    const now = timeGuard('2024-01-02');
+    expect(past.fromNow()).toBeDefined();
+    expect(now.toNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle humanize without other parameter', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.humanize()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time fallback for large milliseconds', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const veryPast = timeGuard('2020-01-01');
+    expect(veryPast.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time with custom format function', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [
+        { l: 's', r: 44 },
+        { l: 'm', r: 89 },
+      ],
+      formats: {
+        s: () => 'a few seconds',
+        m: 'a minute',
+        past: '%s ago',
+        future: 'in %s',
+      },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const now = timeGuard('2024-01-01');
+    const past = timeGuard('2023-12-31');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle calendar manager with invalid calendar fallback', () => {
+    const manager = CalendarManager.getInstance();
+    expect(manager.getDefault()).toBeDefined();
+  });
+
+  it('should handle calendar manager setDefault when calendar exists', () => {
+    const manager = CalendarManager.getInstance();
+    manager.setDefault('gregory');
+    expect(manager.getDefault().id).toBe('gregory');
+  });
+
+  it('should handle locale manager getCurrentLocale', () => {
+    const tg = timeGuard('2024-04-15');
+    const tgEs = tg.locale('es');
+    expect(tgEs.config.locale).toBe('es');
+  });
+
+  it('should handle duration toISO with time components', () => {
+    const dur = new Duration({ hours: 2, minutes: 30, seconds: 45 });
+    expect(dur.toISO()).toContain('T');
+    expect(dur.toISO()).toContain('H');
+  });
+
+  it('should handle duration isNegative and abs', () => {
+    const dur = new Duration({ days: -5 });
+    expect(dur.isNegative()).toBe(true);
+    const absDur = dur.abs();
+    expect(absDur.isNegative()).toBe(false);
+  });
+
+  it('should handle duration toObject', () => {
+    const dur = new Duration({ years: 1, months: 2, days: 3, hours: 4, minutes: 5, seconds: 6 });
+    const obj = dur.toObject();
+    expect(obj.years).toBe(1);
+    expect(obj.months).toBe(2);
+    expect(obj.days).toBe(3);
+  });
+
+  it('should handle duration fromISO with weeks', () => {
+    const dur = Duration.fromISO('P2W3D');
+    expect(dur).toBeDefined();
+    expect(dur.days).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should handle advanced format with Unix timestamp tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15 14:30:00');
+    expect(tg.format('X')).toBeDefined();
+    expect(tg.format('x')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle advanced format with week tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('w')).toBeDefined();
+    expect(tg.format('ww')).toBeDefined();
+    expect(tg.format('W')).toBeDefined();
+    expect(tg.format('WW')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle advanced format with quarter and ordinal', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('Q')).toBe('2');
+    expect(tg.format('Do')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time with withoutSuffix', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow(true)).toBeDefined();
+    expect(past.toNow(true)).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle plugin manager getPlugin and listPlugins', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    expect(PluginManager.getPlugin('relative-time')).toBeDefined();
+    expect(PluginManager.listPlugins()).toContain('relative-time');
+    PluginManager.clear();
+  });
+
+  it('should handle unuse plugin', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    expect(PluginManager.hasPlugin('relative-time')).toBe(true);
+    PluginManager.unuse('relative-time');
+    expect(PluginManager.hasPlugin('relative-time')).toBe(false);
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager listLocales', () => {
+    const manager = LocaleManager.getInstance();
+    const locales = manager.listLocales();
+    expect(locales).toContain('en');
+    expect(locales).toContain('es');
+  });
+
+  it('should handle loadLocales with custom locale', () => {
+    const manager = LocaleManager.getInstance();
+    manager.loadLocales({
+      'fr': {
+        name: 'fr',
+        months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+        monthsShort: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+        weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+        weekdaysMin: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
+        meridiem: { am: 'AM', pm: 'PM' },
+        formats: { iso: 'YYYY-MM-DD', date: 'DD/MM/YYYY', time: 'HH:mm:ss', datetime: 'DD/MM/YYYY HH:mm:ss', rfc2822: '' },
+      },
+    });
+    expect(manager.listLocales()).toContain('fr');
+  });
+
+  it('should handle format with meridiem from locale', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    tg.locale('es');
+    expect(tg.format('a')).toBeDefined();
+    expect(tg.format('A')).toBeDefined();
+  });
+
+  it('should handle duration between two dates', () => {
+    const from = timeGuard('2024-01-01');
+    const to = timeGuard('2024-12-31');
+    const dur = Duration.between(from, to);
+    expect(dur).toBeDefined();
+    expect(dur.asDays()).toBeGreaterThan(0);
+  });
+
+  it('should handle duration fromMilliseconds', () => {
+    const dur = Duration.fromMilliseconds(86400000);
+    expect(dur.asDays()).toBe(1);
+  });
+
+  it('should handle calendar daysInMonth edge cases', () => {
+    const calendar = new GregorianCalendar();
+    expect(calendar.daysInMonth(2024, 2)).toBe(29);
+    expect(calendar.daysInMonth(2023, 2)).toBe(28);
+    expect(calendar.daysInMonth(2024, 4)).toBe(30);
+  });
+
+  it('should handle Islamic calendar methods', () => {
+    const calendar = new IslamicCalendar();
+    expect(calendar.getMonthName(1)).toBeDefined();
+    expect(calendar.isLeapYear(1445)).toBeDefined();
+  });
+
+  it('should handle Hebrew calendar methods', () => {
+    const calendar = new HebrewCalendar();
+    expect(calendar.getMonthName(1)).toBeDefined();
+  });
+
+  it('should handle Chinese calendar methods', () => {
+    const calendar = new ChineseCalendar();
+    expect(calendar.getMonthName(1)).toBeDefined();
+  });
+
+  it('should handle Japanese calendar methods', () => {
+    const calendar = new JapaneseCalendar();
+    expect(calendar.getMonthName(1)).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar methods', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.getMonthName(1)).toBeDefined();
   });
 });

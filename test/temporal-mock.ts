@@ -66,7 +66,8 @@ function buildMockTemporal() {
         if (this.hours) result += `${this.hours}H`;
         if (this.minutes) result += `${this.minutes}M`;
         if (this.seconds || this.milliseconds) {
-          const sec = this.seconds + (this.milliseconds ? this.milliseconds / 1000 : 0);
+          const sec =
+            this.seconds + (this.milliseconds ? this.milliseconds / 1000 : 0);
           result += `${sec}S`;
         }
       }
@@ -96,7 +97,7 @@ function buildMockTemporal() {
       hour: number,
       minute: number,
       second: number,
-      millisecond: number
+      millisecond: number,
     ) {
       this.year = year;
       this.month = month;
@@ -110,20 +111,29 @@ function buildMockTemporal() {
 
     private updateDerivedFields(): void {
       const date = new Date(this.year, this.month - 1, this.day);
-      this.dayOfWeek = (date.getDay() || 7);
-      
+      this.dayOfWeek = date.getDay() || 7;
+
       const startOfYear = new Date(this.year, 0, 1);
-      this.dayOfYear = Math.floor((date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-      
+      this.dayOfYear =
+        Math.floor(
+          (date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000),
+        ) + 1;
+
       const startOfWeek = new Date(date);
       startOfWeek.setDate(date.getDate() - (date.getDay() || 7) + 1);
-      this.weekOfYear = Math.ceil((date.getTime() - startOfWeek.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+      this.weekOfYear =
+        Math.ceil(
+          (date.getTime() - startOfWeek.getTime()) / (7 * 24 * 60 * 60 * 1000),
+        ) + 1;
     }
 
     static from(input: any): PlainDateTime {
       if (input instanceof PlainDateTime) return input;
       if (typeof input === 'string') {
-        const match = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}):(\d{2})(?:\.(\d{3}))?)?/.exec(input);
+        const match =
+          /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}):(\d{2})(?:\.(\d{3}))?)?/.exec(
+            input,
+          );
         if (match) {
           return new PlainDateTime(
             parseInt(match[1]),
@@ -132,7 +142,7 @@ function buildMockTemporal() {
             match[4] ? parseInt(match[4]) : 0,
             match[5] ? parseInt(match[5]) : 0,
             match[6] ? parseInt(match[6]) : 0,
-            match[7] ? parseInt(match[7]) : 0
+            match[7] ? parseInt(match[7]) : 0,
           );
         }
       }
@@ -144,7 +154,7 @@ function buildMockTemporal() {
           input.getHours(),
           input.getMinutes(),
           input.getSeconds(),
-          input.getMilliseconds()
+          input.getMilliseconds(),
         );
       }
       // Handle plain object with date/time properties
@@ -156,7 +166,7 @@ function buildMockTemporal() {
           input.hour || 0,
           input.minute || 0,
           input.second || 0,
-          input.millisecond || 0
+          input.millisecond || 0,
         );
       }
       return new PlainDateTime(2000, 1, 1, 0, 0, 0, 0);
@@ -164,7 +174,7 @@ function buildMockTemporal() {
 
     add(duration: any): PlainDateTime {
       const d = Duration.from(duration);
-      
+
       // Start with current date
       let year = this.year;
       let month = this.month;
@@ -173,11 +183,11 @@ function buildMockTemporal() {
       let minute = this.minute;
       let second = this.second;
       let millisecond = this.millisecond;
-      
+
       // Add years and months first
       year += d.years || 0;
       month += d.months || 0;
-      
+
       // Normalize months
       while (month > 12) {
         month -= 12;
@@ -187,22 +197,31 @@ function buildMockTemporal() {
         month += 12;
         year -= 1;
       }
-      
+
       // Ensure day is valid for target month
       const lastDayOfMonth = new Date(year, month, 0).getDate();
       if (day > lastDayOfMonth) {
         day = lastDayOfMonth;
       }
-      
+
       // Now create date and add days/time components
-      const result = new Date(year, month - 1, day, hour, minute, second, millisecond);
-      
+      const result = new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+      );
+
       if (d.days) result.setDate(result.getDate() + d.days);
       if (d.hours) result.setHours(result.getHours() + d.hours);
       if (d.minutes) result.setMinutes(result.getMinutes() + d.minutes);
       if (d.seconds) result.setSeconds(result.getSeconds() + d.seconds);
-      if (d.milliseconds) result.setMilliseconds(result.getMilliseconds() + d.milliseconds);
-      
+      if (d.milliseconds)
+        result.setMilliseconds(result.getMilliseconds() + d.milliseconds);
+
       return new PlainDateTime(
         result.getFullYear(),
         result.getMonth() + 1,
@@ -210,7 +229,7 @@ function buildMockTemporal() {
         result.getHours(),
         result.getMinutes(),
         result.getSeconds(),
-        result.getMilliseconds()
+        result.getMilliseconds(),
       );
     }
 
@@ -225,14 +244,30 @@ function buildMockTemporal() {
           -(d.hours || 0),
           -(d.minutes || 0),
           -(d.seconds || 0),
-          -(d.milliseconds || 0)
-        )
+          -(d.milliseconds || 0),
+        ),
       );
     }
 
     compare(other: PlainDateTime): number {
-      const t1 = new Date(this.year, this.month - 1, this.day, this.hour, this.minute, this.second, this.millisecond).getTime();
-      const t2 = new Date(other.year, other.month - 1, other.day, other.hour, other.minute, other.second, other.millisecond).getTime();
+      const t1 = new Date(
+        this.year,
+        this.month - 1,
+        this.day,
+        this.hour,
+        this.minute,
+        this.second,
+        this.millisecond,
+      ).getTime();
+      const t2 = new Date(
+        other.year,
+        other.month - 1,
+        other.day,
+        other.hour,
+        other.minute,
+        other.second,
+        other.millisecond,
+      ).getTime();
       return t1 < t2 ? -1 : t1 > t2 ? 1 : 0;
     }
 
@@ -244,41 +279,73 @@ function buildMockTemporal() {
       // Calculate years and months
       let years = this.year - other.year;
       let months = this.month - other.month;
-      
+
       if (this.day < other.day) {
         months--;
       }
-      
+
       if (months < 0) {
         years--;
         months += 12;
       }
-      
+
       // For days/time, calculate from same month/year point
-      const refDate = new Date(other.year, other.month - 1, other.day, other.hour, other.minute, other.second, other.millisecond);
+      const refDate = new Date(
+        other.year,
+        other.month - 1,
+        other.day,
+        other.hour,
+        other.minute,
+        other.second,
+        other.millisecond,
+      );
       refDate.setFullYear(refDate.getFullYear() + years);
       refDate.setMonth(refDate.getMonth() + months);
-      
-      const thisTime = new Date(this.year, this.month - 1, this.day, this.hour, this.minute, this.second, this.millisecond);
+
+      const thisTime = new Date(
+        this.year,
+        this.month - 1,
+        this.day,
+        this.hour,
+        this.minute,
+        this.second,
+        this.millisecond,
+      );
       const totalMs = thisTime.getTime() - refDate.getTime();
-      
+
       // For days, use calendar days (at midnight), not time-aware days
       const thisMidnight = new Date(this.year, this.month - 1, this.day);
-      const refMidnight = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
-      const dayDiff = Math.floor((thisMidnight.getTime() - refMidnight.getTime()) / (1000 * 60 * 60 * 24));
-      
+      const refMidnight = new Date(
+        refDate.getFullYear(),
+        refDate.getMonth(),
+        refDate.getDate(),
+      );
+      const dayDiff = Math.floor(
+        (thisMidnight.getTime() - refMidnight.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+
       // For time components, use remainder after subtracting days
       const daysMs = dayDiff * 24 * 60 * 60 * 1000;
       const remainingMs = totalMs - daysMs;
-      
+
       const hours = Math.floor(remainingMs / (1000 * 60 * 60));
       const remainMs2 = remainingMs % (1000 * 60 * 60);
       const minutes = Math.floor(remainMs2 / (1000 * 60));
       const remainMs3 = remainMs2 % (1000 * 60);
       const seconds = Math.floor(remainMs3 / 1000);
       const milliseconds = Math.abs(remainMs3 % 1000);
-      
-      return new Duration(years, months, 0, dayDiff, hours, minutes, seconds, milliseconds);
+
+      return new Duration(
+        years,
+        months,
+        0,
+        dayDiff,
+        hours,
+        minutes,
+        seconds,
+        milliseconds,
+      );
     }
 
     until(other: PlainDateTime): Duration {
@@ -293,13 +360,14 @@ function buildMockTemporal() {
         values.hour ?? this.hour,
         values.minute ?? this.minute,
         values.second ?? this.second,
-        values.millisecond ?? this.millisecond
+        values.millisecond ?? this.millisecond,
       );
     }
 
     round(options: any): PlainDateTime {
-      const { smallestUnit = 'millisecond', roundingMode = 'halfExpand' } = options;
-      
+      const { smallestUnit = 'millisecond', roundingMode = 'halfExpand' } =
+        options;
+
       let rounded = new PlainDateTime(
         this.year,
         this.month,
@@ -307,9 +375,9 @@ function buildMockTemporal() {
         this.hour,
         this.minute,
         this.second,
-        this.millisecond
+        this.millisecond,
       );
-      
+
       switch (smallestUnit) {
         case 'second':
           rounded.millisecond = 0;
@@ -339,9 +407,17 @@ function buildMockTemporal() {
           rounded.millisecond = 0;
           break;
       }
-      
+
       // Handle day overflow
-      const testDate = new Date(rounded.year, rounded.month - 1, rounded.day, rounded.hour, rounded.minute, rounded.second, rounded.millisecond);
+      const testDate = new Date(
+        rounded.year,
+        rounded.month - 1,
+        rounded.day,
+        rounded.hour,
+        rounded.minute,
+        rounded.second,
+        rounded.millisecond,
+      );
       return new PlainDateTime(
         testDate.getFullYear(),
         testDate.getMonth() + 1,
@@ -349,7 +425,7 @@ function buildMockTemporal() {
         testDate.getHours(),
         testDate.getMinutes(),
         testDate.getSeconds(),
-        testDate.getMilliseconds()
+        testDate.getMilliseconds(),
       );
     }
 
@@ -363,11 +439,21 @@ function buildMockTemporal() {
     }
 
     toPlainDate(): any {
-      return { year: this.year, month: this.month, day: this.day, dayOfWeek: this.dayOfWeek };
+      return {
+        year: this.year,
+        month: this.month,
+        day: this.day,
+        dayOfWeek: this.dayOfWeek,
+      };
     }
 
     toPlainTime(): any {
-      return { hour: this.hour, minute: this.minute, second: this.second, millisecond: this.millisecond };
+      return {
+        hour: this.hour,
+        minute: this.minute,
+        second: this.second,
+        millisecond: this.millisecond,
+      };
     }
 
     toString(): string {
@@ -392,7 +478,11 @@ function buildMockTemporal() {
       if (typeof input === 'string') {
         const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(input);
         if (match) {
-          return new PlainDate(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+          return new PlainDate(
+            parseInt(match[1]),
+            parseInt(match[2]),
+            parseInt(match[3]),
+          );
         }
       }
       return new PlainDate(2000, 1, 1);
@@ -406,7 +496,7 @@ function buildMockTemporal() {
         time?.hour || 0,
         time?.minute || 0,
         time?.second || 0,
-        time?.millisecond || 0
+        time?.millisecond || 0,
       );
     }
 
@@ -436,7 +526,7 @@ function buildMockTemporal() {
 
     static zonedDateTimeISO(timezone?: string): any {
       const dt = this.plainDateTimeISO();
-      return dt.toZonedDateTime(timezone || "UTC");
+      return dt.toZonedDateTime(timezone || 'UTC');
     }
   }
 

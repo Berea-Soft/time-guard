@@ -32,7 +32,9 @@ export const ALL_LOCALES: Record<string, ILocale> = {
 /**
  * Register all locales into a locale map
  */
-export function registerAllLocales(localeMap: Map<string, ILocale> | Record<string, ILocale>): void {
+export function registerAllLocales(
+  localeMap: Map<string, ILocale> | Record<string, ILocale>,
+): void {
   if (localeMap instanceof Map) {
     Object.entries(ALL_LOCALES).forEach(([code, data]) => {
       localeMap.set(code, data);

@@ -6,7 +6,12 @@
 
 import type { ITimeGuardPlugin } from '../../types';
 import type { TimeGuard } from '../../index';
-import type { DurationInput, DurationObject, DurationUnit, IDuration } from './types';
+import type {
+  DurationInput,
+  DurationObject,
+  DurationUnit,
+  IDuration,
+} from './types';
 
 /**
  * Duration class - represents time span following ISO 8601 standard
@@ -37,7 +42,8 @@ export class Duration implements IDuration {
    * @example Duration.fromISO("P3Y6M4DT12H30M5S")
    */
   static fromISO(iso: string): Duration {
-    const isoRegex = /^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?)?$/;
+    const isoRegex =
+      /^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?)?$/;
     const match = iso.match(isoRegex);
 
     if (!match) {
@@ -62,10 +68,10 @@ export class Duration implements IDuration {
    */
   static between(from: TimeGuard, to: TimeGuard): Duration {
     // Calculate (to - from) using since() for proper duration
-    const fromDT = (from as any).toTemporal();
-    const toDT = (to as any).toTemporal();
-    const duration = (toDT as any).since(fromDT);
-    
+    const fromDT = (from as unknown as { toTemporal(): Temporal.PlainDateTime }).toTemporal();
+    const toDT = (to as unknown as { toTemporal(): Temporal.PlainDateTime }).toTemporal();
+    const duration = (toDT as unknown as { since(other: Temporal.PlainDateTime): { years?: number; months?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number } }).since(fromDT);
+
     return new Duration({
       years: duration.years || 0,
       months: duration.months || 0,
@@ -86,9 +92,15 @@ export class Duration implements IDuration {
     const absMilhs = Math.abs(ms);
 
     const years = Math.floor(absMilhs / (1000 * 60 * 60 * 24 * 365));
-    const months = Math.floor((absMilhs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
-    const days = Math.floor((absMilhs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((absMilhs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const months = Math.floor(
+      (absMilhs % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30),
+    );
+    const days = Math.floor(
+      (absMilhs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24),
+    );
+    const hours = Math.floor(
+      (absMilhs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    );
     const minutes = Math.floor((absMilhs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((absMilhs % (1000 * 60)) / 1000);
     const milliseconds = Math.floor(absMilhs % 1000);
@@ -212,17 +224,16 @@ export class Duration implements IDuration {
    * @example "P3Y6M4DT12H30M5S"
    */
   toISO(): string {
-
     // Date part
     let datePart = '';
-    if (this.years) datePart += `${this.years}Y`;
-    if (this.months) datePart += `${this.months}M`;
-    if (this.weeks || this.days) datePart += `${this.weeks * 7 + this.days}D`;
+    if (this.years) { datePart += `${this.years}Y`; }
+    if (this.months) { datePart += `${this.months}M`; }
+    if (this.weeks || this.days) { datePart += `${this.weeks * 7 + this.days}D`; }
 
     // Time part
     let timePart = '';
-    if (this.hours) timePart += `${this.hours}H`;
-    if (this.minutes) timePart += `${this.minutes}M`;
+    if (this.hours) { timePart += `${this.hours}H`; }
+    if (this.minutes) { timePart += `${this.minutes}M`; }
     if (this.seconds || this.milliseconds) {
       timePart += `${this.seconds + this.milliseconds / 1000}S`;
     }
@@ -237,16 +248,44 @@ export class Duration implements IDuration {
   humanize(): string {
     const parts: string[] = [];
 
-    if (this.years) parts.push(`${Math.abs(this.years)} year${Math.abs(this.years) !== 1 ? 's' : ''}`);
-    if (this.months) parts.push(`${Math.abs(this.months)} month${Math.abs(this.months) !== 1 ? 's' : ''}`);
-    if (this.weeks) parts.push(`${Math.abs(this.weeks)} week${Math.abs(this.weeks) !== 1 ? 's' : ''}`);
-    if (this.days) parts.push(`${Math.abs(this.days)} day${Math.abs(this.days) !== 1 ? 's' : ''}`);
-    if (this.hours) parts.push(`${Math.abs(this.hours)} hour${Math.abs(this.hours) !== 1 ? 's' : ''}`);
-    if (this.minutes) parts.push(`${Math.abs(this.minutes)} minute${Math.abs(this.minutes) !== 1 ? 's' : ''}`);
-    if (this.seconds) parts.push(`${Math.abs(this.seconds)} second${Math.abs(this.seconds) !== 1 ? 's' : ''}`);
-    if (this.milliseconds) parts.push(`${Math.abs(this.milliseconds)} ms`);
+    if (this.years) {
+      parts.push(
+        `${Math.abs(this.years)} year${Math.abs(this.years) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.months) {
+      parts.push(
+        `${Math.abs(this.months)} month${Math.abs(this.months) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.weeks) {
+      parts.push(
+        `${Math.abs(this.weeks)} week${Math.abs(this.weeks) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.days) {
+      parts.push(
+        `${Math.abs(this.days)} day${Math.abs(this.days) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.hours) {
+      parts.push(
+        `${Math.abs(this.hours)} hour${Math.abs(this.hours) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.minutes) {
+      parts.push(
+        `${Math.abs(this.minutes)} minute${Math.abs(this.minutes) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.seconds) {
+      parts.push(
+        `${Math.abs(this.seconds)} second${Math.abs(this.seconds) !== 1 ? 's' : ''}`,
+      );
+    }
+    if (this.milliseconds) { parts.push(`${Math.abs(this.milliseconds)} ms`); }
 
-    if (parts.length === 0) return '0 seconds';
+    if (parts.length === 0) { return '0 seconds'; }
 
     const text = parts.join(', ');
     return this.isNegative() ? `-${text}` : text;
@@ -306,21 +345,18 @@ export class DurationPlugin implements ITimeGuardPlugin {
     /**
      * Create a Duration between this date and another
      */
-    (TimeGuardClass.prototype as any).duration = function (other: TimeGuard): Duration {
-      return Duration.between(this, other);
+    (TimeGuardClass.prototype as unknown as { duration: (other: TimeGuard) => Duration }).duration = function (
+      other: TimeGuard,
+    ): Duration {
+      return Duration.between(this as unknown as TimeGuard, other);
     };
 
-    /**
-     * Get Duration class for creating custom durations
-     */
-    (TimeGuardClass as any).Duration = Duration;
+    (TimeGuardClass as unknown as { Duration: typeof Duration; duration: { fromISO: (iso: string) => Duration; between: (from: TimeGuard, to: TimeGuard) => Duration; fromMilliseconds: (ms: number) => Duration } }).Duration = Duration;
 
-    /**
-     * Create Duration from ISO 8601 string
-     */
-    (TimeGuardClass as any).duration = {
+    (TimeGuardClass as unknown as { Duration: typeof Duration; duration: { fromISO: (iso: string) => Duration; between: (from: TimeGuard, to: TimeGuard) => Duration; fromMilliseconds: (ms: number) => Duration } }).duration = {
       fromISO: (iso: string): Duration => Duration.fromISO(iso),
-      between: (from: TimeGuard, to: TimeGuard): Duration => Duration.between(from, to),
+      between: (from: TimeGuard, to: TimeGuard): Duration =>
+        Duration.between(from, to),
       fromMilliseconds: (ms: number): Duration => Duration.fromMilliseconds(ms),
     };
   }

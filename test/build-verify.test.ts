@@ -16,9 +16,14 @@ describe('Cleanup stale build artifacts', () => {
 
     // Remove stale dist artifacts from old build system
     const staleFiles = [
-      'locales.esm', 'locales2.cjs',
-      'calendars.js', 'full.js', 'locales.js',
-      'plugin-advanced-format.js', 'plugin-duration.js', 'plugin-relative-time.js',
+      'locales.esm',
+      'locales2.cjs',
+      'calendars.js',
+      'full.js',
+      'locales.js',
+      'plugin-advanced-format.js',
+      'plugin-duration.js',
+      'plugin-relative-time.js',
     ];
     for (const file of staleFiles) {
       const filePath = join(root, 'dist', file);

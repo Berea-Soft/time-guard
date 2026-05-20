@@ -6,7 +6,11 @@
 
 import type { ITimeGuardPlugin } from '../../types';
 import type { TimeGuard } from '../../index';
-import type { RelativeTimeConfig, RelativeTimeFormats, RelativeTimeThreshold } from './types';
+import type {
+  RelativeTimeConfig,
+  RelativeTimeFormats,
+  RelativeTimeThreshold,
+} from './types';
 
 const DEFAULT_THRESHOLDS: RelativeTimeThreshold[] = [
   { l: 's', r: 44, d: 'second' },
@@ -41,7 +45,7 @@ const DEFAULT_FORMATS: RelativeTimeFormats = {
 export class RelativeTimePlugin implements ITimeGuardPlugin {
   name = 'relative-time';
   version = '1.0.0';
-  
+
   private config: RelativeTimeConfig;
   private formats: RelativeTimeFormats;
 
@@ -62,28 +66,30 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
     /**
      * Get relative time string (e.g., "2 hours ago")
      */
-    (TimeGuardClass.prototype as any).fromNow = function (withoutSuffix?: boolean): string {
-      return plugin.formatRelativeTime(this, false, withoutSuffix);
+    (TimeGuardClass.prototype as unknown as { fromNow: (withoutSuffix?: boolean) => string }).fromNow = function (
+      withoutSuffix?: boolean,
+    ): string {
+      return plugin.formatRelativeTime(this as unknown as TimeGuard, false, withoutSuffix);
     };
 
-    /**
-     * Get future relative time string (e.g., "in 3 days")
-     */
-    (TimeGuardClass.prototype as any).toNow = function (withoutSuffix?: boolean): string {
-      return plugin.formatRelativeTime(this, true, withoutSuffix);
+    (TimeGuardClass.prototype as unknown as { toNow: (withoutSuffix?: boolean) => string }).toNow = function (
+      withoutSuffix?: boolean,
+    ): string {
+      return plugin.formatRelativeTime(this as unknown as TimeGuard, true, withoutSuffix);
     };
 
-    /**
-     * Get human-readable duration
-     */
-    (TimeGuardClass.prototype as any).humanize = function (
+    (TimeGuardClass.prototype as unknown as { humanize: (other?: TimeGuard, withoutSuffix?: boolean) => string }).humanize = function (
       other?: TimeGuard,
       withoutSuffix?: boolean,
     ): string {
       if (other) {
-        return plugin.formatRelativeTime(this, other.isAfter(this), withoutSuffix);
+        return plugin.formatRelativeTime(
+          this as unknown as TimeGuard,
+          other.isAfter(this as unknown as TimeGuard),
+          withoutSuffix,
+        );
       }
-      return plugin.formatRelativeTime(this, false, withoutSuffix);
+      return plugin.formatRelativeTime(this as unknown as TimeGuard, false, withoutSuffix);
     };
   }
 
@@ -96,12 +102,12 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
     withoutSuffix?: boolean,
   ): string {
     const now = (date.constructor as typeof TimeGuard).now();
-    let diff = now.diff(date, 'millisecond');
+    const diff = now.diff(date, 'millisecond');
     const absDiff = Math.abs(diff);
     const isFromNow = diff > 0;
     const actualIsFuture = isFuture ?? !isFromNow;
 
-    let result = this.getRelativeTimeString(absDiff);
+    const result = this.getRelativeTimeString(absDiff);
 
     if (withoutSuffix) {
       return result;
@@ -120,7 +126,8 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
 
     for (let i = 0; i < thresholds.length; i++) {
       const threshold = thresholds[i];
-      const nextThreshold = i + 1 < thresholds.length ? thresholds[i + 1] : null;
+      const nextThreshold =
+        i + 1 < thresholds.length ? thresholds[i + 1] : null;
 
       // Skip if we haven't reached this threshold
       if (nextThreshold && threshold.r && milliseconds < threshold.r * 1000) {
@@ -137,7 +144,7 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
       }
 
       const label = threshold.l;
-      const format = (this.formats as any)[label] || label;
+      const format = this.formats[label as keyof typeof this.formats] || label;
 
       if (typeof format === 'string') {
         return format.includes('%d')

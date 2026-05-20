@@ -399,7 +399,10 @@ describe('TimeGuard - Core Functionality', () => {
     it('should calculate duration with largestUnit and smallestUnit', () => {
       const start = new TimeGuard('2024-01-01T10:30:45');
       const end = new TimeGuard('2024-01-01T14:45:30');
-      const duration = start.until(end, { largestUnit: 'hour', smallestUnit: 'minute' });
+      const duration = start.until(end, {
+        largestUnit: 'hour',
+        smallestUnit: 'minute',
+      });
       // Should return hours and minutes
       expect(typeof duration.hours).toBe('number');
       expect(typeof duration.minutes).toBe('number');
@@ -412,7 +415,7 @@ describe('TimeGuard - Core Functionality', () => {
       // Should include seconds in the result
       expect(typeof duration.seconds).toBe('number');
     });
-  });;
+  });
 
   describe('Duration with largestUnit option', () => {
     it('should calculate duration with largestUnit: month (65 days -> 2 months 5 days)', () => {
@@ -461,7 +464,7 @@ describe('TimeGuard - Core Functionality', () => {
       expect(typeof duration.months).toBe('number');
       expect(typeof duration.days).toBe('number');
     });
-  });;
+  });
 
   describe('Locale operations', () => {
     it('should set default locale', () => {
@@ -525,7 +528,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar' });
-      
+
       expect(diff.getMode()).toBe('calendar');
       expect(diff.breakdown()).not.toBeNull();
     });
@@ -536,7 +539,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar' });
       const bd = diff.breakdown();
-      
+
       expect(bd).not.toBeNull();
       expect(bd!.months).toBeGreaterThan(0);
       expect(bd!.days).toBeGreaterThan(0);
@@ -547,7 +550,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar', locale: 'en' });
       const formatted = diff.format('en');
-      
+
       expect(formatted).toMatch(/month|day/);
     });
 
@@ -556,7 +559,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar', locale: 'es' });
       const formatted = diff.format('es');
-      
+
       // Spanish translations
       expect(formatted).toMatch(/mes|día/);
     });
@@ -565,7 +568,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'exact' });
-      
+
       expect(diff.getMode()).toBe('exact');
       expect(diff.breakdown()).toBeNull();
     });
@@ -574,7 +577,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-01-20');
       const diff = start.diff(end, { mode: 'calendar' });
-      
+
       const days = diff.as('day');
       // The difference is 5 days (absolute)
       expect(Math.abs(days) % 7).toBeLessThan(7); // Should be in day range
@@ -585,7 +588,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-12-31');
       const diff = start.diff(end, { mode: 'calendar' });
       const bd = diff.breakdown();
-      
+
       expect(bd).not.toBeNull();
       expect(Math.abs(bd!.years) + Math.abs(bd!.months)).toBeGreaterThan(0);
     });
@@ -594,7 +597,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-01');
       const end = new TimeGuard('2024-01-11');
       const diff = start.diff(end, { mode: 'calendar' });
-      
+
       const numValue = diff.valueOf();
       expect(typeof numValue).toBe('number');
       expect(Math.abs(numValue)).toBeGreaterThan(0);
@@ -605,7 +608,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar' });
       const formatted = diff.format(); // Should use start's locale
-      
+
       expect(formatted).toBeTruthy();
     });
 
@@ -614,7 +617,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const diff = start.diff(end, { mode: 'calendar' });
       const str = diff.toString();
-      
+
       // Should format nicely for display
       expect(str).toBeTruthy();
       expect(str.length).toBeGreaterThan(0);
@@ -627,7 +630,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize();
-      
+
       // Should return something like "2 months"
       expect(text).toBeTruthy();
       expect(typeof text).toBe('string');
@@ -639,7 +642,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ fullBreakdown: true });
-      
+
       // Should return "2 months and 5 days"
       expect(text).toBeTruthy();
       expect(text).toMatch(/month|day/);
@@ -650,7 +653,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'es' });
-      
+
       // Should use Spanish labels
       expect(text).toBeTruthy();
       expect(typeof text).toBe('string');
@@ -661,7 +664,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'es', fullBreakdown: true });
-      
+
       // Should return "2 meses y 5 días"
       expect(text).toBeTruthy();
       expect(text).toMatch(/mes|día|meses|días/);
@@ -672,7 +675,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'fr' });
-      
+
       // Should use French labels
       expect(text).toBeTruthy();
       expect(typeof text).toBe('string');
@@ -683,7 +686,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = end.since(start);
       const text = duration.humanize();
-      
+
       // Should work similarly to until()
       expect(text).toBeTruthy();
       expect(typeof text).toBe('string');
@@ -694,7 +697,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20T10:05:30');
       const duration = start.until(end);
       const text = duration.humanize();
-      
+
       // Should return minutes or seconds
       expect(text).toBeTruthy();
       expect(text).toMatch(/second|minute/i);
@@ -705,7 +708,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ fullBreakdown: true });
-      
+
       // Should include years
       expect(text).toBeTruthy();
       expect(text).toMatch(/year|month|day/i);
@@ -716,7 +719,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize(); // No locale specified
-      
+
       // Should use instance's locale (es)
       expect(text).toBeTruthy();
     });
@@ -725,7 +728,7 @@ describe('TimeGuard - Core Functionality', () => {
       const tg = new TimeGuard('2024-01-15');
       const duration = tg.until(tg);
       const text = duration.humanize();
-      
+
       // Should return something sensible like "0 seconds"
       expect(text).toBeTruthy();
       expect(text.toLowerCase()).toContain('second');
@@ -735,7 +738,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       // Should have DurationParts properties
       expect(duration.years).toBeDefined();
       expect(duration.months).toBeDefined();
@@ -752,7 +755,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'en', fullBreakdown: true });
-      
+
       // English should use "and"
       expect(text).toContain('and');
     });
@@ -762,7 +765,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'es', fullBreakdown: true });
-      
+
       // Spanish should use "y"
       expect(text).toContain('y');
     });
@@ -772,7 +775,7 @@ describe('TimeGuard - Core Functionality', () => {
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
       const text = duration.humanize({ locale: 'fr', fullBreakdown: true });
-      
+
       // French should use "et"
       expect(text).toContain('et');
     });
@@ -782,9 +785,9 @@ describe('TimeGuard - Core Functionality', () => {
     it('should calculate between two dates (semantic alternative to until)', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       const duration = TimeGuard.between(start, end);
-      
+
       expect(duration).toBeDefined();
       expect(duration.months).toBe(2);
       expect(duration.days).toBe(5);
@@ -793,13 +796,13 @@ describe('TimeGuard - Core Functionality', () => {
     it('should return positive duration regardless of order (semantic clarity)', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       // Forward
       const forward = TimeGuard.between(start, end);
-      
+
       // Backward (should be identical!)
       const backward = TimeGuard.between(end, start);
-      
+
       expect(forward.months).toBe(backward.months);
       expect(forward.days).toBe(backward.days);
     });
@@ -807,9 +810,11 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work with humanize() for user-friendly output', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
-      const text = TimeGuard.between(start, end).humanize({ fullBreakdown: true });
-      
+
+      const text = TimeGuard.between(start, end).humanize({
+        fullBreakdown: true,
+      });
+
       expect(text).toContain('month');
       expect(text).toContain('day');
       expect(text).toContain('and');
@@ -818,10 +823,16 @@ describe('TimeGuard - Core Functionality', () => {
     it('should support locale in humanize()', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
-      const textEs = TimeGuard.between(start, end).humanize({ locale: 'es', fullBreakdown: true });
-      const textFr = TimeGuard.between(start, end).humanize({ locale: 'fr', fullBreakdown: true });
-      
+
+      const textEs = TimeGuard.between(start, end).humanize({
+        locale: 'es',
+        fullBreakdown: true,
+      });
+      const textFr = TimeGuard.between(start, end).humanize({
+        locale: 'fr',
+        fullBreakdown: true,
+      });
+
       expect(textEs).toContain('mes');
       expect(textEs).toContain('y');
       expect(textFr).toContain('mois');
@@ -831,9 +842,9 @@ describe('TimeGuard - Core Functionality', () => {
     it('should have all DurationParts properties', () => {
       const start = new TimeGuard('2020-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       const duration = TimeGuard.between(start, end);
-      
+
       expect(duration.years).toBeGreaterThan(0);
       expect(duration.months).toBeDefined();
       expect(duration.weeks).toBeDefined();
@@ -847,15 +858,15 @@ describe('TimeGuard - Core Functionality', () => {
     it('should eliminate mental load - no need to think about until vs since', () => {
       const dateA = new TimeGuard('2024-01-01');
       const dateB = new TimeGuard('2024-12-31');
-      
+
       // Both read semantically identical:
       const duration1 = TimeGuard.between(dateA, dateB);
       const duration2 = TimeGuard.between(dateB, dateA);
-      
+
       // Result is the same - no mental confusion!
       expect(duration1.months).toBe(duration2.months);
       expect(duration1.days).toBe(duration2.days);
-      
+
       // Humanize works identically
       const text1 = duration1.humanize({ fullBreakdown: true });
       const text2 = duration2.humanize({ fullBreakdown: true });
@@ -865,7 +876,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work with same date (zero duration)', () => {
       const date = new TimeGuard('2024-01-15');
       const duration = TimeGuard.between(date, date);
-      
+
       expect(duration.years).toBe(0);
       expect(duration.months).toBe(0);
       expect(duration.days).toBe(0);
@@ -874,9 +885,9 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work with small time differences (minutes/seconds)', () => {
       const start = new TimeGuard('2024-03-15T10:00:00');
       const end = new TimeGuard('2024-03-15T10:30:45');
-      
+
       const duration = TimeGuard.between(start, end);
-      
+
       expect(duration.minutes).toBe(30);
       expect(duration.seconds).toBe(45);
     });
@@ -884,10 +895,10 @@ describe('TimeGuard - Core Functionality', () => {
     it('should integrate with existing until() - same results', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       const viaBetween = TimeGuard.between(start, end);
       const viaUntil = start.until(end);
-      
+
       // Should produce identical results
       expect(viaBetween.years).toBe(viaUntil.years);
       expect(viaBetween.months).toBe(viaUntil.months);
@@ -912,7 +923,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should convert range to duration with toDuration()', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
       const duration = range.toDuration();
-      
+
       expect(duration).toBeDefined();
       expect(duration.months).toBe(2);
       expect(duration.days).toBe(5);
@@ -921,7 +932,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should get range in months with inMonths()', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
       const months = range.inMonths();
-      
+
       // ~2.1355 months (65 days / 30.4375)
       expect(months).toBeGreaterThan(2);
       expect(months).toBeLessThan(2.2);
@@ -930,7 +941,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should humanize range', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
       const text = range.humanize();
-      
+
       expect(text).toBeDefined();
       expect(typeof text).toBe('string');
       expect(text.length).toBeGreaterThan(0);
@@ -939,7 +950,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should humanize with fullBreakdown', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
       const text = range.humanize({ fullBreakdown: true });
-      
+
       expect(text).toContain('month');
       expect(text).toContain('day');
     });
@@ -948,18 +959,18 @@ describe('TimeGuard - Core Functionality', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
       const textEn = range.humanize({ locale: 'en', fullBreakdown: true });
       const textEs = range.humanize({ locale: 'es', fullBreakdown: true });
-      
+
       expect(textEs).toContain('mes');
       expect(textEn).toContain('month');
     });
 
     it('should work with in(unit) for generic unit conversion', () => {
       const range = TimeGuard.range('2024-01-15', '2024-03-20');
-      
+
       const days = range.in('day');
       const hours = range.in('hour');
       const months = range.in('month');
-      
+
       expect(days).toBeGreaterThan(60);
       expect(hours).toBeGreaterThan(days * 24 - 24); // Approximately
       expect(months).toBeCloseTo(2.1, 0);
@@ -968,20 +979,23 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work regardless of date order', () => {
       const range1 = TimeGuard.range('2024-01-15', '2024-03-20');
       const range2 = TimeGuard.range('2024-03-20', '2024-01-15');
-      
+
       expect(range1.humanize()).toBe(range2.humanize());
       expect(range1.inMonths()).toBe(range2.inMonths());
     });
 
     it('should support method chaining', () => {
-      const range = TimeGuard.range('2024-03-15T10:00:00', '2024-03-17T14:30:00');
-      
+      const range = TimeGuard.range(
+        '2024-03-15T10:00:00',
+        '2024-03-17T14:30:00',
+      );
+
       // All chainable operations
       const text = range.humanize({ fullBreakdown: true });
       const months = range.inMonths();
       const duration = range.toDuration();
       const hours = range.in('hour');
-      
+
       expect(text).toBeDefined();
       expect(months).toBeDefined();
       expect(duration).toBeDefined();
@@ -991,13 +1005,13 @@ describe('TimeGuard - Core Functionality', () => {
     it('should be semantically clear - "range" is obvious', () => {
       // This test documents the marketing value of the API naming
       // TimeGuard.range() is more intuitive than until/since debate
-      
+
       const invoiceDate = '2024-01-01';
       const paymentDate = '2024-02-15';
-      
+
       // Reading is natural and semantically correct:
       const paymentTerm = TimeGuard.range(invoiceDate, paymentDate).humanize();
-      
+
       expect(paymentTerm).toBeDefined();
       expect(typeof paymentTerm).toBe('string');
     });
@@ -1006,12 +1020,12 @@ describe('TimeGuard - Core Functionality', () => {
       // Rental period
       const checkInDate = new TimeGuard('2024-06-15');
       const checkOutDate = new TimeGuard('2024-06-22');
-      
+
       const rentalPeriod = TimeGuard.range(checkInDate, checkOutDate);
       const days = rentalPeriod.in('day');
-      
+
       expect(days).toBeCloseTo(7, 0);
-      
+
       const cost = days * 100; // $100 per day
       expect(cost).toBeCloseTo(700, 0);
     });
@@ -1019,10 +1033,10 @@ describe('TimeGuard - Core Functionality', () => {
     it('should return same results as TimeGuard.between()', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       const viaRange = TimeGuard.range(start, end);
       const viaBetween = TimeGuard.between(start, end);
-      
+
       expect(viaRange.toDuration().humanize()).toBe(viaBetween.humanize());
       expect(viaRange.inMonths()).toBe(viaBetween.total('month'));
     });
@@ -1033,7 +1047,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       // 2 months + 5 days = (2 * 30.4375) + 5 = ~65.875 days
       const totalDays = duration.total('day');
       expect(totalDays).toBeCloseTo(65.9, 0);
@@ -1043,7 +1057,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       // 65 days / 30.4375 days per month ≈ 2.1355
       const totalMonths = duration.total('month');
       expect(totalMonths).toBeGreaterThan(2);
@@ -1054,7 +1068,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-03-15T00:00:00');
       const end = new TimeGuard('2024-03-16T12:00:00');
       const duration = start.until(end);
-      
+
       // 1 day + 12 hours = 36 hours
       const totalHours = duration.total('hour');
       expect(totalHours).toBeCloseTo(36, 0);
@@ -1064,7 +1078,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-03-15T00:00:00');
       const end = new TimeGuard('2024-03-15T00:05:30');
       const duration = start.until(end);
-      
+
       // 5 minutes 30 seconds = 330 seconds
       const totalSeconds = duration.total('second');
       expect(totalSeconds).toBe(330);
@@ -1074,7 +1088,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-03-15T00:00:00');
       const end = new TimeGuard('2024-03-15T00:00:01');
       const duration = start.until(end);
-      
+
       // 1 second = 1000 milliseconds
       const totalMs = duration.total('millisecond');
       expect(totalMs).toBe(1000);
@@ -1084,7 +1098,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-01');
       const end = new TimeGuard('2024-02-15');
       const duration = start.until(end);
-      
+
       // ~6 weeks
       const totalWeeks = duration.total('week');
       expect(totalWeeks).toBeGreaterThan(5);
@@ -1095,7 +1109,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2020-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       // ~4.17 years
       const totalYears = duration.total('year');
       expect(totalYears).toBeGreaterThan(4.1);
@@ -1106,7 +1120,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-03-15T10:00:00');
       const end = new TimeGuard('2024-03-15T10:45:30');
       const duration = start.until(end);
-      
+
       // 45 minutes 30 seconds = 45.5 minutes
       const totalMinutes = duration.total('minute');
       expect(totalMinutes).toBeCloseTo(45.5, 1);
@@ -1116,7 +1130,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2020-03-15');
       const end = new TimeGuard('2024-09-20');
       const duration = start.until(end);
-      
+
       // Years to days
       const daysFromYears = duration.total('day');
       expect(daysFromYears).toBeGreaterThan(1600);
@@ -1127,12 +1141,12 @@ describe('TimeGuard - Core Functionality', () => {
       const invoiceDate = new TimeGuard('2024-01-15');
       const paymentDate = new TimeGuard('2024-02-20');
       const duration = invoiceDate.until(paymentDate);
-      
+
       // Calculate late fees: $10 per day
       // Temporal normalizes to {months: 1, days: 5} = 1*30.4375 + 5 = 35.4375 days
       const daysLate = duration.total('day');
       const lateFee = daysLate * 10;
-      
+
       expect(daysLate).toBeCloseTo(35.4375, 1);
       expect(lateFee).toBeCloseTo(354.375, 0);
     });
@@ -1141,11 +1155,11 @@ describe('TimeGuard - Core Functionality', () => {
       const sessionStart = new TimeGuard('2024-03-15T10:00:00');
       const sessionEnd = new TimeGuard('2024-03-15T10:35:42');
       const duration = sessionStart.until(sessionEnd);
-      
+
       // Calculate engagement metrics
       const sessionMinutes = duration.total('minute');
       const sessionSeconds = duration.total('second');
-      
+
       expect(sessionMinutes).toBeCloseTo(35.7, 1);
       expect(sessionSeconds).toBe(2142);
     });
@@ -1154,7 +1168,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const str = duration.toString();
       expect(typeof str).toBe('string');
       expect(str.length).toBeGreaterThan(0);
@@ -1165,7 +1179,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const json = duration.toJSON();
       expect(json).toEqual({
         years: 0,
@@ -1183,10 +1197,10 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const serialized = JSON.stringify(duration);
       const parsed = JSON.parse(serialized);
-      
+
       expect(parsed.months).toBe(2);
       expect(parsed.days).toBe(5);
     });
@@ -1195,9 +1209,9 @@ describe('TimeGuard - Core Functionality', () => {
       // 365.25 days per year (accounting for leap years)
       const duration = TimeGuard.between(
         new TimeGuard('2024-01-01'),
-        new TimeGuard('2025-01-01')
+        new TimeGuard('2025-01-01'),
       );
-      
+
       // Should be ~365 days (actually depends on leap year)
       const yearInDays = duration.total('day');
       expect(yearInDays).toBeGreaterThan(364);
@@ -1209,7 +1223,7 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-01');
       const end = new TimeGuard('2024-02-01');
       const duration = start.until(end);
-      
+
       // 1 month should be ~30.4375 days
       const days = duration.total('day');
       expect(days).toBeGreaterThan(30);
@@ -1219,7 +1233,7 @@ describe('TimeGuard - Core Functionality', () => {
     it('should handle zero duration gracefully', () => {
       const date = new TimeGuard('2024-01-15');
       const duration = date.until(date);
-      
+
       expect(duration.total('day')).toBe(0);
       expect(duration.total('hour')).toBe(0);
       expect(duration.total('second')).toBe(0);
@@ -1228,11 +1242,11 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work with TimeGuard.between() semantic API', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
-      
+
       // Same total regardless of order
       const duration1 = TimeGuard.between(start, end);
       const duration2 = TimeGuard.between(end, start);
-      
+
       expect(duration1.total('day')).toBe(duration2.total('day'));
       expect(duration1.total('month')).toBe(duration2.total('month'));
     });
@@ -1243,9 +1257,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation).toBeDefined();
       expect(explanation.input).toBeDefined();
       expect(explanation.steps).toBeDefined();
@@ -1259,9 +1273,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.input).toHaveLength(2);
       expect(explanation.input[0]).toContain('2024');
       expect(explanation.input[1]).toContain('2024');
@@ -1271,9 +1285,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.steps.length).toBeGreaterThan(0);
       expect(explanation.steps.join(' ')).toContain('2024');
     });
@@ -1282,9 +1296,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.breakdown.years).toBe(0);
       expect(explanation.breakdown.months).toBe(2);
       expect(explanation.breakdown.days).toBe(5);
@@ -1294,12 +1308,12 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-01');
       const end = new TimeGuard('2024-12-31');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       // 2024 is a leap year
       if (explanation.leapYearFlags && explanation.leapYearFlags.length > 0) {
-        const leapFlag = explanation.leapYearFlags.find(f => f.year === 2024);
+        const leapFlag = explanation.leapYearFlags.find((f) => f.year === 2024);
         expect(leapFlag?.isLeap).toBe(true);
         expect(leapFlag?.daysInFebruary).toBe(29);
       }
@@ -1309,9 +1323,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.metadata).toBeDefined();
       expect(explanation.metadata?.calculationTimeMs).toBeGreaterThanOrEqual(0);
       expect(explanation.metadata?.precision).toBeDefined();
@@ -1321,9 +1335,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.explanation).toContain('Calculated');
       expect(explanation.explanation).toContain('2024');
     });
@@ -1331,10 +1345,10 @@ describe('TimeGuard - Core Functionality', () => {
     it('should work with since() method as well', () => {
       const date1 = new TimeGuard('2024-01-15');
       const date2 = new TimeGuard('2024-03-20');
-      
+
       const duration = date2.since(date1);
       const explanation = duration.explain();
-      
+
       expect(explanation).toBeDefined();
       expect(explanation.mode).toBe('exact');
       expect(explanation.breakdown.months).toBe(2);
@@ -1345,9 +1359,9 @@ describe('TimeGuard - Core Functionality', () => {
       const invoiceDate = new TimeGuard('2023-12-15');
       const paymentDate = new TimeGuard('2024-02-20');
       const duration = invoiceDate.until(paymentDate);
-      
+
       const explanation = duration.explain();
-      
+
       // Can inspect at every step
       expect(explanation.input).toBeDefined();
       expect(explanation.steps).toBeDefined();
@@ -1359,9 +1373,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.locale).toBe('en');
       // Locale should match the TimeGuard instance
     });
@@ -1370,10 +1384,10 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15');
       const end = new TimeGuard('2024-03-20');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
       const serialized = JSON.stringify(explanation);
-      
+
       expect(serialized).toBeTruthy();
       expect(serialized).toContain('input');
       expect(serialized).toContain('steps');
@@ -1384,9 +1398,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-01-15T10:30:45');
       const end = new TimeGuard('2024-03-20T14:45:30');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       expect(explanation.metadata?.precision).toBe('day');
       expect(explanation.mode).toBe('exact');
     });
@@ -1396,9 +1410,9 @@ describe('TimeGuard - Core Functionality', () => {
       const start = new TimeGuard('2024-02-15'); // In leap year
       const end = new TimeGuard('2024-04-15');
       const duration = start.until(end);
-      
+
       const explanation = duration.explain();
-      
+
       // Explanation should reveal:
       // - February has 29 days (leap year)
       // - March has 31 days

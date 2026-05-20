@@ -4,27 +4,28 @@
  * Note: The polyfill must be loaded by the consumer or via the "full" entry.
  */
 
-import { Temporal } from "@js-temporal/polyfill";
+import { Temporal } from '@js-temporal/polyfill';
+import type { TemporalPlainDateTime, TemporalZonedDateTime, TemporalLike } from '../types';
 
-type TemporalPlainDateTime = Temporal.PlainDateTime;
-type TemporalZonedDateTime = Temporal.ZonedDateTime;
+type TemporalType = typeof Temporal;
 
 // Cache to prevent repeated loading attempts
-let temporalCache: any = null;
+let temporalCache: TemporalType | null = null;
 
 /**
  * Get Temporal from globalThis or imported module
  */
-function useTemporal(): any {
-  // Return cached value if available
+function useTemporal(): TemporalType {
   if (temporalCache) {
     return temporalCache;
   }
 
-  const TemporalLoaded = (globalThis as any).Temporal || Temporal;
+  const TemporalLoaded = (globalThis as Record<string, unknown>).Temporal as TemporalType | undefined ?? Temporal;
 
   if (!TemporalLoaded) {
-    throw new Error('Temporal API not loaded. Make sure @js-temporal/polyfill is imported in your app.');
+    throw new Error(
+      'Temporal API not loaded. Make sure @js-temporal/polyfill is imported in your app.',
+    );
   }
 
   temporalCache = TemporalLoaded;
@@ -40,46 +41,50 @@ export class TemporalAdapter {
    */
   static parseToPlainDateTime(input: unknown): TemporalPlainDateTime {
     const Temporal = useTemporal();
-    
-    // Handle Temporal objects
+
     if (this.isPlainDateTime(input)) {
       return input;
     }
 
     if (this.isZonedDateTime(input)) {
-      return (input as any).toPlainDateTime();
+      return (input as TemporalLike).toPlainDateTime();
     }
 
     if (this.isPlainDate(input)) {
-      return (input as any).toPlainDateTime({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+      return (input as Temporal.PlainDate).toPlainDateTime({
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+      });
     }
 
     if (this.isPlainTime(input)) {
       const now = Temporal.Now.plainDateTimeISO();
-      return now.with(input as any);
+      return now.with(input as Temporal.PlainTimeLike);
     }
 
-    // Handle JavaScript Date
-    if (input !== null && typeof input === 'object' && 'getTime' in input && typeof (input as any).getTime === 'function') {
+    if (
+      input !== null &&
+      typeof input === 'object' &&
+      'getTime' in input &&
+      typeof (input as Date).getTime === 'function'
+    ) {
       return this.fromDate(input as Date);
     }
 
-    // Handle timestamp (milliseconds)
     if (typeof input === 'number') {
       return this.fromUnix(input);
     }
 
-    // Handle ISO string
     if (typeof input === 'string') {
       return this.parseISOString(input);
     }
 
-    // Handle object with date components
     if (typeof input === 'object' && input !== null) {
-      return this.fromObject(input as Record<string, any>);
+      return this.fromObject(input as Record<string, unknown>);
     }
 
-    // Default to now
     return Temporal.Now.plainDateTimeISO();
   }
 
@@ -122,7 +127,7 @@ export class TemporalAdapter {
   /**
    * Create from object with date components
    */
-  static fromObject(obj: Record<string, any>): TemporalPlainDateTime {
+  static fromObject(obj: Record<string, unknown>): TemporalPlainDateTime {
     const Temporal = useTemporal();
     const year = obj.year || Temporal.Now.plainDateISO().year;
     const month = obj.month || 1;
@@ -154,7 +159,9 @@ export class TemporalAdapter {
   /**
    * Convert to Unix timestamp (milliseconds)
    */
-  static toUnix(temporal: TemporalPlainDateTime | TemporalZonedDateTime): number {
+  static toUnix(
+    temporal: TemporalPlainDateTime | TemporalZonedDateTime,
+  ): number {
     const plainDT = this.toPlainDateTime(temporal);
     // Use UTC to avoid timezone offset issues
     return Date.UTC(
@@ -164,50 +171,71 @@ export class TemporalAdapter {
       plainDT.hour,
       plainDT.minute,
       plainDT.second,
-      plainDT.millisecond
+      plainDT.millisecond,
     );
   }
 
   /**
    * Convert to ISO string
    */
-  static toISOString(temporal: TemporalPlainDateTime | TemporalZonedDateTime): string {
+  static toISOString(
+    temporal: TemporalPlainDateTime | TemporalZonedDateTime,
+  ): string {
     return this.toPlainDateTime(temporal).toString() + 'Z';
   }
 
   /**
    * Ensure we have a PlainDateTime
    */
-  static toPlainDateTime(temporal: TemporalPlainDateTime | TemporalZonedDateTime): TemporalPlainDateTime {
+  static toPlainDateTime(
+    temporal: TemporalPlainDateTime | TemporalZonedDateTime,
+  ): TemporalPlainDateTime {
     if (this.isPlainDateTime(temporal)) {
       return temporal;
     }
-    return (temporal as any).toPlainDateTime();
+    return (temporal as TemporalZonedDateTime).toPlainDateTime();
   }
 
   /**
    * Type guards
    */
   static isPlainDateTime(obj: unknown): obj is TemporalPlainDateTime {
-    return obj !== null && typeof obj === 'object' && 'year' in obj && 'month' in obj && 'day' in obj && 'hour' in obj;
+    return (
+      obj !== null &&
+      typeof obj === 'object' &&
+      'year' in obj &&
+      'month' in obj &&
+      'day' in obj &&
+      'hour' in obj
+    );
   }
 
   static isZonedDateTime(obj: unknown): obj is TemporalZonedDateTime {
     return obj !== null && typeof obj === 'object' && 'timeZone' in obj;
   }
 
-  static isPlainDate(obj: unknown): obj is any {
-    return obj !== null && typeof obj === 'object' && 'year' in obj && 'month' in obj && 'day' in obj && !('hour' in obj) && 'toPlainDateTime' in obj;
+  static isPlainDate(obj: unknown): obj is Temporal.PlainDate {
+    return (
+      obj !== null &&
+      typeof obj === 'object' &&
+      'year' in obj &&
+      'month' in obj &&
+      'day' in obj &&
+      !('hour' in obj) &&
+      'toPlainDateTime' in obj
+    );
   }
 
-  static isPlainTime(obj: unknown): obj is any {
-    return obj !== null && typeof obj === 'object' && 'hour' in obj && !('year' in obj);
+  static isPlainTime(obj: unknown): obj is Temporal.PlainTime {
+    return (
+      obj !== null &&
+      typeof obj === 'object' &&
+      'hour' in obj &&
+      !('year' in obj)
+    );
   }
 
-  /**
-   * Convert a value to a finite integer for Temporal fields
-   */
-  private static toFiniteInteger(value: any): number {
+  private static toFiniteInteger(value: unknown): number {
     const num = Number(value);
     if (!Number.isFinite(num)) {
       throw new Error(`Temporal error: Expected finite integer, got ${value}`);
@@ -219,11 +247,37 @@ export class TemporalAdapter {
    * Validate that a PlainDateTime has finite integer components
    */
   private static validatePlainDateTime(dt: TemporalPlainDateTime): void {
-    const fields = ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'] as const;
+    const fields = [
+      'year',
+      'month',
+      'day',
+      'hour',
+      'minute',
+      'second',
+      'millisecond',
+    ] as const;
     for (const field of fields) {
-      const value = (dt as any)[field];
-      if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
-        throw new Error(`Temporal error: Expected finite integer for ${field}, got ${value}`);
+      const value = (dt as unknown as Record<string, unknown>)[field];
+      if (
+        typeof value !== 'number' ||
+        !Number.isFinite(value) ||
+        !Number.isInteger(value)
+      ) {
+        // Log de depuración para rastrear el error
+        if (
+          typeof console !== 'undefined' &&
+          typeof console.error === 'function'
+        ) {
+          console.error(
+            'TemporalAdapter.validatePlainDateTime: campo inválido',
+            field,
+            value,
+            dt,
+          );
+        }
+        throw new Error(
+          `Temporal error: Expected finite integer for ${field}, got ${value}`,
+        );
       }
     }
   }
@@ -249,24 +303,30 @@ export class TemporalAdapter {
    * Returns: -1 if dt1 < dt2, 0 if equal, 1 if dt1 > dt2
    * Uses ISO string comparison as fallback for polyfills that don't have Temporal.PlainDateTime.compare
    */
-  static compare(dt1: TemporalPlainDateTime, dt2: TemporalPlainDateTime): number {
+  static compare(
+    dt1: TemporalPlainDateTime,
+    dt2: TemporalPlainDateTime,
+  ): number {
     const Temporal = useTemporal();
-    
+
     // Validate both date times have finite integer components
     this.validatePlainDateTime(dt1);
     this.validatePlainDateTime(dt2);
-    
+
     // Try using Temporal.PlainDateTime.compare if available
-    if (Temporal.PlainDateTime && typeof Temporal.PlainDateTime.compare === 'function') {
+    if (
+      Temporal.PlainDateTime &&
+      typeof Temporal.PlainDateTime.compare === 'function'
+    ) {
       return Temporal.PlainDateTime.compare(dt1, dt2);
     }
-    
+
     // Fallback: compare as ISO strings (which works for PlainDateTime)
     const iso1 = dt1.toString();
     const iso2 = dt2.toString();
-    
-    if (iso1 < iso2) return -1;
-    if (iso1 > iso2) return 1;
+
+    if (iso1 < iso2) { return -1; }
+    if (iso1 > iso2) { return 1; }
     return 0;
   }
 }

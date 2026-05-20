@@ -1,19 +1,10 @@
-/**
- *
- * Three build modes (run sequentially via npm run build):
- *
- *   vite build                → core only (ES + CJS), fast JS build
- *   vite build --mode umd     → core only (UMD + IIFE) for CDN / <script>
- *   vite build --mode types   → declaration files only workflow (via vite:dts)
- */
 import { defineConfig, type UserConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { existsSync, readFileSync, rmSync } from 'fs';
 import dts from 'vite-plugin-dts';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const pack = JSON.parse(
   readFileSync(resolve(__dirname, 'package.json'), 'utf-8'),
 );
@@ -21,7 +12,7 @@ const pack = JSON.parse(
 const banner = `/*! time-guard v${
   pack.version
 } | (c) ${new Date().getFullYear()} Berea-Soft | MIT License | https://github.com/Berea-Soft/time-guard */`;
-const distTypesDir = resolve(__dirname, 'dist', 'types');
+
 const distTypesSrcDir = resolve(__dirname, 'dist', 'types', 'src');
 
 const fileName = (format: string, entryName: string) =>
@@ -41,6 +32,7 @@ export default defineConfig(({ mode }): UserConfig => {
         entry: isUmd
           ? resolve(__dirname, 'src/index.ts')
           : {
+              'time-guard': resolve(__dirname, 'src/index.ts'),
               'locales/index': resolve(__dirname, 'src/locales/index.ts'),
               'calendars/index': resolve(__dirname, 'src/calendars/index.ts'),
               'plugins/relative-time': resolve(

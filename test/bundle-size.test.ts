@@ -13,31 +13,54 @@ describe('Bundle Size Report', () => {
     rmSync(distDir, { recursive: true, force: true });
 
     // Run current build steps
-    execSync('npx vite build',            { cwd: root, stdio: 'pipe', timeout: 60000 });
-    execSync('npx vite build --mode umd',  { cwd: root, stdio: 'pipe', timeout: 60000 });
+    execSync('npx vite build', { cwd: root, stdio: 'pipe', timeout: 60000 });
+    execSync('npx vite build --mode umd', {
+      cwd: root,
+      stdio: 'pipe',
+      timeout: 60000,
+    });
 
     const allDistFiles = readdirSync(distDir, { recursive: true })
-      .map(f => f.toString().replace(/\\/g, '/'))
-      .filter(f => !f.startsWith('types'));
+      .map((f) => f.toString().replace(/\\/g, '/'))
+      .filter((f) => !f.startsWith('types'));
 
     // ── No shared chunks or stale artifacts ──
-    const unwanted = allDistFiles.filter(f =>
-      f.includes('locales.esm') ||
-      f.includes('locales2') ||
-      f.includes('_internal') ||
-      // Old naming: bare .js without .es./.umd./.iife. (except .cjs)
-      (/^(?!time-guard\.).*\.js$/.test(f) && !f.includes('.es.') && !f.includes('.umd.') && !f.includes('.iife.') && !f.includes('/'))
+    // Note: Vite genera shared chunks (locales-xxxx.js) automáticamente
+    // cuando hay múltiples entry points. Esto es comportamiento normal.
+    const unwanted = allDistFiles.filter(
+      (f) =>
+        f.includes('locales.esm') ||
+        f.includes('locales2') ||
+        f.includes('_internal') ||
+        // Old naming: bare .js without .es./.umd./.iife. (except .cjs)
+        (/^(?!time-guard\.).*\.js$/.test(f.split('/').pop() || '') &&
+          !f.includes('.es.') &&
+          !f.includes('.umd.') &&
+          !f.includes('.iife.') &&
+          !f.includes('/') &&
+          !/locales-[A-Za-z0-9]+\.(js|cjs)$/.test(f)),
     );
-    expect(unwanted, `Unexpected files in dist: ${unwanted.join(', ')}`).toEqual([]);
+    expect(
+      unwanted,
+      `Unexpected files in dist: ${unwanted.join(', ')}`,
+    ).toEqual([]);
 
     // ── All expected files are present ──
     const expected = [
-      'time-guard.es.js', 'time-guard.cjs', 'time-guard.umd.js', 'time-guard.iife.js',
-      'locales/index.es.js', 'locales/index.cjs',
-      'calendars/index.es.js', 'calendars/index.cjs',
-      'plugins/relative-time.es.js', 'plugins/relative-time.cjs',
-      'plugins/duration.es.js', 'plugins/duration.cjs',
-      'plugins/advanced-format.es.js', 'plugins/advanced-format.cjs',
+      'time-guard.es.js',
+      'time-guard.cjs',
+      'time-guard.umd.js',
+      'time-guard.iife.js',
+      'locales/index.es.js',
+      'locales/index.cjs',
+      'calendars/index.es.js',
+      'calendars/index.cjs',
+      'plugins/relative-time.es.js',
+      'plugins/relative-time.cjs',
+      'plugins/duration.es.js',
+      'plugins/duration.cjs',
+      'plugins/advanced-format.es.js',
+      'plugins/advanced-format.cjs',
     ];
     for (const file of expected) {
       expect(allDistFiles, `Missing expected file: ${file}`).toContain(file);
@@ -48,9 +71,18 @@ describe('Bundle Size Report', () => {
     // The build may keep a side-effect import or inline a runtime message.
     // Accept either: an `import '@js-temporal/polyfill'` line, or the
     // runtime error/message that references the polyfill.
-    const hasPolyfillImport = coreES.split('\n').some(l => l.startsWith('import') && l.includes('@js-temporal/polyfill'));
-    const hasRuntimeMessage = coreES.includes('Temporal API not loaded') || coreES.includes('Make sure @js-temporal/polyfill');
-    expect(hasPolyfillImport || hasRuntimeMessage, 'Missing polyfill import or runtime message referencing @js-temporal/polyfill').toBe(true);
+    const hasPolyfillImport = coreES
+      .split('\n')
+      .some(
+        (l) => l.startsWith('import') && l.includes('@js-temporal/polyfill'),
+      );
+    const hasRuntimeMessage =
+      coreES.includes('Temporal API not loaded') ||
+      coreES.includes('Make sure @js-temporal/polyfill');
+    expect(
+      hasPolyfillImport || hasRuntimeMessage,
+      'Missing polyfill import or runtime message referencing @js-temporal/polyfill',
+    ).toBe(true);
 
     // ── Size sanity checks (full-compatible entry remains within expected budget)
     // The bundle includes the `@js-temporal/polyfill` runtime which increases

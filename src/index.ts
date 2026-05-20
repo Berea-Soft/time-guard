@@ -12,8 +12,8 @@
 import { Temporal } from '@js-temporal/polyfill';
 
 // Assign Temporal to globalThis so the adapter can find it
-if (typeof globalThis !== 'undefined' && !((globalThis as any).Temporal)) {
-  (globalThis as any).Temporal = Temporal;
+if (typeof globalThis !== 'undefined' && !(globalThis as Record<string, unknown>).Temporal) {
+  (globalThis as Record<string, unknown>).Temporal = Temporal;
 }
 
 import type {
@@ -23,11 +23,17 @@ import type {
   FormatPreset,
   IRoundOptions,
   IDurationOptions,
+  DurationParts,
+  TemporalPlainDateTimePolyfill,
+  TemporalZonedDateTimePolyfill,
+  DurationLike,
   IDiffResult,
   IDiffOptions,
-  DurationParts,
   IDurationExplanation,
   IFormattableDuration,
+  TemporalPlainDateTime,
+  TemporalZonedDateTime,
+  TemporalDuration,
 } from './types';
 import { TemporalAdapter } from './adapters/temporal.adapter';
 import { DateFormatter } from './formatters/date.formatter';
@@ -61,7 +67,7 @@ const ZERO_DIFF_DAYS = ' days';
 /**
  * Calculate total milliseconds from duration parts using hoisted constants
  */
-function calculateTotalMs(duration: any): number {
+function calculateTotalMs(duration: Partial<DurationParts>): number {
   return (
     (duration.years || 0) * MS_PER_YEAR +
     (duration.months || 0) * MS_PER_MONTH +
@@ -95,7 +101,7 @@ class DiffResult implements IDiffResult, IFormattableDuration {
     tg2: TimeGuard,
     mode: 'calendar' | 'exact' = 'exact',
     breakdownData?: DurationParts,
-    locale?: string
+    locale?: string,
   ) {
     this._value = value;
     this._tg1 = tg1;
@@ -125,15 +131,33 @@ class DiffResult implements IDiffResult, IFormattableDuration {
     const bd = this._breakdownData;
 
     // Build parts array in logical order
-    if (bd.years !== 0) parts.push(`${bd.years} ${getDurationUnitLabel('year', l, bd.years)}`);
-    if (bd.months !== 0) parts.push(`${bd.months} ${getDurationUnitLabel('month', l, bd.months)}`);
-    if (bd.weeks !== 0) parts.push(`${bd.weeks} ${getDurationUnitLabel('week', l, bd.weeks)}`);
-    if (bd.days !== 0) parts.push(`${bd.days} ${getDurationUnitLabel('day', l, bd.days)}`);
-    if (bd.hours !== 0) parts.push(`${bd.hours} ${getDurationUnitLabel('hour', l, bd.hours)}`);
-    if (bd.minutes !== 0) parts.push(`${bd.minutes} ${getDurationUnitLabel('minute', l, bd.minutes)}`);
-    if (bd.seconds !== 0) parts.push(`${bd.seconds} ${getDurationUnitLabel('second', l, bd.seconds)}`);
+    if (bd.years !== 0) {
+      parts.push(`${bd.years} ${getDurationUnitLabel('year', l, bd.years)}`);
+    }
+    if (bd.months !== 0) {
+      parts.push(`${bd.months} ${getDurationUnitLabel('month', l, bd.months)}`);
+    }
+    if (bd.weeks !== 0) {
+      parts.push(`${bd.weeks} ${getDurationUnitLabel('week', l, bd.weeks)}`);
+    }
+    if (bd.days !== 0) {
+      parts.push(`${bd.days} ${getDurationUnitLabel('day', l, bd.days)}`);
+    }
+    if (bd.hours !== 0) {
+      parts.push(`${bd.hours} ${getDurationUnitLabel('hour', l, bd.hours)}`);
+    }
+    if (bd.minutes !== 0) {
+      parts.push(
+        `${bd.minutes} ${getDurationUnitLabel('minute', l, bd.minutes)}`,
+      );
+    }
+    if (bd.seconds !== 0) {
+      parts.push(
+        `${bd.seconds} ${getDurationUnitLabel('second', l, bd.seconds)}`,
+      );
+    }
 
-    if (parts.length === 0) return formatZeroDuration(l);
+    if (parts.length === 0) { return formatZeroDuration(l); }
 
     return joinDurationParts(parts, l);
   }
@@ -176,7 +200,11 @@ export class DurationResult implements DurationParts, IFormattableDuration {
   private _endDate?: string;
   private _steps: string[] = [];
   private _mode: 'exact' | 'estimated' = 'exact';
-  private _leapYearFlags: Array<{ year: number; isLeap: boolean; daysInFebruary: number }> = [];
+  private _leapYearFlags: Array<{
+    year: number;
+    isLeap: boolean;
+    daysInFebruary: number;
+  }> = [];
   private _calculationTimeMs: number = 0;
 
   constructor(
@@ -187,9 +215,13 @@ export class DurationResult implements DurationParts, IFormattableDuration {
       endDate?: string;
       steps?: string[];
       mode?: 'exact' | 'estimated';
-      leapYearFlags?: Array<{ year: number; isLeap: boolean; daysInFebruary: number }>;
+      leapYearFlags?: Array<{
+        year: number;
+        isLeap: boolean;
+        daysInFebruary: number;
+      }>;
       calculationTimeMs?: number;
-    }
+    },
   ) {
     this.years = parts.years;
     this.months = parts.months;
@@ -231,7 +263,7 @@ export class DurationResult implements DurationParts, IFormattableDuration {
       { unit: 'millisecond', value: this.milliseconds },
     ];
 
-    const nonZeroParts = parts.filter(p => p.value > 0);
+    const nonZeroParts = parts.filter((p) => p.value > 0);
 
     if (nonZeroParts.length === 0) {
       return '0 seconds';
@@ -240,8 +272,11 @@ export class DurationResult implements DurationParts, IFormattableDuration {
     if (!fullBreakdown || nonZeroParts.length === 1) {
       const largest = nonZeroParts[0];
       try {
-        const rtf = new Intl.RelativeTimeFormat(locale, { numeric, style: 'long' });
-        return rtf.format(largest.value, largest.unit as any);
+        const rtf = new Intl.RelativeTimeFormat(locale, {
+          numeric,
+          style: 'long',
+        });
+        return rtf.format(largest.value, largest.unit as Intl.RelativeTimeFormatUnit);
       } catch {
         return `${largest.value} ${this.pluralizeUnit(largest.unit, largest.value, locale)}`;
       }
@@ -319,21 +354,30 @@ export class DurationResult implements DurationParts, IFormattableDuration {
     const explanationParts: string[] = [];
 
     if (this._startDate && this._endDate) {
-      explanationParts.push(`Calculated duration from ${this._startDate} to ${this._endDate}`);
+      explanationParts.push(
+        `Calculated duration from ${this._startDate} to ${this._endDate}`,
+      );
     }
 
     if (this._leapYearFlags && this._leapYearFlags.length > 0) {
-      const leapYears = this._leapYearFlags.filter(f => f.isLeap).map(f => f.year);
+      const leapYears = this._leapYearFlags
+        .filter((f) => f.isLeap)
+        .map((f) => f.year);
       if (leapYears.length > 0) {
         explanationParts.push(`Leap year(s) detected: ${leapYears.join(', ')}`);
       }
     }
 
-    explanationParts.push(`Breakdown: ${this.years} year(s), ${this.months} month(s), ${this.days} day(s)`);
+    explanationParts.push(
+      `Breakdown: ${this.years} year(s), ${this.months} month(s), ${this.days} day(s)`,
+    );
     explanationParts.push(`Mode: ${this._mode} calculation`);
 
     return {
-      input: this._startDate && this._endDate ? [this._startDate, this._endDate] : [],
+      input:
+        this._startDate && this._endDate
+          ? [this._startDate, this._endDate]
+          : [],
       steps,
       breakdown: {
         years: this.years,
@@ -348,7 +392,8 @@ export class DurationResult implements DurationParts, IFormattableDuration {
       mode: this._mode,
       explanation: explanationParts.join('. '),
       locale: this._locale,
-      leapYearFlags: this._leapYearFlags.length > 0 ? this._leapYearFlags : undefined,
+      leapYearFlags:
+        this._leapYearFlags.length > 0 ? this._leapYearFlags : undefined,
       metadata: {
         calculationTimeMs: this._calculationTimeMs,
         precision: 'day',
@@ -394,7 +439,9 @@ export class DurationResult implements DurationParts, IFormattableDuration {
     if (this._leapYearFlags && this._leapYearFlags.length > 0) {
       for (const flag of this._leapYearFlags) {
         if (flag.isLeap) {
-          steps.push(`${flag.year} is a leap year (February has ${flag.daysInFebruary} days)`);
+          steps.push(
+            `${flag.year} is a leap year (February has ${flag.daysInFebruary} days)`,
+          );
         }
       }
     }
@@ -407,7 +454,7 @@ export class DurationResult implements DurationParts, IFormattableDuration {
       this.minutes > 0 ? `${this.minutes}min` : '',
       this.seconds > 0 ? `${this.seconds}s` : '',
     ]
-      .filter(p => p.length > 0)
+      .filter((p) => p.length > 0)
       .join(' ');
 
     steps.push(`Total: ${totalParts || '0'}`);
@@ -481,7 +528,7 @@ export class TimeGuard implements ITimeGuard {
     return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   }
 
-  private static toDurationParts(duration: any): DurationParts {
+  private static toDurationParts(duration: TemporalDuration): DurationParts {
     return {
       years: Math.floor(duration.years || 0),
       months: Math.floor(duration.months || 0),
@@ -508,7 +555,10 @@ export class TimeGuard implements ITimeGuard {
     // Convert to ZonedDateTime if timezone is specified
     if (this.config.timezone && this.config.timezone !== 'UTC') {
       try {
-        this.temporal = (this.temporal as any).toZonedDateTime(this.config.timezone);
+        const zoned = (this.temporal as { toZonedDateTime(tz: string): TemporalZonedDateTimePolyfill }).toZonedDateTime(
+          this.config.timezone,
+        );
+        this.temporal = zoned;
       } catch {
         // Keep as PlainDateTime if timezone conversion fails
       }
@@ -524,7 +574,7 @@ export class TimeGuard implements ITimeGuard {
   }
 
   static fromTemporal(
-    temporal: any, // Temporal.PlainDateTime | Temporal.ZonedDateTime
+    temporal: TemporalPlainDateTime | TemporalZonedDateTime,
     config?: ITimeGuardConfig,
   ): TimeGuard {
     const instance = new TimeGuard(undefined, config);
@@ -543,9 +593,8 @@ export class TimeGuard implements ITimeGuard {
     const t1 = TemporalAdapter.toPlainDateTime(date1.temporal);
     const t2 = TemporalAdapter.toPlainDateTime(date2.temporal);
 
-    const [earlier, later] = TemporalAdapter.compare(t1, t2) <= 0
-      ? [date1, date2]
-      : [date2, date1];
+    const [earlier, later] =
+      TemporalAdapter.compare(t1, t2) <= 0 ? [date1, date2] : [date2, date1];
 
     return earlier.until(later);
   }
@@ -562,7 +611,7 @@ export class TimeGuard implements ITimeGuard {
     return new TimeRange(startTg, endTg);
   }
 
-  toTemporal(): any {
+  toTemporal(): TemporalPlainDateTime | TemporalZonedDateTime {
     return this.temporal;
   }
 
@@ -621,8 +670,8 @@ export class TimeGuard implements ITimeGuard {
     const cloned = this.clone();
     cloned.config.timezone = timezone;
     try {
-      const plainDT = TemporalAdapter.toPlainDateTime(cloned.temporal);
-      cloned.temporal = (plainDT as any).toZonedDateTime(timezone);
+      const plainDT = TemporalAdapter.toPlainDateTime(cloned.temporal) as TemporalPlainDateTimePolyfill;
+      cloned.temporal = plainDT.toZonedDateTime(timezone);
     } catch {
       // Keep as PlainDateTime if timezone conversion fails
     }
@@ -631,11 +680,23 @@ export class TimeGuard implements ITimeGuard {
 
   format(pattern: string | FormatPreset): string {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    const knownPresets = ['iso', 'date', 'time', 'datetime', 'rfc2822', 'rfc3339', 'utc'];
+    const knownPresets = [
+      'iso',
+      'date',
+      'time',
+      'datetime',
+      'rfc2822',
+      'rfc3339',
+      'utc',
+    ];
     const formatPattern = knownPresets.includes(pattern as string)
       ? this.formatterInstance.getPreset(pattern as FormatPreset)
       : (pattern as string);
-    return this.formatterInstance.format(plainDT, formatPattern, this.config.locale);
+    return this.formatterInstance.format(
+      plainDT,
+      formatPattern,
+      this.config.locale,
+    );
   }
 
   get(component: Unit): number {
@@ -655,23 +716,34 @@ export class TimeGuard implements ITimeGuard {
     };
 
     if (component === 'week') {
-      return (plainDT as any).weekOfYear;
+      return (plainDT as TemporalPlainDateTimePolyfill).weekOfYear;
     }
 
-    return (plainDT as Record<string, any>)[unitMap[component]] as number;
+    return (plainDT as unknown as Record<string, unknown>)[unitMap[component]] as number;
   }
 
   add(units: Partial<Record<Unit, number>>): TimeGuard {
     let plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
 
-    const duration: any = {};
+    const duration: Record<Unit, number> = {
+      year: 0,
+      month: 0,
+      week: 0,
+      day: 0,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+      microsecond: 0,
+      nanosecond: 0,
+    };
     let hasValidFields = false;
-    
+
     Object.entries(units).forEach(([unit, value]) => {
       if (value !== undefined && value !== 0) {
         const num = Number(value);
         if (Number.isFinite(num)) {
-          duration[unit + 's'] = Math.trunc(num);
+          (duration as Record<string, number>)[unit + 's'] = Math.trunc(num);
           hasValidFields = true;
         }
       }
@@ -681,7 +753,7 @@ export class TimeGuard implements ITimeGuard {
       return this;
     }
 
-    plainDT = (plainDT as any).add(duration);
+    plainDT = (plainDT as TemporalPlainDateTimePolyfill).add(duration as DurationLike);
     return TimeGuard.fromTemporal(plainDT, this.config);
   }
 
@@ -699,7 +771,7 @@ export class TimeGuard implements ITimeGuard {
   diff(other: TimeGuard, options: IDiffOptions): DiffResult;
   diff(
     other: TimeGuard,
-    unitOrOptions?: Unit | IDiffOptions
+    unitOrOptions?: Unit | IDiffOptions,
   ): DiffResult | number {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
@@ -719,9 +791,12 @@ export class TimeGuard implements ITimeGuard {
 
     if (typeof unitOrOptions === 'string') {
       const unit = unitOrOptions;
-      const mappedUnit = unitMap[unit];
-      const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: unit });
-      return Math.round((duration as any)[mappedUnit] || 0);
+      const mappedUnit = unitMap[unit] as keyof { years?: number; months?: number; weeks?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number; microseconds?: number; nanoseconds?: number };
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
+        smallestUnit: unit,
+      });
+      const durationObj = duration as unknown as Record<string, number | undefined>;
+      return Math.round(durationObj[mappedUnit] || 0);
     }
 
     const options = (unitOrOptions as IDiffOptions) || {};
@@ -730,22 +805,32 @@ export class TimeGuard implements ITimeGuard {
     const locale = options.locale || this.config.locale;
 
     if (mode === 'exact') {
-      const mappedUnit = unitMap[unit];
-      const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: unit });
-      const result = Math.round((duration as any)[mappedUnit] || 0);
+      const mappedUnit = unitMap[unit] as keyof { years?: number; months?: number; weeks?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number; microseconds?: number; nanoseconds?: number };
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
+        smallestUnit: unit,
+      });
+      const durationObj = duration as unknown as Record<string, number | undefined>;
+      const result = Math.round(durationObj[mappedUnit] || 0);
 
       if (unitOrOptions === undefined || typeof unitOrOptions === 'object') {
         const totalMs = calculateTotalMs(duration);
-        return new DiffResult(Math.round(totalMs), this, other, mode, undefined, locale);
+        return new DiffResult(
+          Math.round(totalMs),
+          this,
+          other,
+          mode,
+          undefined,
+          locale,
+        );
       }
 
       return result;
     }
 
     if (mode === 'calendar') {
-      const duration = (plainDT1 as any).since(plainDT2, {
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
         largestUnit: 'month',
-        smallestUnit: 'millisecond'
+        smallestUnit: 'millisecond',
       });
 
       const breakdownData: DurationParts = {
@@ -760,12 +845,28 @@ export class TimeGuard implements ITimeGuard {
       };
 
       const totalMs = calculateTotalMs(duration);
-      return new DiffResult(Math.round(totalMs), this, other, mode, breakdownData, locale);
+      return new DiffResult(
+        Math.round(totalMs),
+        this,
+        other,
+        mode,
+        breakdownData,
+        locale,
+      );
     }
 
-    const duration = (plainDT1 as any).since(plainDT2, { smallestUnit: 'millisecond' });
+    const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
+      smallestUnit: 'millisecond',
+    });
     const totalMs = calculateTotalMs(duration);
-    return new DiffResult(Math.round(totalMs), this, other, mode, undefined, locale);
+    return new DiffResult(
+      Math.round(totalMs),
+      this,
+      other,
+      mode,
+      undefined,
+      locale,
+    );
   }
 
   isBefore(other: TimeGuard): boolean {
@@ -782,10 +883,12 @@ export class TimeGuard implements ITimeGuard {
 
   isSame(other: TimeGuard, unit?: Unit): boolean {
     if (!unit) {
-      return TemporalAdapter.compare(
-        TemporalAdapter.toPlainDateTime(this.temporal),
-        TemporalAdapter.toPlainDateTime(other.temporal),
-      ) === 0;
+      return (
+        TemporalAdapter.compare(
+          TemporalAdapter.toPlainDateTime(this.temporal),
+          TemporalAdapter.toPlainDateTime(other.temporal),
+        ) === 0
+      );
     }
 
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
@@ -795,36 +898,38 @@ export class TimeGuard implements ITimeGuard {
       case 'year':
         return plainDT1.year === plainDT2.year;
       case 'month':
-        return plainDT1.year === plainDT2.year && plainDT1.month === plainDT2.month;
+        return (
+          plainDT1.year === plainDT2.year && plainDT1.month === plainDT2.month
+        );
       case 'day':
         return (
-          plainDT1.year === plainDT2.year
-          && plainDT1.month === plainDT2.month
-          && plainDT1.day === plainDT2.day
+          plainDT1.year === plainDT2.year &&
+          plainDT1.month === plainDT2.month &&
+          plainDT1.day === plainDT2.day
         );
       case 'hour':
         return (
-          plainDT1.year === plainDT2.year
-          && plainDT1.month === plainDT2.month
-          && plainDT1.day === plainDT2.day
-          && plainDT1.hour === plainDT2.hour
+          plainDT1.year === plainDT2.year &&
+          plainDT1.month === plainDT2.month &&
+          plainDT1.day === plainDT2.day &&
+          plainDT1.hour === plainDT2.hour
         );
       case 'minute':
         return (
-          plainDT1.year === plainDT2.year
-          && plainDT1.month === plainDT2.month
-          && plainDT1.day === plainDT2.day
-          && plainDT1.hour === plainDT2.hour
-          && plainDT1.minute === plainDT2.minute
+          plainDT1.year === plainDT2.year &&
+          plainDT1.month === plainDT2.month &&
+          plainDT1.day === plainDT2.day &&
+          plainDT1.hour === plainDT2.hour &&
+          plainDT1.minute === plainDT2.minute
         );
       case 'second':
         return (
-          plainDT1.year === plainDT2.year
-          && plainDT1.month === plainDT2.month
-          && plainDT1.day === plainDT2.day
-          && plainDT1.hour === plainDT2.hour
-          && plainDT1.minute === plainDT2.minute
-          && plainDT1.second === plainDT2.second
+          plainDT1.year === plainDT2.year &&
+          plainDT1.month === plainDT2.month &&
+          plainDT1.day === plainDT2.day &&
+          plainDT1.hour === plainDT2.hour &&
+          plainDT1.minute === plainDT2.minute &&
+          plainDT1.second === plainDT2.second
         );
       default:
         return false;
@@ -860,8 +965,14 @@ export class TimeGuard implements ITimeGuard {
     const hasStartBracket = inclusivity[0] === '[';
     const hasEndBracket = inclusivity[1] === ']';
 
-    return (hasStartBracket ? afterStart : TemporalAdapter.compare(plainDT, plainStart) > 0)
-      && (hasEndBracket ? beforeEnd : TemporalAdapter.compare(plainDT, plainEnd) < 0);
+    return (
+      (hasStartBracket
+        ? afterStart
+        : TemporalAdapter.compare(plainDT, plainStart) > 0) &&
+      (hasEndBracket
+        ? beforeEnd
+        : TemporalAdapter.compare(plainDT, plainEnd) < 0)
+    );
   }
 
   clone(): TimeGuard {
@@ -909,19 +1020,19 @@ export class TimeGuard implements ITimeGuard {
         break;
     }
 
-    const updated = (plainDT as any).with(values);
+    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(values as Record<string, unknown>);
     return TimeGuard.fromTemporal(updated, this.config);
   }
 
   endOf(unit: Unit): TimeGuard {
     const start = this.startOf(unit);
-    const next = start.add({ [unit]: 1 } as any).subtract({ millisecond: 1 });
+    const next = start.add({ [unit]: 1 } as Partial<Record<Unit, number>>).subtract({ millisecond: 1 } as Partial<Record<Unit, number>>);
     return next;
   }
 
   set(values: Partial<Record<Unit, number>>): TimeGuard {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    const updated = (plainDT as any).with(values);
+    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(values as Record<string, unknown>);
     return TimeGuard.fromTemporal(updated, this.config);
   }
 
@@ -953,22 +1064,22 @@ export class TimeGuard implements ITimeGuard {
     return TemporalAdapter.toPlainDateTime(this.temporal).millisecond;
   }
 
-  dayOfWeek(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as any).dayOfWeek;
+dayOfWeek(): number {
+    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).dayOfWeek;
   }
 
   dayOfYear(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as any).dayOfYear;
+    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).dayOfYear;
   }
 
   weekOfYear(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as any).weekOfYear;
+    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).weekOfYear;
   }
 
   daysInMonth(): number {
-    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    const nextMonth = (plainDT as any).add({ months: 1 }).with({ day: 1 });
-    const lastDay = (nextMonth as any).subtract({ days: 1 });
+    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill;
+    const nextMonth = plainDT.add({ months: 1 }).with({ day: 1 });
+    const lastDay = nextMonth.subtract({ days: 1 });
     return lastDay.day;
   }
 
@@ -988,23 +1099,39 @@ export class TimeGuard implements ITimeGuard {
     const startTime = performance.now();
 
     try {
-      const temporalOptions: any = {};
-      if (options?.largestUnit) temporalOptions.largestUnit = options.largestUnit;
-      if (options?.smallestUnit) temporalOptions.smallestUnit = options.smallestUnit;
-      
-      const duration = (plainDT2 as any).since(plainDT1, Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined);
+      const temporalOptions: Record<string, string> = {};
+      if (options?.largestUnit) {
+        temporalOptions.largestUnit = options.largestUnit;
+      }
+      if (options?.smallestUnit) {
+        temporalOptions.smallestUnit = options.smallestUnit;
+      }
+
+      const duration = (plainDT2 as TemporalPlainDateTimePolyfill).since(
+        plainDT1,
+        Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined,
+      );
       const parts = TimeGuard.toDurationParts(duration);
-      
+
       const startYear = plainDT1.year;
       const endYear = plainDT2.year;
-      const leapYearFlags: Array<{ year: number; isLeap: boolean; daysInFebruary: number }> = [];
+      const leapYearFlags: Array<{
+        year: number;
+        isLeap: boolean;
+        daysInFebruary: number;
+      }> = [];
 
       for (let year = startYear; year <= endYear; year++) {
         const isLeap = TimeGuard.isLeapYearValue(year);
         leapYearFlags.push({ year, isLeap, daysInFebruary: isLeap ? 29 : 28 });
       }
 
-      const steps = this.generateUntilSteps(plainDT1, plainDT2, parts, leapYearFlags);
+      const steps = this.generateUntilSteps(
+        plainDT1,
+        plainDT2,
+        parts,
+        leapYearFlags,
+      );
       const endTime = performance.now();
       const calculationTimeMs = endTime - startTime;
 
@@ -1013,7 +1140,7 @@ export class TimeGuard implements ITimeGuard {
         endDate: plainDT2.toString(),
         steps,
         mode: 'exact',
-        leapYearFlags: leapYearFlags.filter(f => f.isLeap),
+        leapYearFlags: leapYearFlags.filter((f) => f.isLeap),
         calculationTimeMs,
       });
     } catch {
@@ -1027,60 +1154,86 @@ export class TimeGuard implements ITimeGuard {
   }
 
   private generateUntilSteps(
-    start: any,
-    end: any,
+    start: TemporalPlainDateTime,
+    end: TemporalPlainDateTime,
     parts: DurationParts,
-    leapYearFlags: Array<{ year: number; isLeap: boolean; daysInFebruary: number }>
+    leapYearFlags: Array<{
+      year: number;
+      isLeap: boolean;
+      daysInFebruary: number;
+    }>,
   ): string[] {
     const steps: string[] = [];
-    steps.push(`Parsed dates: ${start.year}-${String(start.month).padStart(2, '0')}-${String(start.day).padStart(2, '0')} (day ${start.dayOfYear} of ${TimeGuard.isLeapYearValue(start.year) ? 366 : 365})`);
-    steps.push(`to ${end.year}-${String(end.month).padStart(2, '0')}-${String(end.day).padStart(2, '0')} (day ${end.dayOfYear} of ${TimeGuard.isLeapYearValue(end.year) ? 366 : 365})`);
+    steps.push(
+      `Parsed dates: ${start.year}-${String(start.month).padStart(2, '0')}-${String(start.day).padStart(2, '0')} (day ${start.dayOfYear} of ${TimeGuard.isLeapYearValue(start.year) ? 366 : 365})`,
+    );
+    steps.push(
+      `to ${end.year}-${String(end.month).padStart(2, '0')}-${String(end.day).padStart(2, '0')} (day ${end.dayOfYear} of ${TimeGuard.isLeapYearValue(end.year) ? 366 : 365})`,
+    );
 
-    const leapYearsInRange = leapYearFlags.filter(f => f.isLeap);
+    const leapYearsInRange = leapYearFlags.filter((f) => f.isLeap);
     if (leapYearsInRange.length > 0) {
       for (const flag of leapYearsInRange) {
-        steps.push(`${flag.year} is a leap year (February has ${flag.daysInFebruary} days)`);
+        steps.push(
+          `${flag.year} is a leap year (February has ${flag.daysInFebruary} days)`,
+        );
       }
     }
 
-    if (parts.years > 0) steps.push(`Years: ${parts.years}`);
-    if (parts.months > 0) steps.push(`Months: ${parts.months}`);
-    if (parts.days > 0) steps.push(`Days: ${parts.days}`);
-    
+    if (parts.years > 0) { steps.push(`Years: ${parts.years}`); }
+    if (parts.months > 0) { steps.push(`Months: ${parts.months}`); }
+    if (parts.days > 0) { steps.push(`Days: ${parts.days}`); }
+
     if (parts.hours > 0 || parts.minutes > 0 || parts.seconds > 0) {
       const timeComponents = [];
-      if (parts.hours > 0) timeComponents.push(`${parts.hours}h`);
-      if (parts.minutes > 0) timeComponents.push(`${parts.minutes}m`);
-      if (parts.seconds > 0) timeComponents.push(`${parts.seconds}s`);
+      if (parts.hours > 0) { timeComponents.push(`${parts.hours}h`); }
+      if (parts.minutes > 0) { timeComponents.push(`${parts.minutes}m`); }
+      if (parts.seconds > 0) { timeComponents.push(`${parts.seconds}s`); }
       steps.push(`Time: ${timeComponents.join(' ')}`);
     }
 
-    const totalDays = (parts.years * 365.25) + (parts.months * 30.4375) + parts.days + (parts.hours / 24);
+    const totalDays =
+      parts.years * 365.25 +
+      parts.months * 30.4375 +
+      parts.days +
+      parts.hours / 24;
     steps.push(`Total: approximately ${totalDays.toFixed(2)} days`);
     return steps;
   }
 
   round(options: IRoundOptions = {}): TimeGuard {
-    const { smallestUnit = 'millisecond', roundingMode = 'halfExpand' } = options;
+    const { smallestUnit = 'millisecond', roundingMode = 'halfExpand' } =
+      options;
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
 
+    const polyfillDT = plainDT as TemporalPlainDateTimePolyfill;
     const unitValues: Record<Unit, number> = {
-      year: plainDT.year,
-      month: plainDT.month,
-      day: plainDT.day,
-      hour: plainDT.hour,
-      minute: plainDT.minute,
-      second: plainDT.second,
-      millisecond: plainDT.millisecond,
-      microsecond: (plainDT as any).microsecond || 0,
-      nanosecond: (plainDT as any).nanosecond || 0,
+      year: polyfillDT.year,
+      month: polyfillDT.month,
+      day: polyfillDT.day,
+      hour: polyfillDT.hour,
+      minute: polyfillDT.minute,
+      second: polyfillDT.second,
+      millisecond: polyfillDT.millisecond,
+      microsecond: polyfillDT.microsecond || 0,
+      nanosecond: polyfillDT.nanosecond || 0,
       week: 0,
     };
 
-    const unitOrder: Unit[] = ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond', 'microsecond', 'nanosecond'];
+    const unitOrder: Unit[] = [
+      'year',
+      'month',
+      'day',
+      'hour',
+      'minute',
+      'second',
+      'millisecond',
+      'microsecond',
+      'nanosecond',
+    ];
     const smallestIndex = unitOrder.indexOf(smallestUnit);
 
-    if (smallestIndex === -1) return this.clone();
+    if (smallestIndex === -1) { return this.clone(); }
 
     const roundedValues: Partial<Record<Unit, number>> = {};
     for (let i = 0; i < smallestIndex; i++) {
@@ -1095,17 +1248,22 @@ export class TimeGuard implements ITimeGuard {
       const nextUnitValue = unitValues[unitOrder[smallestIndex + 1]];
       const shouldRoundUp = (mode: string, nextVal: number): boolean => {
         switch (mode) {
-          case 'ceil': return nextVal > 0;
+          case 'ceil':
+            return nextVal > 0;
           case 'floor':
-          case 'trunc': return false;
+          case 'trunc':
+            return false;
           case 'halfExpand':
           case 'halfFloor':
-          case 'halfCeil': return nextVal >= 5;
-          case 'expand': return nextVal > 0;
-          default: return nextVal >= 5;
+          case 'halfCeil':
+            return nextVal >= 5;
+          case 'expand':
+            return nextVal > 0;
+          default:
+            return nextVal >= 5;
         }
       };
-      if (shouldRoundUp(roundingMode, nextUnitValue)) value += 1;
+      if (shouldRoundUp(roundingMode, nextUnitValue)) { value += 1; }
     }
 
     roundedValues[unit as Unit] = value;
@@ -1116,17 +1274,27 @@ export class TimeGuard implements ITimeGuard {
     return this.set(roundedValues);
   }
 
-  toPlainDate(): { year: number; month: number; day: number; dayOfWeek: number } {
-    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
+  toPlainDate(): {
+    year: number;
+    month: number;
+    day: number;
+    dayOfWeek: number;
+  } {
+    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill;
     return {
       year: plainDT.year,
       month: plainDT.month,
       day: plainDT.day,
-      dayOfWeek: (plainDT as any).dayOfWeek,
+      dayOfWeek: plainDT.dayOfWeek,
     };
   }
 
-  toPlainTime(): { hour: number; minute: number; second: number; millisecond: number } {
+  toPlainTime(): {
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+  } {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
     return {
       hour: plainDT.hour,
@@ -1140,20 +1308,25 @@ export class TimeGuard implements ITimeGuard {
     return this.set({ year, month, day });
   }
 
-  withTime(hour: number, minute: number = 0, second: number = 0, millisecond: number = 0): TimeGuard {
+  withTime(
+    hour: number,
+    minute: number = 0,
+    second: number = 0,
+    millisecond: number = 0,
+  ): TimeGuard {
     return this.set({ hour, minute, second, millisecond });
   }
 
   getOffset(): string {
-    return (this.temporal as any)?.offset || 'Z';
+    return (this.temporal as TemporalZonedDateTimePolyfill)?.offset || 'Z';
   }
 
   getOffsetNanoseconds(): number {
-    return (this.temporal as any)?.offsetNanoseconds || 0;
+    return (this.temporal as TemporalZonedDateTimePolyfill)?.offsetNanoseconds || 0;
   }
 
   getTimeZoneId(): string | null {
-    return (this.temporal as any)?.timeZoneId || null;
+    return (this.temporal as TemporalZonedDateTimePolyfill)?.timeZoneId || null;
   }
 
   startOfDay(): TimeGuard {
@@ -1170,23 +1343,39 @@ export class TimeGuard implements ITimeGuard {
     const startTime = performance.now();
 
     try {
-      const temporalOptions: any = {};
-      if (options?.largestUnit) temporalOptions.largestUnit = options.largestUnit;
-      if (options?.smallestUnit) temporalOptions.smallestUnit = options.smallestUnit;
-      
-      const duration = (plainDT1 as any).since(plainDT2, Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined);
+      const temporalOptions: Record<string, string> = {};
+      if (options?.largestUnit) {
+        temporalOptions.largestUnit = options.largestUnit;
+      }
+      if (options?.smallestUnit) {
+        temporalOptions.smallestUnit = options.smallestUnit;
+      }
+
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
+        plainDT2,
+        Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined,
+      );
       const parts = TimeGuard.toDurationParts(duration);
 
       const startYear = plainDT2.year;
       const endYear = plainDT1.year;
-      const leapYearFlags: Array<{ year: number; isLeap: boolean; daysInFebruary: number }> = [];
+      const leapYearFlags: Array<{
+        year: number;
+        isLeap: boolean;
+        daysInFebruary: number;
+      }> = [];
 
       for (let year = startYear; year <= endYear; year++) {
         const isLeap = TimeGuard.isLeapYearValue(year);
         leapYearFlags.push({ year, isLeap, daysInFebruary: isLeap ? 29 : 28 });
       }
 
-      const steps = this.generateUntilSteps(plainDT2, plainDT1, parts, leapYearFlags);
+      const steps = this.generateUntilSteps(
+        plainDT2,
+        plainDT1,
+        parts,
+        leapYearFlags,
+      );
       const endTime = performance.now();
       const calculationTimeMs = endTime - startTime;
 
@@ -1195,7 +1384,7 @@ export class TimeGuard implements ITimeGuard {
         endDate: plainDT1.toString(),
         steps,
         mode: 'exact',
-        leapYearFlags: leapYearFlags.filter(f => f.isLeap),
+        leapYearFlags: leapYearFlags.filter((f) => f.isLeap),
         calculationTimeMs,
       });
     } catch {
@@ -1211,24 +1400,34 @@ export class TimeGuard implements ITimeGuard {
   toDurationString(other?: TimeGuard): string {
     const duration = other ? this.until(other) : this.until(TimeGuard.now());
     const parts: string[] = [];
-    if (duration.years) parts.push(`${duration.years}Y`);
-    if (duration.months) parts.push(`${duration.months}M`);
-    if (duration.days) parts.push(`${duration.days}D`);
+    if (duration.years) { parts.push(`${duration.years}Y`); }
+    if (duration.months) { parts.push(`${duration.months}M`); }
+    if (duration.days) { parts.push(`${duration.days}D`); }
 
     const timeParts: string[] = [];
-    if (duration.hours) timeParts.push(`${duration.hours}H`);
-    if (duration.minutes) timeParts.push(`${duration.minutes}M`);
-    if (duration.seconds) timeParts.push(`${duration.seconds}S`);
+    if (duration.hours) { timeParts.push(`${duration.hours}H`); }
+    if (duration.minutes) { timeParts.push(`${duration.minutes}M`); }
+    if (duration.seconds) { timeParts.push(`${duration.seconds}S`); }
 
     const result = `P${parts.join('')}${timeParts.length > 0 ? 'T' + timeParts.join('') : ''}`;
     return result === 'P' ? 'PT0S' : result;
   }
 
-  isPast(): boolean { return this.isBefore(TimeGuard.now()); }
-  isFuture(): boolean { return this.isAfter(TimeGuard.now()); }
-  isToday(): boolean { return this.isSame(TimeGuard.now(), 'day'); }
-  isTomorrow(): boolean { return this.isSame(TimeGuard.now().add({ day: 1 }), 'day'); }
-  isYesterday(): boolean { return this.isSame(TimeGuard.now().subtract({ day: 1 }), 'day'); }
+  isPast(): boolean {
+    return this.isBefore(TimeGuard.now());
+  }
+  isFuture(): boolean {
+    return this.isAfter(TimeGuard.now());
+  }
+  isToday(): boolean {
+    return this.isSame(TimeGuard.now(), 'day');
+  }
+  isTomorrow(): boolean {
+    return this.isSame(TimeGuard.now().add({ day: 1 }), 'day');
+  }
+  isYesterday(): boolean {
+    return this.isSame(TimeGuard.now().subtract({ day: 1 }), 'day');
+  }
 }
 
 // --- Exports ---
@@ -1268,7 +1467,12 @@ export { TemporalAdapter } from './adapters/temporal.adapter';
 export { LocaleManager, EN_LOCALE, ES_LOCALE };
 
 // Locale exports (all locales)
-export { getAvailableLocales, LOCALES_COUNT, ALL_LOCALES, registerAllLocales } from './locales/index';
+export {
+  getAvailableLocales,
+  LOCALES_COUNT,
+  ALL_LOCALES,
+  registerAllLocales,
+} from './locales/index';
 
 // Formatter exports
 export { DateFormatter } from './formatters/date.formatter';
@@ -1294,13 +1498,32 @@ export * from './plugins/index';
 export { PluginManager } from './plugins/manager';
 
 // Plugin exports (all plugins)
-export { RelativeTimePlugin, default as relativeTimePlugin } from './plugins/relative-time';
-export type { RelativeTimeConfig, RelativeTimeFormats, RelativeTimeThreshold } from './plugins/relative-time/types';
+export {
+  RelativeTimePlugin,
+  default as relativeTimePlugin,
+} from './plugins/relative-time';
+export type {
+  RelativeTimeConfig,
+  RelativeTimeFormats,
+  RelativeTimeThreshold,
+} from './plugins/relative-time/types';
 
-export { DurationPlugin, Duration, default as durationPlugin } from './plugins/duration';
-export type { IDuration, DurationInput, DurationObject, DurationUnit } from './plugins/duration/types';
+export {
+  DurationPlugin,
+  Duration,
+  default as durationPlugin,
+} from './plugins/duration';
+export type {
+  IDuration,
+  DurationInput,
+  DurationObject,
+  DurationUnit,
+} from './plugins/duration/types';
 
-export { AdvancedFormatPlugin, default as advancedFormatPlugin } from './plugins/advanced-format';
+export {
+  AdvancedFormatPlugin,
+  default as advancedFormatPlugin,
+} from './plugins/advanced-format';
 
 // Factory function (fluent API)
 export function timeGuard(input?: unknown, config?: ITimeGuardConfig) {

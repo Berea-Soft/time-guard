@@ -52,7 +52,9 @@ export class PluginManager {
     config?: unknown,
   ): void {
     const manager = PluginManager.getInstance();
-    plugins.forEach(plugin => manager.register(plugin, timeGuardClass, config));
+    plugins.forEach((plugin) =>
+      manager.register(plugin, timeGuardClass, config),
+    );
   }
 
   /**
@@ -110,14 +112,20 @@ export class PluginManager {
     config?: unknown,
   ): void {
     if (this.plugins.has(plugin.name)) {
-      console.warn(`Plugin "${plugin.name}" is already registered. Skipping...`);
+      console.warn(
+        `Plugin "${plugin.name}" is already registered. Skipping...`,
+      );
       return;
     }
 
     try {
       plugin.install(timeGuardClass, config);
       this.plugins.set(plugin.name, plugin);
-      console.debug(`Plugin "${plugin.name}" v${plugin.version} registered successfully`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          `Plugin "${plugin.name}" v${plugin.version} registered successfully`,
+        );
+      }
     } catch (error) {
       console.error(`Failed to register plugin "${plugin.name}":`, error);
       throw new Error(

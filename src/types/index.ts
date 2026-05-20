@@ -5,6 +5,86 @@
  * Temporal types are provided natively by TypeScript (lib.esnext.temporal).
  */
 
+import type { Temporal } from '@js-temporal/polyfill';
+
+export type TemporalPlainDateTime = Temporal.PlainDateTime;
+export type TemporalZonedDateTime = Temporal.ZonedDateTime;
+export type TemporalPlainDate = Temporal.PlainDate;
+export type TemporalPlainTime = Temporal.PlainTime;
+export type TemporalDuration = Temporal.Duration;
+
+export interface TemporalPlainDateTimeExtended extends TemporalPlainDateTime {
+  dayOfWeek: number;
+  dayOfYear: number;
+  weekOfYear: number;
+  yearOfWeek: number;
+  microsecond: number;
+  nanosecond: number;
+  add<T extends TemporalPlainDateTime>(duration: TemporalDuration | Record<string, unknown>): T;
+  subtract<T extends TemporalPlainDateTime>(duration: TemporalDuration | Record<string, unknown>): T;
+  with<T extends TemporalPlainDateTime>(fields: Record<string, unknown>): T;
+}
+
+export interface TemporalZonedDateTimeExtended extends TemporalZonedDateTime {
+  offset: string;
+  offsetNanoseconds: number;
+  timeZoneId: string;
+}
+
+export interface TemporalDurationExtended extends TemporalDuration {
+  abs<T extends TemporalDuration>(this: T): T;
+}
+
+export interface TemporalDurationLike {
+  years?: number;
+  months?: number;
+  weeks?: number;
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+  milliseconds?: number;
+  microseconds?: number;
+  nanoseconds?: number;
+}
+
+export type DurationLike = TemporalDuration | TemporalDurationLike | Record<string, unknown>;
+
+export interface TemporalPlainDateTimePolyfill extends TemporalPlainDateTime {
+  toZonedDateTime(timeZone: string): TemporalZonedDateTime;
+  dayOfWeek: number;
+  dayOfYear: number;
+  weekOfYear: number;
+  yearOfWeek: number;
+  add(duration: DurationLike): TemporalPlainDateTimePolyfill;
+  subtract(duration: DurationLike): TemporalPlainDateTimePolyfill;
+  with(fields: Record<string, unknown>): TemporalPlainDateTimePolyfill;
+  since(other: TemporalPlainDateTime, options?: Record<string, unknown>): TemporalDuration;
+}
+
+export interface TemporalZonedDateTimePolyfill extends TemporalZonedDateTime {
+  offset: string;
+  offsetNanoseconds: number;
+  timeZoneId: string;
+  toPlainDateTime(): TemporalPlainDateTime;
+}
+
+export interface TemporalLike {
+  toPlainDateTime(): TemporalPlainDateTime;
+  toPlainDate?(): TemporalPlainDate;
+  toPlainTime?(): TemporalPlainTime;
+}
+
+export type DateInput =
+  | TemporalPlainDateTime
+  | TemporalZonedDateTime
+  | TemporalPlainDate
+  | TemporalPlainTime
+  | Date
+  | string
+  | number
+  | Record<string, unknown>;
+
 /**
  * Unit type for date/time operations
  */
@@ -23,7 +103,14 @@ export type Unit =
 /**
  * Format preset strings for common patterns
  */
-export type FormatPreset = 'iso' | 'date' | 'time' | 'datetime' | 'rfc2822' | 'rfc3339' | 'utc';
+export type FormatPreset =
+  | 'iso'
+  | 'date'
+  | 'time'
+  | 'datetime'
+  | 'rfc2822'
+  | 'rfc3339'
+  | 'utc';
 
 /**
  * Duration-like object for arithmetic operations
@@ -46,7 +133,15 @@ export interface IDuration {
  */
 export interface IRoundOptions {
   smallestUnit?: Unit;
-  roundingMode?: 'ceil' | 'floor' | 'expand' | 'trunc' | 'halfExpand' | 'halfFloor' | 'halfCeil' | 'halfTrunc';
+  roundingMode?:
+    | 'ceil'
+    | 'floor'
+    | 'expand'
+    | 'trunc'
+    | 'halfExpand'
+    | 'halfFloor'
+    | 'halfCeil'
+    | 'halfTrunc';
   roundingIncrement?: number;
 }
 
@@ -54,8 +149,24 @@ export interface IRoundOptions {
  * Duration options for normalizing time differences
  */
 export interface IDurationOptions {
-  largestUnit?: 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond';
-  smallestUnit?: 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond';
+  largestUnit?:
+    | 'year'
+    | 'month'
+    | 'week'
+    | 'day'
+    | 'hour'
+    | 'minute'
+    | 'second'
+    | 'millisecond';
+  smallestUnit?:
+    | 'year'
+    | 'month'
+    | 'week'
+    | 'day'
+    | 'hour'
+    | 'minute'
+    | 'second'
+    | 'millisecond';
 }
 
 /**
@@ -139,7 +250,7 @@ export interface IHumanizeOptions {
    */
   locale?: string;
   /**
-   * Show full breakdown (e.g., "2 months and 5 days") 
+   * Show full breakdown (e.g., "2 months and 5 days")
    * or just largest unit (e.g., "2 months")
    * @default false (largest unit only with Intl.RelativeTimeFormat style)
    */
@@ -168,17 +279,17 @@ export interface IDurationResult extends DurationParts {
   /**
    * Get total duration in specified unit (date-fns style)
    * Perfect for business metrics: payments, analytics, calculations
-   * 
+   *
    * Conversion factors account for:
    * - Leap years (1 year = 365.25 days)
    * - Average month length (1 month = 30.4375 days)
-   * 
+   *
    * @example
    * duration.total('days')    // 65
    * duration.total('months')  // 2.166... (65 / 30.4375)
    * duration.total('hours')   // 1560
    * duration.total('seconds') // 5616000
-   * 
+   *
    * Use cases:
    * - Billing calculations: `duration.total('days') * dailyRate`
    * - Performance metrics: `duration.total('milliseconds')`
@@ -201,12 +312,12 @@ export interface IDurationResult extends DurationParts {
   /**
    * Explain the calculation - killer feature for debugging and education
    * Returns detailed breakdown of how the duration was calculated
-   * 
+   *
    * Perfect for:
    * - Debugging complex date calculations
    * - Educational purposes (showing date math)
    * - Auditing time-based business logic
-   * 
+   *
    * @example
    * duration.explain()
    * // {
@@ -224,7 +335,7 @@ export interface IDurationResult extends DurationParts {
  * Duration explanation object for debugging and education
  * Provides transparent insight into calculation methodology
  * Perfect for: debugging, auditing, educational purposes
- * 
+ *
  * @example
  * duration.explain()
  * // {
@@ -356,7 +467,7 @@ export interface ITimeGuardConfig {
  * Interface for date/time parsing strategy (Strategy Pattern)
  */
 export interface IDateParser {
-  parse(input: unknown): any | null; // Temporal.PlainDateTime
+  parse(input: unknown): TemporalPlainDateTime | null;
   canHandle(input: unknown): boolean;
 }
 
@@ -364,7 +475,7 @@ export interface IDateParser {
  * Interface for date/time formatting (Strategy Pattern)
  */
 export interface IDateFormatter {
-  format(date: any, pattern: string): string; // Temporal.PlainDateTime
+  format(date: TemporalPlainDateTime | TemporalZonedDateTime, pattern: string): string;
   getPreset(preset: FormatPreset): string;
 }
 
@@ -398,7 +509,12 @@ export interface IDateQuery {
   isBefore(other: TimeGuard): boolean;
   isAfter(other: TimeGuard): boolean;
   isSame(other: TimeGuard, unit?: Unit): boolean;
-  isBetween(start: TimeGuard, end: TimeGuard, unit?: Unit, inclusivity?: '[)' | '()' | '[]' | '(]'): boolean;
+  isBetween(
+    start: TimeGuard,
+    end: TimeGuard,
+    unit?: Unit,
+    inclusivity?: '[)' | '()' | '[]' | '(]',
+  ): boolean;
 }
 
 /**
@@ -429,8 +545,8 @@ export interface IDateManipulation {
  * Interface for timezone operations
  */
 export interface ITimezoneAdapter {
-  toTimezone(date: any, timezone: string): any; // Temporal.PlainDateTime -> Temporal.ZonedDateTime
-  fromTimezone(date: any, targetTimezone: string): any; // Temporal.ZonedDateTime -> Temporal.PlainDateTime
+  toTimezone(date: TemporalPlainDateTime, timezone: string): TemporalZonedDateTime;
+  fromTimezone(date: TemporalZonedDateTime, targetTimezone: string): TemporalPlainDateTime;
   getOffset(timezone: string): number;
 }
 
@@ -438,13 +554,11 @@ export interface ITimezoneAdapter {
  * Main TimeGuard interface (Facade Pattern)
  */
 export interface ITimeGuard
-  extends IDateArithmetic,
-    IDateQuery,
-    IDateManipulation {
+  extends IDateArithmetic, IDateQuery, IDateManipulation {
   /**
    * Get the underlying Temporal date object
    */
-  toTemporal(): any; // Temporal.PlainDateTime | Temporal.ZonedDateTime
+  toTemporal(): TemporalPlainDateTime | TemporalZonedDateTime;
 
   /**
    * Get as JavaScript Date (compatibility)
@@ -509,12 +623,22 @@ export interface ITimeGuard
   /**
    * Convert to PlainDate object
    */
-  toPlainDate(): { year: number; month: number; day: number; dayOfWeek: number };
+  toPlainDate(): {
+    year: number;
+    month: number;
+    day: number;
+    dayOfWeek: number;
+  };
 
   /**
    * Convert to PlainTime object
    */
-  toPlainTime(): { hour: number; minute: number; second: number; millisecond: number };
+  toPlainTime(): {
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+  };
 
   /**
    * Get timezone offset (±HH:mm format or Z)
@@ -592,7 +716,7 @@ export interface ITimeGuardPlugin {
 export interface ITimeGuardFactory {
   create(input?: unknown, config?: ITimeGuardConfig): ITimeGuard;
   now(config?: ITimeGuardConfig): ITimeGuard;
-  fromTemporal(date: any, config?: ITimeGuardConfig): ITimeGuard; // Temporal.PlainDateTime | Temporal.ZonedDateTime
+  fromTemporal(date: TemporalPlainDateTime | TemporalZonedDateTime, config?: ITimeGuardConfig): ITimeGuard;
 }
 
 /**
@@ -616,9 +740,13 @@ export declare class DurationResult implements IDurationResult {
       endDate?: string;
       steps?: string[];
       mode?: 'exact' | 'estimated';
-      leapYearFlags?: Array<{ year: number; isLeap: boolean; daysInFebruary: number }>;
+      leapYearFlags?: Array<{
+        year: number;
+        isLeap: boolean;
+        daysInFebruary: number;
+      }>;
       calculationTimeMs?: number;
-    }
+    },
   );
   years: number;
   months: number;
@@ -655,4 +783,3 @@ export declare class TimeRange {
   }): string;
   in(unit: Unit): number;
 }
-

@@ -24,7 +24,9 @@ describe('TimeGuard - Advanced Features', () => {
 
   describe('TemporalAdapter utility class', () => {
     it('should parse PlainDateTime', () => {
-      const plainDT = TemporalAdapter.parseToPlainDateTime('2024-03-13T14:30:45');
+      const plainDT = TemporalAdapter.parseToPlainDateTime(
+        '2024-03-13T14:30:45',
+      );
       expect(plainDT).toBeDefined();
     });
 
@@ -196,7 +198,10 @@ describe('TimeGuard - Advanced Features', () => {
 
     it('should maintain type safety through chaining', () => {
       const tg = new TimeGuard('2024-03-13');
-      const chained = tg.add({ day: 1 }).add({ hour: 5 }).subtract({ minute: 30 });
+      const chained = tg
+        .add({ day: 1 })
+        .add({ hour: 5 })
+        .subtract({ minute: 30 });
       expect(chained).toBeInstanceOf(TimeGuard);
       expect(typeof chained.format('YYYY-MM-DD')).toBe('string');
     });
@@ -248,10 +253,7 @@ describe('TimeGuard - Advanced Features', () => {
       const timeStart = performance.now();
 
       for (let i = 0; i < 1000; i++) {
-        TimeGuard.now()
-          .add({ day: i })
-          .format('YYYY-MM-DD')
-          .length;
+        TimeGuard.now().add({ day: i }).format('YYYY-MM-DD').length;
       }
 
       const timeEnd = performance.now();

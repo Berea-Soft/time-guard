@@ -2,7 +2,15 @@
  * Duration Plugin Types
  */
 
-export type DurationUnit = 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds';
+export type DurationUnit =
+  | 'years'
+  | 'months'
+  | 'weeks'
+  | 'days'
+  | 'hours'
+  | 'minutes'
+  | 'seconds'
+  | 'milliseconds';
 
 export interface DurationInput {
   years?: number;

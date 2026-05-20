@@ -18,5 +18,3 @@ try {
 import { LocaleManager } from '../src/locales/locale.manager';
 import { ALL_LOCALES } from '../src/locales/index';
 LocaleManager.getInstance().loadLocales(ALL_LOCALES);
-
-

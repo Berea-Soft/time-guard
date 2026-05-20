@@ -30,10 +30,23 @@ describe('TimeGuard Locales', () => {
 
   it('should format dates in all major locales', () => {
     const date = TimeGuard.from('2024-03-13');
-    const locales = ['en', 'es', 'fr', 'de', 'ja', 'zh-cn', 'pt-br', 'ru', 'ar', 'he', 'th', 'ko'];
+    const locales = [
+      'en',
+      'es',
+      'fr',
+      'de',
+      'ja',
+      'zh-cn',
+      'pt-br',
+      'ru',
+      'ar',
+      'he',
+      'th',
+      'ko',
+    ];
 
     console.log('\nDate formatting in different locales:');
-    locales.forEach(locale => {
+    locales.forEach((locale) => {
       try {
         const formatted = date.locale(locale).format('YYYY-MM-DD');
         console.log(`${locale.padEnd(8)}: ${formatted}`);
@@ -48,7 +61,7 @@ describe('TimeGuard Locales', () => {
     const testLocales = ['en', 'es', 'fr', 'de', 'ja', 'pt-br'];
 
     console.log('\nFull date formatting in different locales:');
-    testLocales.forEach(locale => {
+    testLocales.forEach((locale) => {
       try {
         const formatted = date.locale(locale).format('dddd, MMMM DD, YYYY');
         console.log(`${locale.padEnd(8)}: ${formatted}`);
@@ -61,42 +74,42 @@ describe('TimeGuard Locales', () => {
 
 /**
  * Quick reference for all supported locales
- * 
+ *
  * English variants (5):
  * - en: English (US)
  * - en-au: Australian English
  * - en-gb: British English
  * - en-ca: Canadian English
- * 
+ *
  * Spanish variants (3):
  * - es: Spanish
  * - es-mx: Mexican Spanish
  * - es-us: US Spanish
- * 
+ *
  * French (1):
  * - fr: French
- * 
+ *
  * German (1):
  * - de: German
- * 
+ *
  * Romance languages (3):
  * - it: Italian
  * - pt: Portuguese
  * - pt-br: Brazilian Portuguese
  * - ro: Romanian
- * 
+ *
  * Slavic languages (4):
  * - ru: Russian
  * - pl: Polish
  * - cs: Czech
  * - sk: Slovak
- * 
+ *
  * Nordic languages (4):
  * - sv: Swedish
  * - nb: Norwegian Bokmål
  * - da: Danish
  * - fi: Finnish
- * 
+ *
  * Asian languages (5):
  * - ja: Japanese
  * - zh-cn: Simplified Chinese
@@ -105,7 +118,7 @@ describe('TimeGuard Locales', () => {
  * - th: Thai
  * - vi: Vietnamese
  * - id: Indonesian
- * 
+ *
  * Other European (3):
  * - nl: Dutch
  * - el: Greek
@@ -113,12 +126,12 @@ describe('TimeGuard Locales', () => {
  * - eu: Basque
  * - ca: Catalan
  * - tr: Turkish
- * 
+ *
  * Middle Eastern & South Asian (3):
  * - ar: Arabic
  * - he: Hebrew
  * - hi: Hindi
- * 
+ *
  * Usage examples:
  * ```
  * // Use specific locale
@@ -126,7 +139,7 @@ describe('TimeGuard Locales', () => {
  * date.locale('es').format('MMMM DD, YYYY'); // "marzo 13, 2024"
  * date.locale('fr').format('DD MMMM YYYY'); // "13 mars 2024"
  * date.locale('ja').format('YYYY年MM月DD日'); // "2024年3月13日"
- * 
+ *
  * // Get list of all locales
  * import { getAvailableLocales } from 'time-guard';
  * const all = getAvailableLocales();

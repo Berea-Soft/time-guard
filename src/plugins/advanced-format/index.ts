@@ -6,7 +6,7 @@
 
 import type { ITimeGuardPlugin } from '../../types';
 import type { TimeGuard } from '../../index';
-import { Temporal } from '@js-temporal/polyfill';
+import type { Temporal } from '@js-temporal/polyfill';
 
 export class AdvancedFormatPlugin implements ITimeGuardPlugin {
   name = 'advanced-format';
@@ -19,63 +19,88 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
     // Store original format method
     const originalFormat = TimeGuardClass.prototype.format;
 
-    /**
-     * Extended format method with advanced tokens
-     */
-    (TimeGuardClass.prototype as any).format = function (pattern: string) {
+    (TimeGuardClass.prototype as unknown as { format: (pattern: string) => string }).format = function (pattern: string) {
       if (!pattern || typeof pattern !== 'string') {
         return originalFormat.call(this, pattern);
       }
 
-      // Check if pattern contains advanced tokens
       if (!/Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz?/.test(pattern)) {
         return originalFormat.call(this, pattern);
       }
 
-      // Get the underlying Temporal object
-      const temporal = this.toTemporal();
+      const temporal = (this as unknown as { toTemporal(): Temporal.PlainDateTime | Temporal.ZonedDateTime }).toTemporal();
       const temporal_dt =
         'toPlainDateTime' in temporal
-          ? (temporal as any).toPlainDateTime()
+          ? (temporal as Temporal.ZonedDateTime).toPlainDateTime()
           : (temporal as Temporal.PlainDateTime);
-      
+
       const ordinalFn = (n: number) => {
         const suffixes = ['th', 'st', 'nd', 'rd'];
         const v = n % 100;
         return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
       };
-      const padFn = (n: number, length: number) => String(n).padStart(length, '0');
-      const getISOWeek = (temporal: any) => {
+      const padFn = (n: number, length: number) =>
+        String(n).padStart(length, '0');
+      const getISOWeek = (temporal: Temporal.PlainDateTime) => {
         const jan4 = new Date(temporal.year, 0, 4);
         const week1Start = new Date(jan4);
-        week1Start.setDate(jan4.getDate() - jan4.getDay() + (jan4.getDay() === 0 ? -6 : 1));
-        const currentDate = new Date(temporal.year, temporal.month - 1, temporal.day);
-        const weekNum = Math.floor((currentDate.getTime() - week1Start.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+        week1Start.setDate(
+          jan4.getDate() - jan4.getDay() + (jan4.getDay() === 0 ? -6 : 1),
+        );
+        const currentDate = new Date(
+          temporal.year,
+          temporal.month - 1,
+          temporal.day,
+        );
+        const weekNum =
+          Math.floor(
+            (currentDate.getTime() - week1Start.getTime()) /
+              (7 * 24 * 60 * 60 * 1000),
+          ) + 1;
         return Math.max(1, weekNum);
       };
-      const getWeekOfYear = (temporal: any) => {
-        const weekNum = Math.ceil(((temporal.day + new Date(temporal.year, temporal.month - 1, 1).getDay()) / 7));
+      const getWeekOfYear = (temporal: Temporal.PlainDateTime) => {
+        const weekNum = Math.ceil(
+          (temporal.day +
+            new Date(temporal.year, temporal.month - 1, 1).getDay()) /
+            7,
+        );
         return Math.max(1, weekNum);
       };
-      const getISOWeekYear = (temporal: any) => {
-        const currentDate = new Date(temporal.year, temporal.month - 1, temporal.day);
-        const yearAdjust = currentDate.getTime() < new Date(temporal.year, 0, 1).getTime() ? -1 : currentDate.getTime() >= new Date(temporal.year + 1, 0, 1).getTime() ? 1 : 0;
+      const getISOWeekYear = (temporal: Temporal.PlainDateTime) => {
+        const currentDate = new Date(
+          temporal.year,
+          temporal.month - 1,
+          temporal.day,
+        );
+        const yearAdjust =
+          currentDate.getTime() < new Date(temporal.year, 0, 1).getTime()
+            ? -1
+            : currentDate.getTime() >=
+                new Date(temporal.year + 1, 0, 1).getTime()
+              ? 1
+              : 0;
         return temporal.year + yearAdjust;
       };
-      const getWeekYear = (temporal: any) => {
-        const yearAdjust = temporal.month === 1 && temporal.day < 4 ? -1 : temporal.month === 12 && temporal.day > 28 ? 1 : 0;
+      const getWeekYear = (temporal: Temporal.PlainDateTime) => {
+        const yearAdjust =
+          temporal.month === 1 && temporal.day < 4
+            ? -1
+            : temporal.month === 12 && temporal.day > 28
+              ? 1
+              : 0;
         return temporal.year + yearAdjust;
       };
 
       // Replace advanced tokens - wrap results in brackets to protect from standard formatter
-      let result = pattern.replace(
+      const result = pattern.replace(
         /Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz?/g,
         (match) => {
           let replacement = '';
           switch (match) {
             // Quarter
             case 'Q':
-              replacement = String(Math.ceil((temporal_dt.month) / 3));
+              replacement = String(Math.ceil(temporal_dt.month / 3));
               break;
 
             // Ordinal day
@@ -86,13 +111,19 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
             // Week of year (ISO)
             case 'W':
             case 'WW':
-              replacement = padFn(getISOWeek(temporal_dt), match === 'W' ? 1 : 2);
+              replacement = padFn(
+                getISOWeek(temporal_dt),
+                match === 'W' ? 1 : 2,
+              );
               break;
 
             // Week of year (locale)
             case 'w':
             case 'ww':
-              replacement = padFn(getWeekOfYear(temporal_dt), match === 'w' ? 1 : 2);
+              replacement = padFn(
+                getWeekOfYear(temporal_dt),
+                match === 'w' ? 1 : 2,
+              );
               break;
 
             // ISO week year
@@ -114,21 +145,19 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
 
             // Unix seconds timestamp
             case 'X':
-              replacement = String(Math.floor(this.valueOf() / 1000));
+              replacement = String(Math.floor((this as unknown as { valueOf(): number }).valueOf() / 1000));
               break;
 
-            // Unix milliseconds timestamp
             case 'x':
-              replacement = String(this.valueOf());
+              replacement = String((this as unknown as { valueOf(): number }).valueOf());
               break;
 
-            // Timezone offset
             case 'z':
-              replacement = `${this.getTimezoneOffset()}`;
+              replacement = `${(this as unknown as { getTimezoneOffset(): number }).getTimezoneOffset()}`;
               break;
 
             case 'zzz':
-              replacement = `${this.getTimezoneOffsetLong()}`;
+              replacement = `${(this as unknown as { getTimezoneOffsetLong(): string }).getTimezoneOffsetLong()}`;
               break;
 
             default:

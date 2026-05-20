@@ -161,7 +161,9 @@ describe('Temporal API Polyfill', () => {
     });
 
     it('should handle invalid ISO string parsing', () => {
-      expect(() => TemporalAdapter.parseISOString('invalid-date-string')).toBeDefined();
+      expect(() =>
+        TemporalAdapter.parseISOString('invalid-date-string'),
+      ).toBeDefined();
     });
 
     it('should handle timezone not found error', () => {

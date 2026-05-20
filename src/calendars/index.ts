@@ -15,9 +15,18 @@ export class IslamicCalendar implements ICalendarSystem {
   readonly locale = 'ar';
 
   private monthNames = [
-    'Muharram', 'Safar', 'Rabi al-awwal', 'Rabi al-thani',
-    'Jumada al-awwal', 'Jumada al-thani', 'Rajab', 'Sha\'ban',
-    'Ramadan', 'Shawwal', 'Dhu al-Qi\'dah', 'Dhu al-Hijjah'
+    'Muharram',
+    'Safar',
+    'Rabi al-awwal',
+    'Rabi al-thani',
+    'Jumada al-awwal',
+    'Jumada al-thani',
+    'Rajab',
+    "Sha'ban",
+    'Ramadan',
+    'Shawwal',
+    "Dhu al-Qi'dah",
+    'Dhu al-Hijjah',
   ];
 
   getMonthName(month: number): string {
@@ -39,8 +48,8 @@ export class IslamicCalendar implements ICalendarSystem {
   daysInMonth(year: number, month: number): number {
     // Islamic months: odd months have 30 days, even months have 29 days
     // except last month which has 30 on leap years
-    if (month % 2 === 1) return 30;
-    if (month === 12 && this.isLeapYear(year)) return 30;
+    if (month % 2 === 1) { return 30; }
+    if (month === 12 && this.isLeapYear(year)) { return 30; }
     return 29;
   }
 
@@ -59,8 +68,18 @@ export class HebrewCalendar implements ICalendarSystem {
   readonly locale = 'he';
 
   private monthNames = [
-    'Tishrei', 'Cheshvan', 'Kislev', 'Tevet', 'Shevat', 'Adar',
-    'Nisan', 'Iyar', 'Sivan', 'Tammuz', 'Av', 'Elul'
+    'Tishrei',
+    'Cheshvan',
+    'Kislev',
+    'Tevet',
+    'Shevat',
+    'Adar',
+    'Nisan',
+    'Iyar',
+    'Sivan',
+    'Tammuz',
+    'Av',
+    'Elul',
   ];
 
   getMonthName(month: number): string {
@@ -70,7 +89,15 @@ export class HebrewCalendar implements ICalendarSystem {
   getWeekdayName(day: number, short: boolean = false): string {
     const weekdays = short
       ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-      : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      : [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ];
     return weekdays[Math.max(0, Math.min(6, day - 1))];
   }
 
@@ -100,13 +127,33 @@ export class ChineseCalendar implements ICalendarSystem {
   readonly locale = 'zh';
 
   private monthNames = [
-    '正月', '二月', '三月', '四月', '五月', '六月',
-    '七月', '八月', '九月', '十月', '冬月', '腊月'
+    '正月',
+    '二月',
+    '三月',
+    '四月',
+    '五月',
+    '六月',
+    '七月',
+    '八月',
+    '九月',
+    '十月',
+    '冬月',
+    '腊月',
   ];
 
   private terrestrialBranches = [
-    '子', '丑', '寅', '卯', '辰', '巳',
-    '午', '未', '申', '酉', '戌', '亥'
+    '子',
+    '丑',
+    '寅',
+    '卯',
+    '辰',
+    '巳',
+    '午',
+    '未',
+    '申',
+    '酉',
+    '戌',
+    '亥',
   ];
 
   getMonthName(month: number): string {
@@ -151,8 +198,18 @@ export class JapaneseCalendar implements ICalendarSystem {
   readonly locale = 'ja';
 
   private monthNames = [
-    '1月', '2月', '3月', '4月', '5月', '6月',
-    '7月', '8月', '9月', '10月', '11月', '12月'
+    '1月',
+    '2月',
+    '3月',
+    '4月',
+    '5月',
+    '6月',
+    '7月',
+    '8月',
+    '9月',
+    '10月',
+    '11月',
+    '12月',
   ];
 
   getMonthName(month: number): string {
@@ -195,8 +252,18 @@ export class BuddhistCalendar implements ICalendarSystem {
   readonly locale = 'th';
 
   private monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   getMonthName(month: number): string {
@@ -204,9 +271,15 @@ export class BuddhistCalendar implements ICalendarSystem {
   }
 
   getWeekdayName(day: number): string {
-    return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][
-      Math.max(0, Math.min(6, day - 1))
-    ];
+    return [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ][Math.max(0, Math.min(6, day - 1))];
   }
 
   isLeapYear(year: number): boolean {
