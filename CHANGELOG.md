@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/Berea-Soft/time-guard/compare/v2.5.4...v2.6.0) (2026-04-22)
+
+
+### Features
+
+* enhance TemporalAdapter with finite integer validation and improve TimeGuard's handling of duration fields ([f3d387e](https://github.com/Berea-Soft/time-guard/commit/f3d387eba2cfbdc7b6d14c436a03ca064644226c))
+
 ## [2.5.4](https://github.com/Berea-Soft/time-guard/compare/v2.5.3...v2.5.4) (2026-04-21)
 
 
