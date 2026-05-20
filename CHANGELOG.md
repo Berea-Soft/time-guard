@@ -1,3 +1,10 @@
+## [2.6.1](https://github.com/Berea-Soft/time-guard/compare/v2.6.0...v2.6.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* add error logging for invalid fields in validatePlainDateTime method ([d73fbfa](https://github.com/Berea-Soft/time-guard/commit/d73fbfac5b9baa9e14e7799d15f421d8fced8c5e))
+
 # [2.6.0](https://github.com/Berea-Soft/time-guard/compare/v2.5.4...v2.6.0) (2026-04-22)
 
 
