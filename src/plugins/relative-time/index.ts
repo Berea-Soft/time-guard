@@ -66,22 +66,35 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
     /**
      * Get relative time string (e.g., "2 hours ago")
      */
-    (TimeGuardClass.prototype as unknown as { fromNow: (withoutSuffix?: boolean) => string }).fromNow = function (
-      withoutSuffix?: boolean,
-    ): string {
-      return plugin.formatRelativeTime(this as unknown as TimeGuard, false, withoutSuffix);
+    (
+      TimeGuardClass.prototype as unknown as {
+        fromNow: (withoutSuffix?: boolean) => string;
+      }
+    ).fromNow = function (withoutSuffix?: boolean): string {
+      return plugin.formatRelativeTime(
+        this as unknown as TimeGuard,
+        false,
+        withoutSuffix,
+      );
     };
 
-    (TimeGuardClass.prototype as unknown as { toNow: (withoutSuffix?: boolean) => string }).toNow = function (
-      withoutSuffix?: boolean,
-    ): string {
-      return plugin.formatRelativeTime(this as unknown as TimeGuard, true, withoutSuffix);
+    (
+      TimeGuardClass.prototype as unknown as {
+        toNow: (withoutSuffix?: boolean) => string;
+      }
+    ).toNow = function (withoutSuffix?: boolean): string {
+      return plugin.formatRelativeTime(
+        this as unknown as TimeGuard,
+        true,
+        withoutSuffix,
+      );
     };
 
-    (TimeGuardClass.prototype as unknown as { humanize: (other?: TimeGuard, withoutSuffix?: boolean) => string }).humanize = function (
-      other?: TimeGuard,
-      withoutSuffix?: boolean,
-    ): string {
+    (
+      TimeGuardClass.prototype as unknown as {
+        humanize: (other?: TimeGuard, withoutSuffix?: boolean) => string;
+      }
+    ).humanize = function (other?: TimeGuard, withoutSuffix?: boolean): string {
       if (other) {
         return plugin.formatRelativeTime(
           this as unknown as TimeGuard,
@@ -89,7 +102,11 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
           withoutSuffix,
         );
       }
-      return plugin.formatRelativeTime(this as unknown as TimeGuard, false, withoutSuffix);
+      return plugin.formatRelativeTime(
+        this as unknown as TimeGuard,
+        false,
+        withoutSuffix,
+      );
     };
   }
 

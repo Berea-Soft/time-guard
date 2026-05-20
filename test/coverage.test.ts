@@ -29,7 +29,9 @@ import {
   formatZeroDuration,
 } from '../src/utils/duration-locale';
 import { registerAllLocales, ALL_LOCALES } from '../src/locales/index';
-import relativeTimePlugin, { RelativeTimePlugin } from '../src/plugins/relative-time';
+import relativeTimePlugin, {
+  RelativeTimePlugin,
+} from '../src/plugins/relative-time';
 
 describe('Coverage Tests - Calendar Manager', () => {
   beforeEach(() => {
@@ -793,10 +795,18 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle round with different modes', () => {
     const tg = timeGuard('2024-04-15 14:30:45.123');
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'floor' })).toBeDefined();
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'ceil' })).toBeDefined();
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfExpand' })).toBeDefined();
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'trunc' })).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'floor' }),
+    ).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'ceil' }),
+    ).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'halfExpand' }),
+    ).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'trunc' }),
+    ).toBeDefined();
   });
 
   it('should handle Hebrew calendar methods', () => {
@@ -873,9 +883,15 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle round with halfExpand and other modes', () => {
     const tg = timeGuard('2024-04-15 14:30:35');
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' })).toBeDefined();
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' })).toBeDefined();
-    expect(tg.round({ smallestUnit: 'minute', roundingMode: 'expand' })).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' }),
+    ).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' }),
+    ).toBeDefined();
+    expect(
+      tg.round({ smallestUnit: 'minute', roundingMode: 'expand' }),
+    ).toBeDefined();
   });
 
   it('should handle advanced format with z and zzz', () => {
@@ -896,8 +912,12 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle round with halfFloor and halfCeil modes', () => {
     const tg1 = timeGuard('2024-04-15 14:30:25');
-    expect(tg1.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' })).toBeDefined();
-    expect(tg1.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' })).toBeDefined();
+    expect(
+      tg1.round({ smallestUnit: 'minute', roundingMode: 'halfFloor' }),
+    ).toBeDefined();
+    expect(
+      tg1.round({ smallestUnit: 'minute', roundingMode: 'halfCeil' }),
+    ).toBeDefined();
   });
 
   it('should handle humanize with other and withoutSuffix', () => {
@@ -940,7 +960,10 @@ describe('Coverage Tests - Missing Branches', () => {
   it('should handle diff with calendar mode and options', () => {
     const start = timeGuard('2024-01-01');
     const end = timeGuard('2024-06-15');
-    const diff = start.diff(end, 'millisecond', { mode: 'calendar', locale: 'es' });
+    const diff = start.diff(end, 'millisecond', {
+      mode: 'calendar',
+      locale: 'es',
+    });
     expect(diff).toBeDefined();
   });
 
@@ -1084,7 +1107,9 @@ describe('Coverage Tests - Missing Branches', () => {
     const badPlugin = {
       name: 'bad-plugin',
       version: '1.0.0',
-      install: () => { throw new Error('install failed'); },
+      install: () => {
+        throw new Error('install failed');
+      },
     };
     expect(() => PluginManager.use(badPlugin as any, TimeGuard)).toThrow();
     PluginManager.clear();
@@ -1093,7 +1118,10 @@ describe('Coverage Tests - Missing Branches', () => {
   it('should handle until with both largestUnit and smallestUnit', () => {
     const start = timeGuard('2024-01-01 10:30:00');
     const end = timeGuard('2024-06-15 14:45:30');
-    const result = start.until(end, { largestUnit: 'month', smallestUnit: 'second' });
+    const result = start.until(end, {
+      largestUnit: 'month',
+      smallestUnit: 'second',
+    });
     expect(result).toBeDefined();
   });
 
@@ -1222,7 +1250,10 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle round with unknown roundingMode', () => {
     const tg = timeGuard('2024-04-15 14:30:45.500');
-    const result = tg.round({ smallestUnit: 'second', roundingMode: 'unknown' as any });
+    const result = tg.round({
+      smallestUnit: 'second',
+      roundingMode: 'unknown' as any,
+    });
     expect(result).toBeDefined();
   });
 
@@ -1256,7 +1287,10 @@ describe('Coverage Tests - Missing Branches', () => {
   it('should handle since with options', () => {
     const start = timeGuard('2024-01-01 10:30:00');
     const end = timeGuard('2024-06-15 14:45:30');
-    const result = start.since(end, { largestUnit: 'month', smallestUnit: 'second' });
+    const result = start.since(end, {
+      largestUnit: 'month',
+      smallestUnit: 'second',
+    });
     expect(result).toBeDefined();
   });
 
@@ -1378,7 +1412,14 @@ describe('Coverage Tests - Missing Branches', () => {
   });
 
   it('should handle duration toObject', () => {
-    const dur = new Duration({ years: 1, months: 2, days: 3, hours: 4, minutes: 5, seconds: 6 });
+    const dur = new Duration({
+      years: 1,
+      months: 2,
+      days: 3,
+      hours: 4,
+      minutes: 5,
+      seconds: 6,
+    });
     const obj = dur.toObject();
     expect(obj.years).toBe(1);
     expect(obj.months).toBe(2);
@@ -1450,15 +1491,55 @@ describe('Coverage Tests - Missing Branches', () => {
   it('should handle loadLocales with custom locale', () => {
     const manager = LocaleManager.getInstance();
     manager.loadLocales({
-      'fr': {
+      fr: {
         name: 'fr',
-        months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
-        monthsShort: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-        weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+        months: [
+          'Janvier',
+          'Février',
+          'Mars',
+          'Avril',
+          'Mai',
+          'Juin',
+          'Juillet',
+          'Août',
+          'Septembre',
+          'Octobre',
+          'Novembre',
+          'Décembre',
+        ],
+        monthsShort: [
+          'Jan',
+          'Fév',
+          'Mar',
+          'Avr',
+          'Mai',
+          'Jun',
+          'Jul',
+          'Aoû',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Déc',
+        ],
+        weekdays: [
+          'Dimanche',
+          'Lundi',
+          'Mardi',
+          'Mercredi',
+          'Jeudi',
+          'Vendredi',
+          'Samedi',
+        ],
         weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
         weekdaysMin: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
         meridiem: { am: 'AM', pm: 'PM' },
-        formats: { iso: 'YYYY-MM-DD', date: 'DD/MM/YYYY', time: 'HH:mm:ss', datetime: 'DD/MM/YYYY HH:mm:ss', rfc2822: '' },
+        formats: {
+          iso: 'YYYY-MM-DD',
+          date: 'DD/MM/YYYY',
+          time: 'HH:mm:ss',
+          datetime: 'DD/MM/YYYY HH:mm:ss',
+          rfc2822: '',
+        },
       },
     });
     expect(manager.listLocales()).toContain('fr');

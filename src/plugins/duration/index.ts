@@ -68,9 +68,25 @@ export class Duration implements IDuration {
    */
   static between(from: TimeGuard, to: TimeGuard): Duration {
     // Calculate (to - from) using since() for proper duration
-    const fromDT = (from as unknown as { toTemporal(): Temporal.PlainDateTime }).toTemporal();
-    const toDT = (to as unknown as { toTemporal(): Temporal.PlainDateTime }).toTemporal();
-    const duration = (toDT as unknown as { since(other: Temporal.PlainDateTime): { years?: number; months?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number } }).since(fromDT);
+    const fromDT = (
+      from as unknown as { toTemporal(): Temporal.PlainDateTime }
+    ).toTemporal();
+    const toDT = (
+      to as unknown as { toTemporal(): Temporal.PlainDateTime }
+    ).toTemporal();
+    const duration = (
+      toDT as unknown as {
+        since(other: Temporal.PlainDateTime): {
+          years?: number;
+          months?: number;
+          days?: number;
+          hours?: number;
+          minutes?: number;
+          seconds?: number;
+          milliseconds?: number;
+        };
+      }
+    ).since(fromDT);
 
     return new Duration({
       years: duration.years || 0,
@@ -226,14 +242,24 @@ export class Duration implements IDuration {
   toISO(): string {
     // Date part
     let datePart = '';
-    if (this.years) { datePart += `${this.years}Y`; }
-    if (this.months) { datePart += `${this.months}M`; }
-    if (this.weeks || this.days) { datePart += `${this.weeks * 7 + this.days}D`; }
+    if (this.years) {
+      datePart += `${this.years}Y`;
+    }
+    if (this.months) {
+      datePart += `${this.months}M`;
+    }
+    if (this.weeks || this.days) {
+      datePart += `${this.weeks * 7 + this.days}D`;
+    }
 
     // Time part
     let timePart = '';
-    if (this.hours) { timePart += `${this.hours}H`; }
-    if (this.minutes) { timePart += `${this.minutes}M`; }
+    if (this.hours) {
+      timePart += `${this.hours}H`;
+    }
+    if (this.minutes) {
+      timePart += `${this.minutes}M`;
+    }
     if (this.seconds || this.milliseconds) {
       timePart += `${this.seconds + this.milliseconds / 1000}S`;
     }
@@ -283,9 +309,13 @@ export class Duration implements IDuration {
         `${Math.abs(this.seconds)} second${Math.abs(this.seconds) !== 1 ? 's' : ''}`,
       );
     }
-    if (this.milliseconds) { parts.push(`${Math.abs(this.milliseconds)} ms`); }
+    if (this.milliseconds) {
+      parts.push(`${Math.abs(this.milliseconds)} ms`);
+    }
 
-    if (parts.length === 0) { return '0 seconds'; }
+    if (parts.length === 0) {
+      return '0 seconds';
+    }
 
     const text = parts.join(', ');
     return this.isNegative() ? `-${text}` : text;
@@ -345,15 +375,35 @@ export class DurationPlugin implements ITimeGuardPlugin {
     /**
      * Create a Duration between this date and another
      */
-    (TimeGuardClass.prototype as unknown as { duration: (other: TimeGuard) => Duration }).duration = function (
-      other: TimeGuard,
-    ): Duration {
+    (
+      TimeGuardClass.prototype as unknown as {
+        duration: (other: TimeGuard) => Duration;
+      }
+    ).duration = function (other: TimeGuard): Duration {
       return Duration.between(this as unknown as TimeGuard, other);
     };
 
-    (TimeGuardClass as unknown as { Duration: typeof Duration; duration: { fromISO: (iso: string) => Duration; between: (from: TimeGuard, to: TimeGuard) => Duration; fromMilliseconds: (ms: number) => Duration } }).Duration = Duration;
+    (
+      TimeGuardClass as unknown as {
+        Duration: typeof Duration;
+        duration: {
+          fromISO: (iso: string) => Duration;
+          between: (from: TimeGuard, to: TimeGuard) => Duration;
+          fromMilliseconds: (ms: number) => Duration;
+        };
+      }
+    ).Duration = Duration;
 
-    (TimeGuardClass as unknown as { Duration: typeof Duration; duration: { fromISO: (iso: string) => Duration; between: (from: TimeGuard, to: TimeGuard) => Duration; fromMilliseconds: (ms: number) => Duration } }).duration = {
+    (
+      TimeGuardClass as unknown as {
+        Duration: typeof Duration;
+        duration: {
+          fromISO: (iso: string) => Duration;
+          between: (from: TimeGuard, to: TimeGuard) => Duration;
+          fromMilliseconds: (ms: number) => Duration;
+        };
+      }
+    ).duration = {
       fromISO: (iso: string): Duration => Duration.fromISO(iso),
       between: (from: TimeGuard, to: TimeGuard): Duration =>
         Duration.between(from, to),

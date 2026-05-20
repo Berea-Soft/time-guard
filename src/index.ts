@@ -12,7 +12,10 @@
 import { Temporal } from '@js-temporal/polyfill';
 
 // Assign Temporal to globalThis so the adapter can find it
-if (typeof globalThis !== 'undefined' && !(globalThis as Record<string, unknown>).Temporal) {
+if (
+  typeof globalThis !== 'undefined' &&
+  !(globalThis as Record<string, unknown>).Temporal
+) {
   (globalThis as Record<string, unknown>).Temporal = Temporal;
 }
 
@@ -157,7 +160,9 @@ class DiffResult implements IDiffResult, IFormattableDuration {
       );
     }
 
-    if (parts.length === 0) { return formatZeroDuration(l); }
+    if (parts.length === 0) {
+      return formatZeroDuration(l);
+    }
 
     return joinDurationParts(parts, l);
   }
@@ -276,7 +281,10 @@ export class DurationResult implements DurationParts, IFormattableDuration {
           numeric,
           style: 'long',
         });
-        return rtf.format(largest.value, largest.unit as Intl.RelativeTimeFormatUnit);
+        return rtf.format(
+          largest.value,
+          largest.unit as Intl.RelativeTimeFormatUnit,
+        );
       } catch {
         return `${largest.value} ${this.pluralizeUnit(largest.unit, largest.value, locale)}`;
       }
@@ -555,9 +563,11 @@ export class TimeGuard implements ITimeGuard {
     // Convert to ZonedDateTime if timezone is specified
     if (this.config.timezone && this.config.timezone !== 'UTC') {
       try {
-        const zoned = (this.temporal as { toZonedDateTime(tz: string): TemporalZonedDateTimePolyfill }).toZonedDateTime(
-          this.config.timezone,
-        );
+        const zoned = (
+          this.temporal as {
+            toZonedDateTime(tz: string): TemporalZonedDateTimePolyfill;
+          }
+        ).toZonedDateTime(this.config.timezone);
         this.temporal = zoned;
       } catch {
         // Keep as PlainDateTime if timezone conversion fails
@@ -670,7 +680,9 @@ export class TimeGuard implements ITimeGuard {
     const cloned = this.clone();
     cloned.config.timezone = timezone;
     try {
-      const plainDT = TemporalAdapter.toPlainDateTime(cloned.temporal) as TemporalPlainDateTimePolyfill;
+      const plainDT = TemporalAdapter.toPlainDateTime(
+        cloned.temporal,
+      ) as TemporalPlainDateTimePolyfill;
       cloned.temporal = plainDT.toZonedDateTime(timezone);
     } catch {
       // Keep as PlainDateTime if timezone conversion fails
@@ -719,7 +731,9 @@ export class TimeGuard implements ITimeGuard {
       return (plainDT as TemporalPlainDateTimePolyfill).weekOfYear;
     }
 
-    return (plainDT as unknown as Record<string, unknown>)[unitMap[component]] as number;
+    return (plainDT as unknown as Record<string, unknown>)[
+      unitMap[component]
+    ] as number;
   }
 
   add(units: Partial<Record<Unit, number>>): TimeGuard {
@@ -753,7 +767,9 @@ export class TimeGuard implements ITimeGuard {
       return this;
     }
 
-    plainDT = (plainDT as TemporalPlainDateTimePolyfill).add(duration as DurationLike);
+    plainDT = (plainDT as TemporalPlainDateTimePolyfill).add(
+      duration as DurationLike,
+    );
     return TimeGuard.fromTemporal(plainDT, this.config);
   }
 
@@ -791,11 +807,28 @@ export class TimeGuard implements ITimeGuard {
 
     if (typeof unitOrOptions === 'string') {
       const unit = unitOrOptions;
-      const mappedUnit = unitMap[unit] as keyof { years?: number; months?: number; weeks?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number; microseconds?: number; nanoseconds?: number };
-      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
-        smallestUnit: unit,
-      });
-      const durationObj = duration as unknown as Record<string, number | undefined>;
+      const mappedUnit = unitMap[unit] as keyof {
+        years?: number;
+        months?: number;
+        weeks?: number;
+        days?: number;
+        hours?: number;
+        minutes?: number;
+        seconds?: number;
+        milliseconds?: number;
+        microseconds?: number;
+        nanoseconds?: number;
+      };
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
+        plainDT2,
+        {
+          smallestUnit: unit,
+        },
+      );
+      const durationObj = duration as unknown as Record<
+        string,
+        number | undefined
+      >;
       return Math.round(durationObj[mappedUnit] || 0);
     }
 
@@ -805,11 +838,28 @@ export class TimeGuard implements ITimeGuard {
     const locale = options.locale || this.config.locale;
 
     if (mode === 'exact') {
-      const mappedUnit = unitMap[unit] as keyof { years?: number; months?: number; weeks?: number; days?: number; hours?: number; minutes?: number; seconds?: number; milliseconds?: number; microseconds?: number; nanoseconds?: number };
-      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
-        smallestUnit: unit,
-      });
-      const durationObj = duration as unknown as Record<string, number | undefined>;
+      const mappedUnit = unitMap[unit] as keyof {
+        years?: number;
+        months?: number;
+        weeks?: number;
+        days?: number;
+        hours?: number;
+        minutes?: number;
+        seconds?: number;
+        milliseconds?: number;
+        microseconds?: number;
+        nanoseconds?: number;
+      };
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
+        plainDT2,
+        {
+          smallestUnit: unit,
+        },
+      );
+      const durationObj = duration as unknown as Record<
+        string,
+        number | undefined
+      >;
       const result = Math.round(durationObj[mappedUnit] || 0);
 
       if (unitOrOptions === undefined || typeof unitOrOptions === 'object') {
@@ -828,10 +878,13 @@ export class TimeGuard implements ITimeGuard {
     }
 
     if (mode === 'calendar') {
-      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
-        largestUnit: 'month',
-        smallestUnit: 'millisecond',
-      });
+      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
+        plainDT2,
+        {
+          largestUnit: 'month',
+          smallestUnit: 'millisecond',
+        },
+      );
 
       const breakdownData: DurationParts = {
         years: Math.floor(duration.years || 0),
@@ -855,9 +908,12 @@ export class TimeGuard implements ITimeGuard {
       );
     }
 
-    const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(plainDT2, {
-      smallestUnit: 'millisecond',
-    });
+    const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
+      plainDT2,
+      {
+        smallestUnit: 'millisecond',
+      },
+    );
     const totalMs = calculateTotalMs(duration);
     return new DiffResult(
       Math.round(totalMs),
@@ -1020,19 +1076,25 @@ export class TimeGuard implements ITimeGuard {
         break;
     }
 
-    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(values as Record<string, unknown>);
+    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(
+      values as Record<string, unknown>,
+    );
     return TimeGuard.fromTemporal(updated, this.config);
   }
 
   endOf(unit: Unit): TimeGuard {
     const start = this.startOf(unit);
-    const next = start.add({ [unit]: 1 } as Partial<Record<Unit, number>>).subtract({ millisecond: 1 } as Partial<Record<Unit, number>>);
+    const next = start
+      .add({ [unit]: 1 } as Partial<Record<Unit, number>>)
+      .subtract({ millisecond: 1 } as Partial<Record<Unit, number>>);
     return next;
   }
 
   set(values: Partial<Record<Unit, number>>): TimeGuard {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
-    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(values as Record<string, unknown>);
+    const updated = (plainDT as TemporalPlainDateTimePolyfill).with(
+      values as Record<string, unknown>,
+    );
     return TimeGuard.fromTemporal(updated, this.config);
   }
 
@@ -1064,20 +1126,34 @@ export class TimeGuard implements ITimeGuard {
     return TemporalAdapter.toPlainDateTime(this.temporal).millisecond;
   }
 
-dayOfWeek(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).dayOfWeek;
+  dayOfWeek(): number {
+    return (
+      TemporalAdapter.toPlainDateTime(
+        this.temporal,
+      ) as TemporalPlainDateTimePolyfill
+    ).dayOfWeek;
   }
 
   dayOfYear(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).dayOfYear;
+    return (
+      TemporalAdapter.toPlainDateTime(
+        this.temporal,
+      ) as TemporalPlainDateTimePolyfill
+    ).dayOfYear;
   }
 
   weekOfYear(): number {
-    return (TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill).weekOfYear;
+    return (
+      TemporalAdapter.toPlainDateTime(
+        this.temporal,
+      ) as TemporalPlainDateTimePolyfill
+    ).weekOfYear;
   }
 
   daysInMonth(): number {
-    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill;
+    const plainDT = TemporalAdapter.toPlainDateTime(
+      this.temporal,
+    ) as TemporalPlainDateTimePolyfill;
     const nextMonth = plainDT.add({ months: 1 }).with({ day: 1 });
     const lastDay = nextMonth.subtract({ days: 1 });
     return lastDay.day;
@@ -1180,15 +1256,27 @@ dayOfWeek(): number {
       }
     }
 
-    if (parts.years > 0) { steps.push(`Years: ${parts.years}`); }
-    if (parts.months > 0) { steps.push(`Months: ${parts.months}`); }
-    if (parts.days > 0) { steps.push(`Days: ${parts.days}`); }
+    if (parts.years > 0) {
+      steps.push(`Years: ${parts.years}`);
+    }
+    if (parts.months > 0) {
+      steps.push(`Months: ${parts.months}`);
+    }
+    if (parts.days > 0) {
+      steps.push(`Days: ${parts.days}`);
+    }
 
     if (parts.hours > 0 || parts.minutes > 0 || parts.seconds > 0) {
       const timeComponents = [];
-      if (parts.hours > 0) { timeComponents.push(`${parts.hours}h`); }
-      if (parts.minutes > 0) { timeComponents.push(`${parts.minutes}m`); }
-      if (parts.seconds > 0) { timeComponents.push(`${parts.seconds}s`); }
+      if (parts.hours > 0) {
+        timeComponents.push(`${parts.hours}h`);
+      }
+      if (parts.minutes > 0) {
+        timeComponents.push(`${parts.minutes}m`);
+      }
+      if (parts.seconds > 0) {
+        timeComponents.push(`${parts.seconds}s`);
+      }
       steps.push(`Time: ${timeComponents.join(' ')}`);
     }
 
@@ -1233,7 +1321,9 @@ dayOfWeek(): number {
     ];
     const smallestIndex = unitOrder.indexOf(smallestUnit);
 
-    if (smallestIndex === -1) { return this.clone(); }
+    if (smallestIndex === -1) {
+      return this.clone();
+    }
 
     const roundedValues: Partial<Record<Unit, number>> = {};
     for (let i = 0; i < smallestIndex; i++) {
@@ -1263,7 +1353,9 @@ dayOfWeek(): number {
             return nextVal >= 5;
         }
       };
-      if (shouldRoundUp(roundingMode, nextUnitValue)) { value += 1; }
+      if (shouldRoundUp(roundingMode, nextUnitValue)) {
+        value += 1;
+      }
     }
 
     roundedValues[unit as Unit] = value;
@@ -1280,7 +1372,9 @@ dayOfWeek(): number {
     day: number;
     dayOfWeek: number;
   } {
-    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal) as TemporalPlainDateTimePolyfill;
+    const plainDT = TemporalAdapter.toPlainDateTime(
+      this.temporal,
+    ) as TemporalPlainDateTimePolyfill;
     return {
       year: plainDT.year,
       month: plainDT.month,
@@ -1322,7 +1416,9 @@ dayOfWeek(): number {
   }
 
   getOffsetNanoseconds(): number {
-    return (this.temporal as TemporalZonedDateTimePolyfill)?.offsetNanoseconds || 0;
+    return (
+      (this.temporal as TemporalZonedDateTimePolyfill)?.offsetNanoseconds || 0
+    );
   }
 
   getTimeZoneId(): string | null {
@@ -1400,14 +1496,26 @@ dayOfWeek(): number {
   toDurationString(other?: TimeGuard): string {
     const duration = other ? this.until(other) : this.until(TimeGuard.now());
     const parts: string[] = [];
-    if (duration.years) { parts.push(`${duration.years}Y`); }
-    if (duration.months) { parts.push(`${duration.months}M`); }
-    if (duration.days) { parts.push(`${duration.days}D`); }
+    if (duration.years) {
+      parts.push(`${duration.years}Y`);
+    }
+    if (duration.months) {
+      parts.push(`${duration.months}M`);
+    }
+    if (duration.days) {
+      parts.push(`${duration.days}D`);
+    }
 
     const timeParts: string[] = [];
-    if (duration.hours) { timeParts.push(`${duration.hours}H`); }
-    if (duration.minutes) { timeParts.push(`${duration.minutes}M`); }
-    if (duration.seconds) { timeParts.push(`${duration.seconds}S`); }
+    if (duration.hours) {
+      timeParts.push(`${duration.hours}H`);
+    }
+    if (duration.minutes) {
+      timeParts.push(`${duration.minutes}M`);
+    }
+    if (duration.seconds) {
+      timeParts.push(`${duration.seconds}S`);
+    }
 
     const result = `P${parts.join('')}${timeParts.length > 0 ? 'T' + timeParts.join('') : ''}`;
     return result === 'P' ? 'PT0S' : result;

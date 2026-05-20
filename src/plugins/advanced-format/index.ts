@@ -19,7 +19,11 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
     // Store original format method
     const originalFormat = TimeGuardClass.prototype.format;
 
-    (TimeGuardClass.prototype as unknown as { format: (pattern: string) => string }).format = function (pattern: string) {
+    (
+      TimeGuardClass.prototype as unknown as {
+        format: (pattern: string) => string;
+      }
+    ).format = function (pattern: string) {
       if (!pattern || typeof pattern !== 'string') {
         return originalFormat.call(this, pattern);
       }
@@ -28,7 +32,11 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
         return originalFormat.call(this, pattern);
       }
 
-      const temporal = (this as unknown as { toTemporal(): Temporal.PlainDateTime | Temporal.ZonedDateTime }).toTemporal();
+      const temporal = (
+        this as unknown as {
+          toTemporal(): Temporal.PlainDateTime | Temporal.ZonedDateTime;
+        }
+      ).toTemporal();
       const temporal_dt =
         'toPlainDateTime' in temporal
           ? (temporal as Temporal.ZonedDateTime).toPlainDateTime()
@@ -145,11 +153,17 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
 
             // Unix seconds timestamp
             case 'X':
-              replacement = String(Math.floor((this as unknown as { valueOf(): number }).valueOf() / 1000));
+              replacement = String(
+                Math.floor(
+                  (this as unknown as { valueOf(): number }).valueOf() / 1000,
+                ),
+              );
               break;
 
             case 'x':
-              replacement = String((this as unknown as { valueOf(): number }).valueOf());
+              replacement = String(
+                (this as unknown as { valueOf(): number }).valueOf(),
+              );
               break;
 
             case 'z':

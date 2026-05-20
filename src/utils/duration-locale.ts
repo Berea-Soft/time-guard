@@ -83,7 +83,9 @@ export function formatDurationPart(
   unit: string,
   locale: string,
 ): string {
-  if (value === 0) { return ''; }
+  if (value === 0) {
+    return '';
+  }
   const label = getDurationUnitLabel(unit, locale, value);
   return `${value} ${label}`;
 }
@@ -92,8 +94,12 @@ export function formatDurationPart(
  * Join formatted duration parts with locale-appropriate conjunctions
  */
 export function joinDurationParts(parts: string[], locale: string): string {
-  if (parts.length === 0) { return ''; }
-  if (parts.length === 1) { return parts[0]; }
+  if (parts.length === 0) {
+    return '';
+  }
+  if (parts.length === 1) {
+    return parts[0];
+  }
 
   const conjunction = getConjunctionLabel(locale);
 

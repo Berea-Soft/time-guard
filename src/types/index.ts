@@ -20,8 +20,12 @@ export interface TemporalPlainDateTimeExtended extends TemporalPlainDateTime {
   yearOfWeek: number;
   microsecond: number;
   nanosecond: number;
-  add<T extends TemporalPlainDateTime>(duration: TemporalDuration | Record<string, unknown>): T;
-  subtract<T extends TemporalPlainDateTime>(duration: TemporalDuration | Record<string, unknown>): T;
+  add<T extends TemporalPlainDateTime>(
+    duration: TemporalDuration | Record<string, unknown>,
+  ): T;
+  subtract<T extends TemporalPlainDateTime>(
+    duration: TemporalDuration | Record<string, unknown>,
+  ): T;
   with<T extends TemporalPlainDateTime>(fields: Record<string, unknown>): T;
 }
 
@@ -48,7 +52,10 @@ export interface TemporalDurationLike {
   nanoseconds?: number;
 }
 
-export type DurationLike = TemporalDuration | TemporalDurationLike | Record<string, unknown>;
+export type DurationLike =
+  | TemporalDuration
+  | TemporalDurationLike
+  | Record<string, unknown>;
 
 export interface TemporalPlainDateTimePolyfill extends TemporalPlainDateTime {
   toZonedDateTime(timeZone: string): TemporalZonedDateTime;
@@ -59,7 +66,10 @@ export interface TemporalPlainDateTimePolyfill extends TemporalPlainDateTime {
   add(duration: DurationLike): TemporalPlainDateTimePolyfill;
   subtract(duration: DurationLike): TemporalPlainDateTimePolyfill;
   with(fields: Record<string, unknown>): TemporalPlainDateTimePolyfill;
-  since(other: TemporalPlainDateTime, options?: Record<string, unknown>): TemporalDuration;
+  since(
+    other: TemporalPlainDateTime,
+    options?: Record<string, unknown>,
+  ): TemporalDuration;
 }
 
 export interface TemporalZonedDateTimePolyfill extends TemporalZonedDateTime {
@@ -475,7 +485,10 @@ export interface IDateParser {
  * Interface for date/time formatting (Strategy Pattern)
  */
 export interface IDateFormatter {
-  format(date: TemporalPlainDateTime | TemporalZonedDateTime, pattern: string): string;
+  format(
+    date: TemporalPlainDateTime | TemporalZonedDateTime,
+    pattern: string,
+  ): string;
   getPreset(preset: FormatPreset): string;
 }
 
@@ -545,8 +558,14 @@ export interface IDateManipulation {
  * Interface for timezone operations
  */
 export interface ITimezoneAdapter {
-  toTimezone(date: TemporalPlainDateTime, timezone: string): TemporalZonedDateTime;
-  fromTimezone(date: TemporalZonedDateTime, targetTimezone: string): TemporalPlainDateTime;
+  toTimezone(
+    date: TemporalPlainDateTime,
+    timezone: string,
+  ): TemporalZonedDateTime;
+  fromTimezone(
+    date: TemporalZonedDateTime,
+    targetTimezone: string,
+  ): TemporalPlainDateTime;
   getOffset(timezone: string): number;
 }
 
@@ -716,7 +735,10 @@ export interface ITimeGuardPlugin {
 export interface ITimeGuardFactory {
   create(input?: unknown, config?: ITimeGuardConfig): ITimeGuard;
   now(config?: ITimeGuardConfig): ITimeGuard;
-  fromTemporal(date: TemporalPlainDateTime | TemporalZonedDateTime, config?: ITimeGuardConfig): ITimeGuard;
+  fromTemporal(
+    date: TemporalPlainDateTime | TemporalZonedDateTime,
+    config?: ITimeGuardConfig,
+  ): ITimeGuard;
 }
 
 /**

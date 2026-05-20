@@ -48,8 +48,12 @@ export class IslamicCalendar implements ICalendarSystem {
   daysInMonth(year: number, month: number): number {
     // Islamic months: odd months have 30 days, even months have 29 days
     // except last month which has 30 on leap years
-    if (month % 2 === 1) { return 30; }
-    if (month === 12 && this.isLeapYear(year)) { return 30; }
+    if (month % 2 === 1) {
+      return 30;
+    }
+    if (month === 12 && this.isLeapYear(year)) {
+      return 30;
+    }
     return 29;
   }
 

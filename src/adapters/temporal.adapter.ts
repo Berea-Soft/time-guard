@@ -5,7 +5,11 @@
  */
 
 import { Temporal } from '@js-temporal/polyfill';
-import type { TemporalPlainDateTime, TemporalZonedDateTime, TemporalLike } from '../types';
+import type {
+  TemporalPlainDateTime,
+  TemporalZonedDateTime,
+  TemporalLike,
+} from '../types';
 
 type TemporalType = typeof Temporal;
 
@@ -20,7 +24,10 @@ function useTemporal(): TemporalType {
     return temporalCache;
   }
 
-  const TemporalLoaded = (globalThis as Record<string, unknown>).Temporal as TemporalType | undefined ?? Temporal;
+  const TemporalLoaded =
+    ((globalThis as Record<string, unknown>).Temporal as
+      | TemporalType
+      | undefined) ?? Temporal;
 
   if (!TemporalLoaded) {
     throw new Error(
@@ -325,8 +332,12 @@ export class TemporalAdapter {
     const iso1 = dt1.toString();
     const iso2 = dt2.toString();
 
-    if (iso1 < iso2) { return -1; }
-    if (iso1 > iso2) { return 1; }
+    if (iso1 < iso2) {
+      return -1;
+    }
+    if (iso1 > iso2) {
+      return 1;
+    }
     return 0;
   }
 }

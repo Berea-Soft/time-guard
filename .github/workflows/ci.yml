@@ -80,7 +80,7 @@ jobs:
         run: |
           test -f dist/time-guard.iife.js && echo "IIFE bundle exists"
           test -f dist/time-guard.umd.js && echo "UMD bundle exists"
-          test -f dist/timeguard.es.js && echo "ES bundle exists"
+          test -f dist/time-guard.es.js && echo "ES bundle exists"
   release:
     needs: [test, test-browser]
     runs-on: ubuntu-latest
