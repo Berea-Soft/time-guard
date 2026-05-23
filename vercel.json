@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm build:docs",
+  "outputDirectory": "docs-app/dist",
+  "installCommand": "pnpm install --frozen-lockfile && pnpm --prefix docs-app install --frozen-lockfile",
+  "framework": "vite"
+}

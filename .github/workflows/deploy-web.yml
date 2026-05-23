@@ -1,0 +1,111 @@
+name: Deploy Docs App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs-app/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs-app/**'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install docs-app dependencies
+        run: pnpm --prefix docs-app install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:docs:check
+
+      - name: Lint
+        run: pnpm lint:docs
+
+      - name: Typecheck
+        run: pnpm typecheck:docs
+
+      - name: Build
+        run: pnpm build:docs
+
+  deploy-preview:
+    needs: quality
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: vercel-preview
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile && pnpm --prefix docs-app install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build:docs
+
+      - name: Deploy to Vercel (Preview)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        id: deploy
+        run: |
+          npx vercel@latest deploy docs-app/dist \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --yes \
+            --name time-guard-docs \
+            2>&1 | tee deploy.log
+          echo "url=$(grep -E 'https?://' deploy.log | head -1)" >> $GITHUB_OUTPUT
+
+  deploy-production:
+    needs: quality
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: vercel-production
+      url: https://time-guard.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile && pnpm --prefix docs-app install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build:docs
+
+      - name: Deploy to Vercel (Production)
+        run: npx vercel@latest deploy docs-app/dist --token ${{ secrets.VERCEL_TOKEN }} --yes --prod --name time-guard-docs

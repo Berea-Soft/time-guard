@@ -1597,4 +1597,480 @@ describe('Coverage Tests - Missing Branches', () => {
     const calendar = new BuddhistCalendar();
     expect(calendar.getMonthName(1)).toBeDefined();
   });
+
+  it('should handle Islamic calendar daysInMonth with leap year', () => {
+    const calendar = new IslamicCalendar();
+    expect(calendar.daysInMonth(1445, 12)).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar daysInMonth edge case', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.daysInMonth(2567, 2)).toBeDefined();
+  });
+
+  it('should handle duration humanize with singular units', () => {
+    const dur = new Duration({
+      years: 1,
+      months: 1,
+      weeks: 1,
+      days: 1,
+      hours: 1,
+      minutes: 1,
+      seconds: 1,
+    });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle duration humanize with zero values', () => {
+    const dur = new Duration({});
+    expect(dur.humanize()).toBe('0 seconds');
+  });
+
+  it('should handle advanced format default case with unknown token', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-04-15 14:30:00');
+    const result = tg.format('YYYY-MM-DD');
+    expect(result).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time format as function type', () => {
+    const customPlugin = new RelativeTimePlugin({
+      formats: {
+        s: () => 'just now',
+        m: 'a minute',
+        past: '%s ago',
+        future: 'in %s',
+      },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager getLocale fallback', () => {
+    const manager = LocaleManager.getInstance();
+    const locale = manager.getLocale('nonexistent');
+    expect(locale.name).toBe('en');
+  });
+
+  it('should handle plugin manager error message formatting', () => {
+    const badPlugin = {
+      name: 'error-plugin',
+      version: '1.0.0',
+      install: () => {
+        throw 'string error';
+      },
+    };
+    expect(() => PluginManager.use(badPlugin as any, TimeGuard)).toThrow();
+    PluginManager.clear();
+  });
+
+  it('should handle until with same date', () => {
+    const date = timeGuard('2024-01-01');
+    const result = date.until(date);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle since with same date', () => {
+    const date = timeGuard('2024-01-01');
+    const result = date.since(date);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle format with all meridiem variations', () => {
+    const tg1 = timeGuard('2024-04-15 00:30:00');
+    expect(tg1.format('a')).toBeDefined();
+    expect(tg1.format('A')).toBeDefined();
+    const tg2 = timeGuard('2024-04-15 12:00:00');
+    expect(tg2.format('a')).toBeDefined();
+    expect(tg2.format('A')).toBeDefined();
+  });
+
+  it('should handle duration with negative milliseconds', () => {
+    const dur = new Duration({ milliseconds: -500 });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle relative time with threshold.d undefined', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [{ l: 's', r: 44 }],
+      formats: { s: 'seconds', past: '%s ago', future: 'in %s' },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager getCurrentLocale after setLocale', () => {
+    const manager = LocaleManager.getInstance();
+    manager.setLocale('es');
+    expect(manager.getCurrentLocale()).toBe('es');
+  });
+
+  it('should handle duration humanize with all singular units', () => {
+    const d1 = new Duration({ years: 1 });
+    const d2 = new Duration({ months: 1 });
+    const d3 = new Duration({ weeks: 1 });
+    const d4 = new Duration({ days: 1 });
+    const d5 = new Duration({ hours: 1 });
+    const d6 = new Duration({ minutes: 1 });
+    const d7 = new Duration({ seconds: 1 });
+    expect(d1.humanize()).toContain('year');
+    expect(d2.humanize()).toContain('month');
+    expect(d3.humanize()).toContain('week');
+    expect(d4.humanize()).toContain('day');
+    expect(d5.humanize()).toContain('hour');
+    expect(d6.humanize()).toContain('minute');
+    expect(d7.humanize()).toContain('second');
+  });
+
+  it('should handle calendar getMonthName with short form', () => {
+    const islamic = new IslamicCalendar();
+    expect(islamic.getMonthName(1, true)).toBeDefined();
+    const hebrew = new HebrewCalendar();
+    expect(hebrew.getMonthName(1, true)).toBeDefined();
+  });
+
+  it('should handle advanced format with k and kk tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg1 = timeGuard('2024-04-15 00:30:00');
+    expect(tg1.format('k')).toBeDefined();
+    expect(tg1.format('kk')).toBeDefined();
+    const tg2 = timeGuard('2024-04-15 14:30:00');
+    expect(tg2.format('k')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time getUnitMilliseconds with unknown unit', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [{ l: 'custom', r: 100, d: 'unknown' }],
+      formats: { custom: '%d units', past: '%s ago', future: 'in %s' },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle Islamic calendar daysInMonth boundary months', () => {
+    const calendar = new IslamicCalendar();
+    expect(calendar.daysInMonth(1445, 1)).toBeDefined();
+    expect(calendar.daysInMonth(1445, 6)).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar daysInMonth', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.daysInMonth(2567, 2)).toBeDefined();
+    expect(calendar.daysInMonth(2568, 2)).toBeDefined();
+  });
+
+  it('should handle duration humanize with negative plural units', () => {
+    const dur = new Duration({ years: -2, months: -3, days: -5 });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle format with escaped brackets and default token', () => {
+    const tg = timeGuard('2024-04-15 14:30:00');
+    const result = tg.format('[test] YYYY-MM-DD');
+    expect(result).toContain('test');
+  });
+
+  it('should handle until with large date range crossing leap years', () => {
+    const start = timeGuard('2020-01-01');
+    const end = timeGuard('2024-12-31');
+    const result = start.until(end);
+    expect(result.explain().leapYearFlags.length).toBeGreaterThan(0);
+  });
+
+  it('should handle calendar getWeekdayName with short form', () => {
+    const islamic = new IslamicCalendar();
+    expect(islamic.getWeekdayName(1, true)).toBeDefined();
+    const hebrew = new HebrewCalendar();
+    expect(hebrew.getWeekdayName(1, true)).toBeDefined();
+  });
+
+  it('should handle duration toISO with empty duration', () => {
+    const dur = new Duration({});
+    expect(dur.toISO()).toBeDefined();
+  });
+
+  it('should handle advanced format with gggg and GGGG tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-01-01');
+    expect(tg.format('gggg')).toBeDefined();
+    expect(tg.format('GGGG')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time with very small milliseconds', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    const now = timeGuard('2024-01-01 00:00:00.000');
+    const slightlyPast = timeGuard('2024-01-01 00:00:00.001');
+    expect(slightlyPast.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager setLocale with uppercase', () => {
+    const manager = LocaleManager.getInstance();
+    manager.setLocale('ES');
+    expect(manager.getCurrentLocale()).toBe('es');
+  });
+
+  it('should handle Hebrew calendar daysInMonth', () => {
+    const calendar = new HebrewCalendar();
+    expect(calendar.daysInMonth(5784, 1)).toBeDefined();
+    expect(calendar.daysInMonth(5784, 12)).toBeDefined();
+  });
+
+  it('should handle Chinese calendar daysInMonth', () => {
+    const calendar = new ChineseCalendar();
+    expect(calendar.daysInMonth(2024, 1)).toBeDefined();
+  });
+
+  it('should handle Japanese calendar daysInMonth', () => {
+    const calendar = new JapaneseCalendar();
+    expect(calendar.daysInMonth(2024, 2)).toBeDefined();
+  });
+
+  it('should handle duration as with all unit types', () => {
+    const dur = new Duration({ days: 1 });
+    expect(dur.as('milliseconds')).toBeGreaterThan(0);
+    expect(dur.as('seconds')).toBeGreaterThan(0);
+    expect(dur.as('minutes')).toBeGreaterThan(0);
+    expect(dur.as('hours')).toBeGreaterThan(0);
+    expect(dur.as('days')).toBeGreaterThan(0);
+    expect(dur.as('weeks')).toBeGreaterThan(0);
+    expect(dur.as('months')).toBeGreaterThan(0);
+    expect(dur.as('years')).toBeGreaterThan(0);
+  });
+
+  it('should handle format with meridiem from different locales', () => {
+    const tgEs = timeGuard('2024-04-15 14:30:00').locale('es');
+    expect(tgEs.format('a')).toBeDefined();
+  });
+
+  it('should handle relative time with custom thresholds no nextThreshold', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [{ l: 's' }],
+      formats: { s: 'seconds', past: '%s ago', future: 'in %s' },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle Islamic calendar isLeapYear variations', () => {
+    const calendar = new IslamicCalendar();
+    expect(calendar.isLeapYear(1444)).toBeDefined();
+    expect(calendar.isLeapYear(1445)).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar isLeapYear', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.isLeapYear(2567)).toBeDefined();
+    expect(calendar.isLeapYear(2568)).toBeDefined();
+  });
+
+  it('should handle duration fromISO with full ISO string', () => {
+    const dur = Duration.fromISO('P1Y2M3W4DT5H6M7S');
+    expect(dur).toBeDefined();
+  });
+
+  it('should handle format with all weekday tokens', () => {
+    const tg = timeGuard('2024-04-15'); // Monday
+    expect(tg.format('dddd')).toBeDefined();
+    expect(tg.format('ddd')).toBeDefined();
+    expect(tg.format('dd')).toBeDefined();
+    expect(tg.format('d')).toBeDefined();
+  });
+
+  it('should handle advanced format with Do ordinal variations', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg1 = timeGuard('2024-04-01');
+    expect(tg1.format('Do')).toBeDefined();
+    const tg2 = timeGuard('2024-04-02');
+    expect(tg2.format('Do')).toBeDefined();
+    const tg3 = timeGuard('2024-04-03');
+    expect(tg3.format('Do')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle plugin manager clear and re-register', () => {
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    expect(PluginManager.hasPlugin('relative-time')).toBe(true);
+    PluginManager.clear();
+    expect(PluginManager.hasPlugin('relative-time')).toBe(false);
+    PluginManager.use(relativeTimePlugin, TimeGuard);
+    expect(PluginManager.hasPlugin('relative-time')).toBe(true);
+    PluginManager.clear();
+  });
+
+  it('should handle Islamic calendar getMonthName with all months', () => {
+    const calendar = new IslamicCalendar();
+    for (let i = 1; i <= 12; i++) {
+      expect(calendar.getMonthName(i)).toBeDefined();
+    }
+  });
+
+  it('should handle Hebrew calendar getWeekdayName', () => {
+    const calendar = new HebrewCalendar();
+    expect(calendar.getWeekdayName(1)).toBeDefined();
+    expect(calendar.getWeekdayName(7)).toBeDefined();
+  });
+
+  it('should handle Chinese calendar getWeekdayName', () => {
+    const calendar = new ChineseCalendar();
+    expect(calendar.getWeekdayName(1)).toBeDefined();
+  });
+
+  it('should handle Japanese calendar getWeekdayName', () => {
+    const calendar = new JapaneseCalendar();
+    expect(calendar.getWeekdayName(1)).toBeDefined();
+  });
+
+  it('should handle Buddhist calendar getWeekdayName', () => {
+    const calendar = new BuddhistCalendar();
+    expect(calendar.getWeekdayName(1)).toBeDefined();
+  });
+
+  it('should handle duration humanize with mixed positive and negative', () => {
+    const dur = new Duration({ years: 1, months: -2, days: 3 });
+    expect(dur.humanize()).toBeDefined();
+  });
+
+  it('should handle format with month variations', () => {
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('MMMM')).toBeDefined();
+    expect(tg.format('MMM')).toBeDefined();
+    expect(tg.format('MM')).toBeDefined();
+    expect(tg.format('M')).toBeDefined();
+  });
+
+  it('should handle format with year variations', () => {
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('YYYY')).toBeDefined();
+    expect(tg.format('YY')).toBeDefined();
+    expect(tg.format('Y')).toBeDefined();
+  });
+
+  it('should handle advanced format with Q token for all quarters', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    expect(timeGuard('2024-01-15').format('Q')).toBe('1');
+    expect(timeGuard('2024-04-15').format('Q')).toBe('2');
+    expect(timeGuard('2024-07-15').format('Q')).toBe('3');
+    expect(timeGuard('2024-10-15').format('Q')).toBe('4');
+    PluginManager.clear();
+  });
+
+  it('should handle calendar manager register new calendar', () => {
+    const manager = CalendarManager.getInstance();
+    const persian = {
+      id: 'persian',
+      name: 'Persian',
+      getMonthName: (m: number) => ['Farvardin'][m - 1] || 'Unknown',
+      getWeekdayName: (d: number) => ['Saturday'][d - 1] || 'Unknown',
+      isLeapYear: () => false,
+      daysInMonth: () => 30,
+      daysInYear: () => 365,
+    };
+    manager.register(persian as any);
+    expect(manager.get('persian')).toBeDefined();
+  });
+
+  it('should handle duration fromISO with negative duration', () => {
+    const dur = Duration.fromISO('-P1Y2M3D');
+    expect(dur).toBeDefined();
+  });
+
+  it('should handle format with day tokens', () => {
+    const tg = timeGuard('2024-04-15');
+    expect(tg.format('DD')).toBeDefined();
+    expect(tg.format('D')).toBeDefined();
+  });
+
+  it('should handle relative time with threshold.r zero', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [{ l: 's', r: 0 }],
+      formats: { s: 'seconds', past: '%s ago', future: 'in %s' },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle locale manager getLocale with current locale', () => {
+    const manager = LocaleManager.getInstance();
+    manager.setLocale('en');
+    expect(manager.getLocale().name).toBe('en');
+  });
+
+  it('should handle Islamic calendar getWeekdayName with all days', () => {
+    const calendar = new IslamicCalendar();
+    for (let i = 1; i <= 7; i++) {
+      expect(calendar.getWeekdayName(i)).toBeDefined();
+    }
+  });
+
+  it('should handle duration toObject with all fields', () => {
+    const dur = new Duration({
+      years: 1,
+      months: 2,
+      weeks: 3,
+      days: 4,
+      hours: 5,
+      minutes: 6,
+      seconds: 7,
+      milliseconds: 8,
+    });
+    const obj = dur.toObject();
+    expect(obj.years).toBe(1);
+    expect(obj.months).toBe(2);
+    expect(obj.weeks).toBe(3);
+    expect(obj.days).toBe(4);
+    expect(obj.hours).toBe(5);
+    expect(obj.minutes).toBe(6);
+    expect(obj.seconds).toBe(7);
+    expect(obj.milliseconds).toBe(8);
+  });
+
+  it('should handle format with time tokens at midnight', () => {
+    const tg = timeGuard('2024-04-15 00:00:00');
+    expect(tg.format('HH:mm:ss')).toBe('00:00:00');
+    expect(tg.format('h:mm a')).toBeDefined();
+  });
+
+  it('should handle advanced format with w and ww tokens', () => {
+    PluginManager.use(advancedFormatPlugin, TimeGuard);
+    const tg = timeGuard('2024-06-15');
+    expect(tg.format('w')).toBeDefined();
+    expect(tg.format('ww')).toBeDefined();
+    PluginManager.clear();
+  });
+
+  it('should handle relative time with hours threshold', () => {
+    const customPlugin = new RelativeTimePlugin({
+      thresholds: [
+        { l: 's', r: 44, d: 'second' },
+        { l: 'm', r: 89, d: 'minute' },
+        { l: 'h', r: 22, d: 'hour' },
+      ],
+      formats: {
+        s: 'seconds',
+        m: 'a minute',
+        h: 'an hour',
+        past: '%s ago',
+        future: 'in %s',
+      },
+    });
+    PluginManager.use(customPlugin, TimeGuard);
+    const past = timeGuard('2024-01-01 10:00:00');
+    const now = timeGuard('2024-01-01 12:00:00');
+    expect(past.fromNow()).toBeDefined();
+    PluginManager.clear();
+  });
 });

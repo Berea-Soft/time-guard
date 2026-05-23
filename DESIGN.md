@@ -43,8 +43,220 @@ A central `PluginManager` handles the lifecycle of plugins, ensuring they are co
 - **Formatters**: `src/formatters/date.formatter.ts` — Pattern-based string generation.
 
 ## Extensibility
-- **Plugins**: Implement `ITimeGuardPlugin` and register with `PluginManager.use()`.
-- **Locales**: Add new locale objects to `src/locales/` and register via `LocaleManager`.
-- **Calendars**: Implement `ICalendarSystem` and register via `CalendarManager`.
+
+### Plugin System
+
+#### ITimeGuardPlugin Interface
+
+Every plugin must implement the `ITimeGuardPlugin` interface:
+
+```typescript
+interface ITimeGuardPlugin {
+  name: string;
+  version: string;
+  install(timeGuardClass: typeof TimeGuard, config?: unknown): void;
+}
+```
+
+#### Plugin Lifecycle
+
+1. **Registration**: `PluginManager.use(plugin, TimeGuard)` calls `plugin.install()`.
+2. **Installation**: The plugin extends `TimeGuard.prototype` with new methods.
+3. **Usage**: All TimeGuard instances now have access to the plugin methods.
+4. **Unregistration**: `PluginManager.unuse(name)` removes the plugin (methods remain on prototype but are no longer tracked).
+
+#### Creating a Custom Plugin
+
+```typescript
+import type { ITimeGuardPlugin, TimeGuard } from "@bereasoftware/time-guard";
+
+export class MyPlugin implements ITimeGuardPlugin {
+  name = "my-plugin";
+  version = "1.0.0";
+
+  install(TimeGuardClass: typeof TimeGuard): void {
+    // Store reference to original methods if needed
+    const originalFormat = TimeGuardClass.prototype.format;
+
+    // Add new method
+    (TimeGuardClass.prototype as any).myMethod = function(
+      this: InstanceType<typeof TimeGuardClass>,
+      arg: string
+    ): string {
+      return `Custom: ${this.format("YYYY-MM-DD")} - ${arg}`;
+    };
+  }
+}
+```
+
+#### Registering and Using Plugins
+
+```typescript
+import { TimeGuard, PluginManager } from "@bereasoftware/time-guard";
+import { MyPlugin } from "./my-plugin";
+
+// Register single plugin
+PluginManager.use(new MyPlugin(), TimeGuard);
+
+// Register multiple plugins
+PluginManager.useMultiple([plugin1, plugin2, plugin3], TimeGuard);
+
+// Check if plugin is registered
+PluginManager.hasPlugin("my-plugin"); // true
+
+// List all registered plugins
+PluginManager.listPlugins(); // ['my-plugin']
+
+// Get plugin instance
+PluginManager.getPlugin("my-plugin");
+
+// Unregister plugin
+PluginManager.unuse("my-plugin");
+
+// Clear all plugins
+PluginManager.clear();
+```
+
+#### Plugin Best Practices
+
+1. **Namespace your methods**: Prefix method names to avoid collisions.
+2. **Store originals**: Keep references to original methods if wrapping them.
+3. **Use types**: Cast with `as unknown as` to maintain type safety.
+4. **Keep it isolated**: Plugins should not depend on each other.
+5. **Lazy load**: Only register plugins when needed to minimize bundle size.
+
+### Calendar System
+
+#### ICalendarSystem Interface
+
+Calendars implement the `ICalendarSystem` interface:
+
+```typescript
+interface ICalendarSystem {
+  id: string;
+  name: string;
+  getMonthName(month: number, short?: boolean): string;
+  getWeekdayName(day: number, short?: boolean): string;
+  isLeapYear(year: number): boolean;
+  daysInMonth(year: number, month: number): number;
+  daysInYear(year: number): number;
+}
+```
+
+#### Built-in Calendars
+
+| Calendar | ID | Description |
+|----------|----|-------------|
+| Gregorian | `gregory` | Standard international calendar |
+| Islamic | `islamic` | Hijri calendar for Islamic dates |
+| Hebrew | `hebrew` | Jewish calendar |
+| Chinese | `chinese` | Traditional Chinese calendar |
+| Japanese | `japanese` | Japanese imperial calendar |
+| Buddhist | `buddhist` | Buddhist Era calendar |
+
+#### Creating a Custom Calendar
+
+```typescript
+import type { ICalendarSystem } from "@bereasoftware/time-guard";
+
+export class PersianCalendar implements ICalendarSystem {
+  id = "persian";
+  name = "Persian (Jalali)";
+  months = [
+    "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar",
+    "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand"
+  ];
+
+  getMonthName(month: number, short = false): string {
+    const idx = Math.max(0, Math.min(11, month - 1));
+    return short ? this.months[idx].slice(0, 3) : this.months[idx];
+  }
+
+  getWeekdayName(day: number, short = false): string {
+    const days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const idx = Math.max(0, Math.min(6, day - 1));
+    return short ? days[idx].slice(0, 3) : days[idx];
+  }
+
+  isLeapYear(year: number): boolean {
+    // Persian leap year calculation
+    return ((year % 2820 + 474) % 2820) % 128 < 31;
+  }
+
+  daysInMonth(year: number, month: number): number {
+    if (month <= 6) return 31;
+    if (month <= 11) return 30;
+    return this.isLeapYear(year) ? 30 : 29;
+  }
+
+  daysInYear(year: number): number {
+    return this.isLeapYear(year) ? 366 : 365;
+  }
+}
+```
+
+#### Registering a Calendar
+
+```typescript
+import { CalendarManager } from "@bereasoftware/time-guard";
+import { PersianCalendar } from "./persian-calendar";
+
+const manager = CalendarManager.getInstance();
+
+// Register calendar
+manager.register(new PersianCalendar());
+
+// Set as default
+manager.setDefault("persian");
+
+// Get calendar
+const persian = manager.get("persian");
+
+// List all calendars
+manager.list(); // ['gregory', 'islamic', 'hebrew', 'chinese', 'japanese', 'buddhist', 'persian']
+```
+
+### Locale System
+
+#### ILocale Interface
+
+```typescript
+interface ILocale {
+  name: string;
+  months: string[];
+  monthsShort: string[];
+  weekdays: string[];
+  weekdaysShort: string[];
+  weekdaysMin: string[];
+  meridiem: { am: string; pm: string };
+  formats: {
+    iso: string;
+    date: string;
+    time: string;
+    datetime: string;
+    rfc2822: string;
+  };
+}
+```
+
+#### Adding a Locale
+
+```typescript
+import { LocaleManager } from "@bereasoftware/time-guard";
+
+const manager = LocaleManager.getInstance();
+
+// Set locale with data
+manager.setLocale("fr", frenchLocaleData);
+
+// Load multiple locales
+manager.loadLocales({
+  "de": germanLocaleData,
+  "it": italianLocaleData,
+});
+
+// List all locales
+manager.listLocales(); // ['en', 'es', 'fr', 'de', 'it']
+```
 
 See `ARCHITECTURE.md` for a more technical breakdown of the class hierarchy and internal data flow.

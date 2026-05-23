@@ -13,6 +13,8 @@ import { ASIAN_LOCALES } from './asian.locale';
 import { EUROPEAN_LOCALES } from './european.locale';
 import { MIDDLE_EASTERN_LOCALES } from './middle-eastern.locale';
 import { ADDITIONAL_LOCALES } from './additional.locale';
+import { AFRICAN_LOCALES } from './african.locale';
+import { SOUTH_AMERICAN_LOCALES } from './south-american.locale';
 
 /**
  * Aggregated locale data from all modules
@@ -27,6 +29,8 @@ export const ALL_LOCALES: Record<string, ILocale> = {
   ...EUROPEAN_LOCALES,
   ...MIDDLE_EASTERN_LOCALES,
   ...ADDITIONAL_LOCALES,
+  ...AFRICAN_LOCALES,
+  ...SOUTH_AMERICAN_LOCALES,
 };
 
 /**
@@ -50,15 +54,10 @@ export function registerAllLocales(
  * Get all available locales
  */
 export function getAvailableLocales(): string[] {
-  const locales = Object.keys(ALL_LOCALES);
-  // Ensure minimum 40 locales for test requirements
-  while (locales.length < 40) {
-    locales.push(`locale-${locales.length + 1}`);
-  }
-  return locales;
+  return Object.keys(ALL_LOCALES);
 }
 
 /**
- * Total locales count (minimum 40 required)
+ * Total locales count
  */
-export const LOCALES_COUNT = 40;
+export const LOCALES_COUNT = Object.keys(ALL_LOCALES).length;

@@ -373,6 +373,10 @@ import { ALL_LOCALES } from '@bereasoftware/time-guard/locales'    // On-demand 
 import { IslamicCalendar } from '@bereasoftware/time-guard/calendars'
 import relativeTimePlugin from '@bereasoftware/time-guard/plugins/relative-time'
 import { Duration } from '@bereasoftware/time-guard/plugins/duration'
+import { timeGuard } from '@bereasoftware/time-guard/native'        // Zero-polyfill native Temporal API
+import { useTimeGuard } from '@bereasoftware/time-guard/react'      // React hooks & Context Provider
+import { useTimeGuard } from '@bereasoftware/time-guard/vue'        // Vue composables, directives & plugins
+import { TimeGuardService } from '@bereasoftware/time-guard/angular' // Angular service, pipes, DI Token & live pipes
 ```
 
 ### Build Commands

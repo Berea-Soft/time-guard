@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+html {
+  line-height: 1.15; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Custom premium scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-950;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply transition-colors border-2 rounded-full bg-slate-300 dark:bg-slate-800 border-slate-100 dark:border-slate-950 hover:bg-slate-400 dark:hover:bg-slate-700;
+  }
+}
+
+/* Premium Glassmorphic Card */
+@utility glass-card {
+  @apply transition-all duration-300 border shadow-xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-md border-slate-200 dark:border-slate-800/80 rounded-2xl;
+
+  &:hover {
+    @apply shadow-lg border-brand-500/30 shadow-brand-500/5;
+  }
+}
+
+/* Glow typography utility */
+@utility glow-text {
+  @apply text-transparent bg-clip-text bg-linear-to-r from-brand-500 via-sky-500 to-indigo-600 dark:from-brand-400 dark:via-sky-400 dark:to-indigo-500;
+}
+
+/* Glassy button utility */
+@utility glow-btn {
+  @apply bg-linear-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-medium px-4 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 active:scale-95 transition-all duration-200;
+}
+
+/* Custom code block typography */
+pre,
+code {
+  font-family: 'Fira Code', monospace;
+}

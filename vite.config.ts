@@ -18,36 +18,67 @@ const distTypesSrcDir = resolve(__dirname, 'dist', 'types', 'src');
 const fileName = (format: string, entryName: string) =>
   format === 'cjs' ? `${entryName}.cjs` : `${entryName}.${format}.js`;
 
+function getEntries(isUmd: boolean, buildMode: string) {
+  if (isUmd) {
+    return resolve(__dirname, 'src/index.ts');
+  }
+  const entries: Record<string, string> = {
+    'time-guard': resolve(__dirname, 'src/index.ts'),
+    'native/index': resolve(__dirname, 'src/native.ts'),
+    'react/index': resolve(__dirname, 'src/react.ts'),
+    'vue/index': resolve(__dirname, 'src/vue.ts'),
+    'svelte/index': resolve(__dirname, 'src/svelte.ts'),
+    'solid/index': resolve(__dirname, 'src/solid.ts'),
+    'qwik/index': resolve(__dirname, 'src/qwik.ts'),
+    'locales/index': resolve(__dirname, 'src/locales/index.ts'),
+    'calendars/index': resolve(__dirname, 'src/calendars/index.ts'),
+    'plugins/relative-time': resolve(
+      __dirname,
+      'src/plugins/relative-time/index.ts',
+    ),
+    'plugins/duration': resolve(
+      __dirname,
+      'src/plugins/duration/index.ts',
+    ),
+    'plugins/advanced-format': resolve(
+      __dirname,
+      'src/plugins/advanced-format/index.ts',
+    ),
+  };
+  // Angular uses TypeScript decorators not supported by Rolldown — built separately
+  if (buildMode === 'angular') {
+    entries['angular/index'] = resolve(__dirname, 'src/angular.ts');
+  }
+  return entries;
+}
+
 export default defineConfig(({ mode }): UserConfig => {
   const shared = {
     define: { __VERSION__: JSON.stringify(pack.version) },
   };
 
   const isUmd = mode === 'umd';
+  const isAngular = mode === 'angular';
 
   return {
     ...shared,
+    // Angular build uses esbuild (supports decorators) instead of Rolldown
+    builder: isAngular ? 'esbuild' : undefined,
+    // Rolldown (Vite 8 default) no soporta decoradores legacy de TypeScript
+    // Para Angular usamos esbuild como builder
+    builder: isAngular ? 'esbuild' : undefined,
+    esbuild: isAngular
+      ? {
+          tsconfigRaw: JSON.stringify({
+            compilerOptions: {
+              experimentalDecorators: true,
+            },
+          }),
+        }
+      : undefined,
     build: {
       lib: {
-        entry: isUmd
-          ? resolve(__dirname, 'src/index.ts')
-          : {
-              'time-guard': resolve(__dirname, 'src/index.ts'),
-              'locales/index': resolve(__dirname, 'src/locales/index.ts'),
-              'calendars/index': resolve(__dirname, 'src/calendars/index.ts'),
-              'plugins/relative-time': resolve(
-                __dirname,
-                'src/plugins/relative-time/index.ts',
-              ),
-              'plugins/duration': resolve(
-                __dirname,
-                'src/plugins/duration/index.ts',
-              ),
-              'plugins/advanced-format': resolve(
-                __dirname,
-                'src/plugins/advanced-format/index.ts',
-              ),
-            },
+        entry: getEntries(isUmd, mode),
         name: 'BereasoftTimeGuard',
         fileName: isUmd
           ? (format: string) =>
@@ -56,14 +87,15 @@ export default defineConfig(({ mode }): UserConfig => {
         formats: isUmd ? ['umd', 'iife', 'es', 'cjs'] : ['es', 'cjs'],
       },
       rollupOptions: {
+        external: ['react', 'vue', '@angular/core', 'rxjs', 'svelte', 'solid-js', '@builder.io/qwik'],
         output: {
           banner,
           exports: 'named' as const,
         },
       },
-      emptyOutDir: isUmd ? false : true, // Solo limpiamos para el modo no-UMD
-      sourcemap: true,
-      minify: 'oxc',
+      emptyOutDir: isUmd || isAngular ? false : true,
+      sourcemap: false,
+      minify: false,
       reportCompressedSize: true,
     },
     plugins: [

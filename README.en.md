@@ -44,6 +44,7 @@ A modern, production-grade date/time manipulation library built with **TypeScrip
 - [Advanced Calculations](#advanced-calculations)
 - [Calendar Systems](#calendar-systems)
 - [Plugins](#plugins)
+- [Framework Integrations](#framework-integrations)
 - [Documentation](#documentation)
 - [Supported Locales](#supported-locales)
 - [API Overview](#api-overview)
@@ -1439,6 +1440,237 @@ date.format('DD/MM/YYYY "at" HH:mm'); // 13/03/2024 at 14:30
 ```
 
 **📖 Complete Format Guide:** See [EXAMPLES.md](EXAMPLES.md) for more patterns and use cases.
+
+---
+
+## 🔌 Framework Integrations
+<a id="framework-integrations"></a>
+
+TimeGuard includes high-performance, native integrations for **React**, **Vue**, and **Angular** packaged under specific subpath exports. These integrations are built following SOLID principles and optimized to prevent memory leaks and unnecessary change detection/rendering cycles.
+
+### 📦 Installing Optional Peer Dependencies
+
+Since framework integrations are optional, ensure you have the respective framework packages installed in your project:
+
+```bash
+# For React
+npm install react react-dom
+
+# For Vue
+npm install vue
+
+# For Angular
+npm install @angular/core rxjs
+```
+
+---
+
+### ⚛️ React (`@bereasoftware/time-guard/react`)
+
+The React integration exposes custom reactive hooks backed by a global context configuration provider.
+
+#### 1. Global Context: `TimeGuardProvider`
+Provides a default configuration (such as locale or timezone) down the React component tree.
+
+```tsx
+import React from 'react';
+import { TimeGuardProvider } from '@bereasoftware/time-guard/react';
+
+export function App() {
+  return (
+    <TimeGuardProvider config={{ locale: 'en', timezone: 'America/New_York' }}>
+      <MyComponent />
+    </TimeGuardProvider>
+  );
+}
+```
+
+#### 2. Reactive Hooks
+
+*   **`useTimeGuard(input, config?)`**:
+    Creates a reactive `TimeGuard` instance that automatically updates when input or configuration changes. Inherits configuration from the global context provider as a fallback.
+    ```tsx
+    import { useTimeGuard } from '@bereasoftware/time-guard/react';
+
+    function DateDisplay({ dateString }) {
+      const tg = useTimeGuard(dateString);
+      return <p>Date: {tg.format('LL')}</p>;
+    }
+    ```
+
+*   **`useCurrentTime(options?)`**:
+    Returns a reactive `TimeGuard` representing the current time, ticking automatically at the specified interval (defaults to `1000ms`).
+    ```tsx
+    import { useCurrentTime } from '@bereasoftware/time-guard/react';
+
+    function LiveClock() {
+      const now = useCurrentTime({ interval: 1000 });
+      return <h2>Current Time: {now.format('HH:mm:ss')}</h2>;
+    }
+    ```
+
+*   **`useRelativeTime(date, options?)`**:
+    Returns a dynamic relative time string (e.g. *"5 minutes ago"*) that is periodically updated at a regular interval (defaults to `60000ms`).
+    ```tsx
+    import { useRelativeTime } from '@bereasoftware/time-guard/react';
+
+    function CommentTime({ createdAt }) {
+      const relative = useRelativeTime(createdAt, { interval: 30000 }); // updates every 30s
+      return <span>Published {relative}</span>;
+    }
+    ```
+
+*   **`useTimeRange(start, end, config?)`**:
+    Creates and manages a reactive `TimeRange` instance that updates when start, end, or configuration options change.
+    ```tsx
+    import { useTimeRange } from '@bereasoftware/time-guard/react';
+
+    function EventRange({ start, end }) {
+      const range = useTimeRange(start, end);
+      return (
+        <div>
+          <p>Total duration: {range.duration().humanize()}</p>
+          <p>Is happening now?: {range.contains('now') ? 'Yes' : 'No'}</p>
+        </div>
+      );
+    }
+    ```
+
+---
+
+### 🟢 Vue (`@bereasoftware/time-guard/vue`)
+
+The Vue integration supports Vue 3 Composition API composables, a global setup plugin, and a custom directive.
+
+#### 1. Registering the Plugin: `TimeGuardVuePlugin`
+Registers the `v-time-guard` directive globally and configures defaults via `provide`/`inject`.
+
+```typescript
+import { createApp } from 'vue';
+import { TimeGuardVuePlugin } from '@bereasoftware/time-guard/vue';
+import App from './App.vue';
+
+const app = createApp(App);
+
+// Register plugin with default options
+app.use(TimeGuardVuePlugin, {
+  locale: 'en',
+});
+
+app.mount('#app');
+```
+
+#### 2. Custom Directive: `v-time-guard`
+A declarative and highly reactive directive for rendering formatted or relative dates directly in templates. Automatically cleans up polling intervals to prevent memory leaks when components unmount.
+
+```html
+<!-- Standard formatting -->
+<span v-time-guard:format="date" data-pattern="DD MMMM YYYY"></span>
+
+<!-- Live relative time (recalculates every minute by default) -->
+<span v-time-guard:relative="date"></span>
+
+<!-- Real-time clock (updates every second) -->
+<span v-time-guard:format="'now'" data-pattern="HH:mm:ss" data-live="true" data-interval="1000"></span>
+```
+
+#### 3. Composition API Composables
+*   **`useTimeGuard(input, config?)`**: Returns a reactive `Ref<TimeGuard>`.
+*   **`useCurrentTime(options?)`**: Returns a reactive `Ref<TimeGuard>` of the current time, with automatic interval cleanup on unmount.
+*   **`useRelativeTime(date, options?)`**: Returns a reactive `Ref<string>` containing the relative time representation, with built-in deep watching.
+
+```html
+<script setup>
+import { useCurrentTime, useRelativeTime } from '@bereasoftware/time-guard/vue';
+
+const now = useCurrentTime({ interval: 1000 });
+const relative = useRelativeTime('2026-05-20T08:00:00');
+</script>
+
+<template>
+  <div>
+    <p>Current Time: {{ now.format('HH:mm:ss') }}</p>
+    <p>Published: {{ relative }}</p>
+  </div>
+</template>
+```
+
+---
+
+### 🅰️ Angular (`@bereasoftware/time-guard/angular`)
+
+The Angular integration is optimized for highly reactive Change Detection strategies (like `OnPush`). It provides dependency-injectable services and pure/impure pipes that run polling intervals outside Angular's Zone to maximize rendering performance.
+
+#### 1. Global Setup Injection Token: `TIME_GUARD_CONFIG`
+Registers a global configuration at module or root level.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { TIME_GUARD_CONFIG } from '@bereasoftware/time-guard/angular';
+
+@NgModule({
+  providers: [
+    {
+      provide: TIME_GUARD_CONFIG,
+      useValue: { locale: 'en' }
+    }
+  ]
+})
+export class AppModule {}
+```
+
+#### 2. Provided Pipes
+
+*   **`TimeGuardFormatPipe` (`timeGuardFormat`)**:
+    A pure pipe designed for lightning-fast date-time formatting in templates.
+    ```html
+    <p>{{ createdDate | timeGuardFormat:'DD/MM/YYYY' }}</p>
+    ```
+
+*   **`TimeGuardRelativePipe` (`timeGuardRelative`)**:
+    An impure pipe for showing humanized relative time representations.
+    ```html
+    <p>Published {{ createdDate | timeGuardRelative }}</p>
+    ```
+
+*   **`TimeGuardLiveFormatPipe` (`timeGuardLiveFormat`)**:
+    An optimized impure pipe utilizing `ChangeDetectorRef` to update live ticking clocks or dates without re-evaluating the entire component tree.
+    ```html
+    <!-- Real-time clock updating every second -->
+    <h2>Current Time: {{ 'now' | timeGuardLiveFormat:'HH:mm:ss':1000 }}</h2>
+
+    <!-- Dynamic format updater for static date -->
+    <p>Last update: {{ updateDate | timeGuardLiveFormat:'YYYY-MM-DD HH:mm:ss':5000 }}</p>
+    ```
+
+#### 3. Reactive Observable Service: `TimeGuardService`
+Exposes an injectable service featuring RxJS streams.
+`getCurrentTime()` returns an observable current time. Crucially, the polling ticks run **outside Angular's zone** (`runOutsideAngular`) and only re-enter Angular's zone (`NgZone.run`) when emitting values, reducing change detection churn and CPU usage in large-scale applications.
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { TimeGuardService } from '@bereasoftware/time-guard/angular';
+import { Observable } from 'rxjs';
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+@Component({
+  selector: 'app-clock',
+  template: `
+    <div *ngIf="time$ | async as time">
+      Time: {{ time.format('HH:mm:ss') }}
+    </div>
+  `
+})
+export class ClockComponent implements OnInit {
+  time$!: Observable<TimeGuard>;
+
+  constructor(private timeGuardService: TimeGuardService) {}
+
+  ngOnInit() {
+    this.time$ = this.timeGuardService.getCurrentTime(1000);
+  }
+}
+```
 
 ---
 

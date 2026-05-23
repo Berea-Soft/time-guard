@@ -4,7 +4,7 @@
  * Note: The polyfill must be loaded by the consumer or via the "full" entry.
  */
 
-import { Temporal } from '@js-temporal/polyfill';
+import type { Temporal } from '@js-temporal/polyfill';
 import type {
   TemporalPlainDateTime,
   TemporalZonedDateTime,
@@ -24,10 +24,9 @@ function useTemporal(): TemporalType {
     return temporalCache;
   }
 
-  const TemporalLoaded =
-    ((globalThis as Record<string, unknown>).Temporal as
-      | TemporalType
-      | undefined) ?? Temporal;
+  const TemporalLoaded = (globalThis as Record<string, unknown>).Temporal as
+    | TemporalType
+    | undefined;
 
   if (!TemporalLoaded) {
     throw new Error(

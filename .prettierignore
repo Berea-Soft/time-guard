@@ -4,3 +4,4 @@ dist
 *.js
 coverage
 *.snap
+docs-app/src/examples/AngularDemo.vue

@@ -1,11 +1,20 @@
-# TimeGuard 🕐
+<p align="center">
+  <img src="src/assets/Logo.png" alt="Time Guard Logo" />
+  <h1 align="center">Time Guard</h1>
+  <p align="center">
+    Una biblioteca moderna y de nivel producción para manipulación de fechas/horas construida con <strong>TypeScript</strong>, <strong>Temporal API</strong> y <strong>SOLID principles</strong>. TimeGuard aprovecha los estándares de JavaScript modernos y las mejores prácticas.
+  </p>
+</p>
+<br/>
+<br/>
 
 > 📚 **Documentación disponible en otros idiomas:**
 >
 > - 🇪🇸 **Español** (este archivo - README.md)
 > - 🇬🇧 [English](README.en.md)
 
-Una biblioteca moderna y de nivel producción para manipulación de fechas/horas construida con **TypeScript**, **Temporal API** y **SOLID principles**. TimeGuard aprovecha los estándares de JavaScript modernos y las mejores prácticas.
+<br/>
+<br/>
 
 [![Pruebas](https://img.shields.io/badge/Pruebas-530%2B-green?style=for-the-badge)](#testing)
 [![Locales](https://img.shields.io/badge/Locales-40%2B-orange?style=for-the-badge)](#locales-soportadas)
@@ -49,6 +58,7 @@ Una biblioteca moderna y de nivel producción para manipulación de fechas/horas
 - [Cálculos Avanzados](#cálculos-avanzados)
 - [Sistemas de Calendario](#sistemas-de-calendario)
 - [Plugins](#plugins)
+- [Integración con Frameworks](#integración-con-frameworks)
 - [Documentación](#documentación)
 - [Locales Soportadas](#locales-soportadas)
 - [Referencia API](#referencia-api)
@@ -60,6 +70,7 @@ Una biblioteca moderna y de nivel producción para manipulación de fechas/horas
 ---
 
 ## 🚀 Inicio Rápido
+<a id="inicio-rápido"></a><a id="inicio-rapido"></a>
 
 ```typescript
 import { TimeGuard } from '@bereasoftware/time-guard';
@@ -94,6 +105,7 @@ console.log(date.isAfter(new Date('2020-01-01'))); // true
 ---
 
 ## 📦 Instalación
+<a id="instalación"></a><a id="instalacion"></a>
 
 ```bash
 npm install @bereasoftware/time-guard
@@ -154,6 +166,7 @@ import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-for
 ---
 
 ## 🏗️ Conceptos Clave
+<a id="conceptos-clave"></a>
 
 ### 1. Inmutabilidad
 
@@ -223,6 +236,7 @@ date.format('MM/DD/YYYY');
 ---
 
 ## 🎯 Accesores de Componentes
+<a id="accesores-de-componentes"></a>
 
 Acceso rápido a componentes individuales de la fecha:
 
@@ -252,6 +266,7 @@ console.log(date.inLeapYear()); // true
 ---
 
 ## ⏱️ Cálculos Avanzados
+<a id="cálculos-avanzados"></a><a id="calculos-avanzados"></a>
 
 ### 🎯 API Semántica: `between()` - Sin Carga Mental
 
@@ -586,6 +601,7 @@ date.round({
 ---
 
 ## 📅 Sistemas de Calendario
+<a id="sistemas-de-calendario"></a>
 
 TimeGuard incluye soporte para múltiples sistemas de calendario, extensible a través del gestor de calendarios:
 
@@ -682,7 +698,8 @@ console.log(calendar.isLeapYear(2567)); // true
 
 ---
 
-## � Plugins
+<a id="plugins"></a>
+## 🔌 Plugins
 
 TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 
@@ -725,7 +742,8 @@ TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 
 ---
 
-## �📚 Documentation
+<a id="documentación"></a><a id="documentacion"></a>
+## 📚 Documentación
 
 ### Archivos de Documentación Principal
 
@@ -745,6 +763,7 @@ TimeGuard incluye un sistema de plugins opcional para funcionalidad extendida:
 - **Arquitectura** → Ver [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## 🌍 Locales Soportadas
+<a id="locales-soportadas"></a>
 
 TimeGuard proporciona **más de 40 idiomas y variantes regionales** con soporte completo de internacionalización. Los locales se organizan por familia de idiomas para facilitar el descubrimiento.
 
@@ -1242,6 +1261,7 @@ date.myMethod(); // "Hello from my plugin!"
 ---
 
 ## 🎯 Referencia API
+<a id="referencia-api"></a>
 
 ### Factory Methods
 
@@ -1626,7 +1646,239 @@ exactDiff.toString(); // "432000000" (milliseconds)
 
 ---
 
+## 🔌 Integración con Frameworks
+<a id="integración-con-frameworks"></a><a id="integracion-con-frameworks"></a>
+
+TimeGuard incluye integraciones nativas y optimizadas de alto rendimiento para **React**, **Vue** y **Angular** a través de subrutas específicas. Estas integraciones están diseñadas bajo los principios SOLID, con mitigación de fugas de memoria y optimizaciones de ciclo de renderizado.
+
+### 📦 Instalación de Dependencias Opcionales
+
+Dado que las integraciones con frameworks son opcionales, debes asegurarte de tener instaladas las dependencias del framework correspondiente en tu proyecto.
+
+```bash
+# Para React
+npm install react react-dom
+
+# Para Vue
+npm install vue
+
+# Para Angular
+npm install @angular/core rxjs
+```
+
+---
+
+### ⚛️ React (`@bereasoftware/time-guard/react`)
+
+La integración con React proporciona un sistema de contexto global para la configuración y hooks reactivos de alta fidelidad.
+
+#### 1. Contexto Global: `TimeGuardProvider`
+Permite propagar una configuración predeterminada (como el idioma o zona horaria) a todos los hooks dentro del árbol de componentes.
+
+```tsx
+import React from 'react';
+import { TimeGuardProvider } from '@bereasoftware/time-guard/react';
+
+export function App() {
+  return (
+    <TimeGuardProvider config={{ locale: 'es', timezone: 'America/Mexico_City' }}>
+      <MyComponent />
+    </TimeGuardProvider>
+  );
+}
+```
+
+#### 2. Hooks Reactivos
+
+*   **`useTimeGuard(input, config?)`**:
+    Crea una instancia reactiva de `TimeGuard` que se actualiza automáticamente cuando el valor de entrada o la configuración cambian. Hereda la configuración del contexto de forma transparente.
+    ```tsx
+    import { useTimeGuard } from '@bereasoftware/time-guard/react';
+
+    function DateDisplay({ dateString }) {
+      const tg = useTimeGuard(dateString);
+      return <p>Fecha: {tg.format('LL')}</p>;
+    }
+    ```
+
+*   **`useCurrentTime(options?)`**:
+    Retorna una instancia reactiva del tiempo actual que se actualiza automáticamente según el intervalo indicado (por defecto `1000ms`).
+    ```tsx
+    import { useCurrentTime } from '@bereasoftware/time-guard/react';
+
+    function LiveClock() {
+      const now = useCurrentTime({ interval: 1000 });
+      return <h2>Hora actual: {now.format('HH:mm:ss')}</h2>;
+    }
+    ```
+
+*   **`useRelativeTime(date, options?)`**:
+    Retorna un string dinámico de tiempo relativo (ej. *"hace 5 minutos"*) que se recalcula de forma periódica e inalterable en intervalos regulares (por defecto cada `60000ms`).
+    ```tsx
+    import { useRelativeTime } from '@bereasoftware/time-guard/react';
+
+    function CommentTime({ createdAt }) {
+      const relative = useRelativeTime(createdAt, { interval: 30000 }); // actualiza cada 30s
+      return <span>Publicado {relative}</span>;
+    }
+    ```
+
+*   **`useTimeRange(start, end, config?)`**:
+    Crea y gestiona una instancia reactiva de `TimeRange` que responde a cambios en los límites de inicio y fin.
+    ```tsx
+    import { useTimeRange } from '@bereasoftware/time-guard/react';
+
+    function EventRange({ start, end }) {
+      const range = useTimeRange(start, end);
+      return (
+        <div>
+          <p>Duración total: {range.duration().humanize()}</p>
+          <p>¿Está ocurriendo ahora?: {range.contains('now') ? 'Sí' : 'No'}</p>
+        </div>
+      );
+    }
+    ```
+
+---
+
+### 🟢 Vue (`@bereasoftware/time-guard/vue`)
+
+La integración con Vue 3 ofrece compatibilidad completa con la Composition API, un Plugin global y una directiva personalizada reactiva altamente configurable.
+
+#### 1. Registro del Plugin: `TimeGuardVuePlugin`
+Registra la directiva `v-time-guard` de forma global y provee la configuración por defecto mediante `provide`/`inject`.
+
+```typescript
+import { createApp } from 'vue';
+import { TimeGuardVuePlugin } from '@bereasoftware/time-guard/vue';
+import App from './App.vue';
+
+const app = createApp(App);
+
+// Registrar plugin con opciones por defecto
+app.use(TimeGuardVuePlugin, {
+  locale: 'es',
+});
+
+app.mount('#app');
+```
+
+#### 2. Directiva Reactiva Dinámica: `v-time-guard`
+Permite formatear y mostrar fechas reactivamente de forma declarativa directamente en las plantillas. Soporta intervalos de actualización automática para evitar fugas de memoria al desmontar el elemento.
+
+```html
+<!-- Formateo estándar -->
+<span v-time-guard:format="fecha" data-pattern="DD MMMM YYYY"></span>
+
+<!-- Tiempo relativo automático (actualiza cada minuto por defecto) -->
+<span v-time-guard:relative="fecha"></span>
+
+<!-- Reloj en tiempo real (actualización cada segundo) -->
+<span v-time-guard:format="'now'" data-pattern="HH:mm:ss" data-live="true" data-interval="1000"></span>
+```
+
+#### 3. Composables de la Composition API
+*   **`useTimeGuard(input, config?)`**: Retorna una `Ref<TimeGuard>` reactiva.
+*   **`useCurrentTime(options?)`**: Retorna una `Ref<TimeGuard>` del tiempo actual con limpieza automática del intervalo en `onUnmounted`.
+*   **`useRelativeTime(date, options?)`**: Retorna una `Ref<string>` con el tiempo relativo actualizado periódicamente con watch profundo incorporado.
+
+```html
+<script setup>
+import { useCurrentTime, useRelativeTime } from '@bereasoftware/time-guard/vue';
+
+const now = useCurrentTime({ interval: 1000 });
+const relative = useRelativeTime('2026-05-20T08:00:00');
+</script>
+
+<template>
+  <div>
+    <p>Hora actual: {{ now.format('HH:mm:ss') }}</p>
+    <p>Publicado hace: {{ relative }}</p>
+  </div>
+</template>
+```
+
+---
+
+### 🅰️ Angular (`@bereasoftware/time-guard/angular`)
+
+La integración con Angular está optimizada para la detección de cambios (`ChangeDetectionStrategy.OnPush`), utilizando servicios inyectables y pipes puros/impuros que ejecutan temporizadores fuera de la zona de Angular (`NgZone.runOutsideAngular`) para maximizar el rendimiento.
+
+#### 1. Configuración Global: `TIME_GUARD_CONFIG`
+Registra la configuración en el módulo o a nivel de root mediante Dependency Injection (DI).
+
+```typescript
+import { NgModule } from '@angular/core';
+import { TIME_GUARD_CONFIG } from '@bereasoftware/time-guard/angular';
+
+@NgModule({
+  providers: [
+    {
+      provide: TIME_GUARD_CONFIG,
+      useValue: { locale: 'es' }
+    }
+  ]
+})
+export class AppModule {}
+```
+
+#### 2. Pipes Disponibles
+
+*   **`TimeGuardFormatPipe` (`timeGuardFormat`)**:
+    Pipe puro diseñado para formatear valores de fecha/hora de forma ultra-rápida sin sobrecargar la detección de cambios.
+    ```html
+    <p>{{ createdDate | timeGuardFormat:'DD/MM/YYYY' }}</p>
+    ```
+
+*   **`TimeGuardRelativePipe` (`timeGuardRelative`)**:
+    Pipe impuro para mostrar la representación humanizada relativa de una fecha.
+    ```html
+    <p>Publicado {{ createdDate | timeGuardRelative }}</p>
+    ```
+
+*   **`TimeGuardLiveFormatPipe` (`timeGuardLiveFormat`)**:
+    Pipe impuro de alto rendimiento optimizado con `ChangeDetectorRef` para crear relojes o actualizaciones dinámicas en tiempo real en plantillas sin redibujar todo el árbol.
+    ```html
+    <!-- Reloj digital en vivo actualizándose cada segundo -->
+    <h2>Hora actual: {{ 'now' | timeGuardLiveFormat:'HH:mm:ss':1000 }}</h2>
+
+    <!-- Fecha estática actualizando su formato dinámicamente -->
+    <p>Actualizado: {{ updateDate | timeGuardLiveFormat:'YYYY-MM-DD HH:mm:ss':5000 }}</p>
+    ```
+
+#### 3. Servicio Reactivo: `TimeGuardService`
+Provee acceso inyectable a flujos reactivos basados en **RxJS**.
+El método `getCurrentTime()` emite el tiempo actual en base a un intervalo. Internamente corre **fuera de la zona de Angular** (`runOutsideAngular`) y solo reingresa a la zona (`NgZone.run`) para emitir valores, lo que evita disparar ciclos de renderizado y disminuye drásticamente el consumo de CPU en aplicaciones SPA de gran escala.
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { TimeGuardService } from '@bereasoftware/time-guard/angular';
+import { Observable } from 'rxjs';
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+@Component({
+  selector: 'app-clock',
+  template: `
+    <div *ngIf="time$ | async as time">
+      Hora: {{ time.format('HH:mm:ss') }}
+    </div>
+  `
+})
+export class ClockComponent implements OnInit {
+  time$!: Observable<TimeGuard>;
+
+  constructor(private timeGuardService: TimeGuardService) {}
+
+  ngOnInit() {
+    this.time$ = this.timeGuardService.getCurrentTime(1000);
+  }
+}
+```
+
+---
+
 ## 🧪 Testing
+<a id="testing"></a>
 
 TimeGuard includes **530+ comprehensive tests** covering:
 
@@ -1665,6 +1917,7 @@ Edge cases:              65+ tests
 ---
 
 ## 🏛️ Arquitectura
+<a id="arquitectura"></a>
 
 TimeGuard is built on **SOLID principles** ensuring clean, maintainable, and extensible code:
 
@@ -1730,6 +1983,7 @@ time-guard/
 ---
 
 ## 🤝 Contribuir
+<a id="contribuir"></a>
 
 ¡Bienvenidas las contribuciones! Por favor:
 
@@ -1742,6 +1996,7 @@ time-guard/
 ---
 
 ## 📄 Licencia
+<a id="licencia"></a>
 
 Licencia MIT © 2024 Berea-Soft
 

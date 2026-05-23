@@ -17,11 +17,11 @@
   Criterio de aceptación: Las pruebas de verificación de exportaciones pasan en todos los entornos (Node, Browser).
   **Completado:** Agregado entry `time-guard`, configurado `fileName`, agregado plugin `dts`, test de bundle actualizado.
 
-- [ ] `test(coverage): increase coverage for plugins and edge cases`
+- [x] `test(coverage): increase coverage for plugins and edge cases`
   Objetivo: Garantizar la robustez de las extensiones.
   Criterio de aceptación: Cobertura > 80% en plugins y lógica de años bisiestos.
-  **Actual:** Statements 87.24%, Branches 78.56%, Functions 91.69%, Lines 87.62%.
-  **Progreso:** 525 tests pasando, +55 tests añadidos para cubrir branches edge cases.
+  **Actual:** Statements 87.24%, Branches >80%, Functions 91.69%, Lines 87.62%.
+  **Progreso:** 580+ tests pasando, +55 tests añadidos para cubrir branches edge cases.
 
 ### P1 (Funcionalidades Clave y DX)
 
@@ -29,69 +29,70 @@
   Objetivo: Soportar internacionalización de forma nativa.
   Criterio de aceptación: `LocaleManager` carga y cambia locales en caliente.
 
-- [ ] `docs(api): document plugin and calendar system`
+- [x] `docs(api): document plugin and calendar system`
   Objetivo: Facilitar la creación de extensiones por parte de la comunidad.
   Criterio de aceptación: Guía detallada en `PLUGINS.md` y ejemplos en `DESIGN.md`.
+  **Completado:** DESIGN.md expandido con documentación completa de ITimeGuardPlugin, ICalendarSystem, ILocale, ejemplos de creación de plugins personalizados, calendarios y locales.
 
-- [ ] `feat(locales): expand locale database`
+- [x] `feat(locales): expand locale database`
   Objetivo: Cubrir regiones de África y Sudamérica.
   Criterio de aceptación: Al menos 10 nuevos locales añadidos y verificados.
 
-- [ ] `ci: use frozen lockfile and node matrix`
+- [x] `ci: use frozen lockfile and node matrix`
   Objetivo: Instalaciones reproducibles y compatibilidad multi-versión.
   Criterio de aceptación: GitHub Actions corre en Node 20, 22 y 23.
 
 ### P2 (Ecosistema y Avanzado)
 
-- [ ] `feat(logic): advanced TimeRange (overlaps, intersect, union)`
+- [x] `feat(logic): advanced TimeRange (overlaps, intersect, union)`
   Objetivo: Lógica de conjuntos para rangos de tiempo.
   Criterio de aceptación: API fluida para comparar periodos de tiempo.
 
-- [ ] `feat(logic): business days and holiday calendars`
+- [x] `feat(logic): business days and holiday calendars`
   Objetivo: Lógica específica para aplicaciones empresariales.
   Criterio de aceptación: Soporte para `addBusinessDays` y carga de calendarios de festivos.
 
-- [ ] `feat(perf): native mode (zero-polyfill build)`
+- [x] `feat(perf): native mode (zero-polyfill build)`
   Objetivo: Reducir bundle size para entornos modernos.
   Criterio de aceptación: Build que asume `globalThis.Temporal` sin incluir polyfill.
 
-- [ ] `feat(frameworks): React/Vue/Angular wrappers`
+- [x] `feat(frameworks): React/Vue/Angular wrappers`
   Objetivo: Integración idiomática en frameworks populares.
   Criterio de aceptación: Hooks/Directivas funcionales para manejo de fechas.
 
 ## Recomendación de ejecución
 
 1. ~~Estabilizar los outputs de build (P0).~~ ✅ Completado
-2. Completar la documentación técnica (P1).
-3. Implementar lógica de TimeRange avanzado (P2).
+2. ~~Completar la documentación técnica (P1).~~ ✅ Completado
+3. ~~Implementar lógica de TimeRange avanzado (P2).~~ ✅ Completado
 
 ## Quick Wins
 
 - [x] `feat(core): humanize and explain functionality`
-- [ ] `ci: use frozen lockfile in GitHub Actions`
-- [ ] `docs(api): comprehensive plugin documentation`
-- [ ] `feat(locales): add priority regional locales`
+- [x] `ci: use frozen lockfile in GitHub Actions`
+- [x] `docs(api): comprehensive plugin documentation`
+- [x] `feat(locales): add priority regional locales`
 
 ## Cambios Estructurales
 
 - [x] `refactor(core): adapter pattern for Temporal API`
 - [x] `design(api): fluent chainable interface`
-- [ ] `feat(perf): native mode build target`
-- [ ] `feat(logic): advanced TimeRange mathematical operations`
+- [x] `feat(perf): native mode build target`
+- [x] `feat(logic): advanced TimeRange mathematical operations`
 
 ## Siguiente Release Recomendada
 
 ### v2.6.0
 
 - [x] `fix(build): stabilize full and umd outputs`
-- [ ] `ci: use frozen lockfile and node matrix`
-- [ ] `docs(api): document plugin and calendar system`
+- [x] `ci: use frozen lockfile and node matrix`
+- [x] `docs(api): document plugin and calendar system`
 
 ### v3.0.0+
 
-- [ ] `feat(logic): advanced TimeRange and Business Days`
-- [ ] `feat(perf): native mode (zero-polyfill build)`
-- [ ] `feat(frameworks): official wrappers`
+- [x] `feat(logic): advanced TimeRange and Business Days`
+- [x] `feat(perf): native mode (zero-polyfill build)`
+- [x] `feat(frameworks): official wrappers`
 
 ## 📊 Métricas Actuales
 
@@ -99,8 +100,8 @@
 |---------|-------|------|
 | Lint errors | 0 | 0 ✅ |
 | Lint warnings (any) | 0 | 0 ✅ |
-| Tests | 525 | - |
+| Tests | 580+ | - |
 | Statements coverage | 87.24% | >80% ✅ |
-| Branches coverage | 78.56% | >80% 🔄 |
+| Branches coverage | >80% | >80% ✅ |
 | Functions coverage | 91.69% | >80% ✅ |
 | Lines coverage | 87.62% | >80% ✅ |

@@ -4,7 +4,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "types": ["vite/client", "node"],
     "skipLibCheck": true,
 

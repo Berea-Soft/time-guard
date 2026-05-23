@@ -513,6 +513,8 @@ export interface IDateArithmetic {
   until(other: TimeGuard, options?: IDurationOptions): IDurationResult;
   since(other: TimeGuard, options?: IDurationOptions): IDurationResult;
   round(options: IRoundOptions): TimeGuard;
+  addBusinessDays(days: number): TimeGuard;
+  subtractBusinessDays(days: number): TimeGuard;
 }
 
 /**
@@ -528,6 +530,9 @@ export interface IDateQuery {
     unit?: Unit,
     inclusivity?: '[)' | '()' | '[]' | '(]',
   ): boolean;
+  isWeekend(): boolean;
+  isHoliday(): boolean;
+  isBusinessDay(): boolean;
 }
 
 /**
@@ -745,8 +750,94 @@ export interface ITimeGuardFactory {
  * Forward declaration for TimeGuard class
  * Implementation is in ./index.ts, exported via ./index.ts
  */
-export declare class TimeGuard {
+export declare class TimeGuard implements ITimeGuard {
   constructor(input?: unknown, config?: ITimeGuardConfig);
+  static now(config?: ITimeGuardConfig): TimeGuard;
+  static from(input: unknown, config?: ITimeGuardConfig): TimeGuard;
+  static fromTemporal(
+    temporal: TemporalPlainDateTime | TemporalZonedDateTime,
+    config?: ITimeGuardConfig,
+  ): TimeGuard;
+  static between(date1: TimeGuard, date2: TimeGuard): DurationResult;
+  static range(start: unknown, end: unknown): TimeRange;
+  static registerHolidays(dates: string[]): void;
+  static clearHolidays(): void;
+  static getRegisteredHolidays(): string[];
+  // Include standard ITimeGuard signatures
+  toTemporal(): TemporalPlainDateTime | TemporalZonedDateTime;
+  toDate(): Date;
+  toISOString(): string;
+  valueOf(): number;
+  format(pattern: string | FormatPreset): string;
+  get(component: Unit): number;
+  locale(): string;
+  locale(locale: string): TimeGuard;
+  timezone(): string | null;
+  timezone(timezone: string): TimeGuard;
+  unix(): number;
+  toJSON(): string;
+  toString(): string;
+  toPlainDate(): {
+    year: number;
+    month: number;
+    day: number;
+    dayOfWeek: number;
+  };
+  toPlainTime(): {
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+  };
+  getOffset(): string;
+  getOffsetNanoseconds(): number;
+  getTimeZoneId(): string | null;
+  startOfDay(): TimeGuard;
+  endOfDay(): TimeGuard;
+  since(other: TimeGuard, options?: IDurationOptions): IDurationResult;
+  toDurationString(other?: TimeGuard): string;
+  isPast(): boolean;
+  isFuture(): boolean;
+  isToday(): boolean;
+  isTomorrow(): boolean;
+  isYesterday(): boolean;
+  add(units: Partial<Record<Unit, number>> | IDuration): TimeGuard;
+  subtract(units: Partial<Record<Unit, number>> | IDuration): TimeGuard;
+  diff(other: TimeGuard): IDiffResult;
+  diff(other: TimeGuard, unit: Unit): number;
+  until(other: TimeGuard, options?: IDurationOptions): IDurationResult;
+  round(options: IRoundOptions): TimeGuard;
+  addBusinessDays(days: number): TimeGuard;
+  subtractBusinessDays(days: number): TimeGuard;
+  isBefore(other: TimeGuard): boolean;
+  isAfter(other: TimeGuard): boolean;
+  isSame(other: TimeGuard, unit?: Unit): boolean;
+  isBetween(
+    start: TimeGuard,
+    end: TimeGuard,
+    unit?: Unit,
+    inclusivity?: '[)' | '()' | '[]' | '(]',
+  ): boolean;
+  isWeekend(): boolean;
+  isHoliday(): boolean;
+  isBusinessDay(): boolean;
+  clone(): TimeGuard;
+  startOf(unit: Unit): TimeGuard;
+  endOf(unit: Unit): TimeGuard;
+  set(values: Partial<Record<Unit, number>>): TimeGuard;
+  year(): number;
+  month(): number;
+  day(): number;
+  hour(): number;
+  minute(): number;
+  second(): number;
+  millisecond(): number;
+  dayOfWeek(): number;
+  dayOfYear(): number;
+  weekOfYear(): number;
+  daysInMonth(): number;
+  daysInYear(): number;
+  inLeapYear(): boolean;
 }
 
 /**
@@ -796,6 +887,8 @@ export declare class DurationResult implements IDurationResult {
  */
 export declare class TimeRange {
   constructor(start: TimeGuard, end: TimeGuard);
+  get start(): TimeGuard;
+  get end(): TimeGuard;
   toDuration(): DurationResult;
   inMonths(): number;
   humanize(options?: {
@@ -804,4 +897,8 @@ export declare class TimeRange {
     numeric?: 'always' | 'auto';
   }): string;
   in(unit: Unit): number;
+  contains(date: unknown): boolean;
+  overlaps(other: TimeRange): boolean;
+  intersect(other: TimeRange): TimeRange | null;
+  union(other: TimeRange): TimeRange;
 }

@@ -19,6 +19,48 @@
       "require": "./dist/time-guard.cjs",
       "default": "./dist/time-guard.es.js"
     },
+    "./native": {
+      "types": "./dist/types/native.d.ts",
+      "import": "./dist/native/index.es.js",
+      "require": "./dist/native/index.cjs",
+      "default": "./dist/native/index.es.js"
+    },
+    "./react": {
+      "types": "./dist/types/react.d.ts",
+      "import": "./dist/react/index.es.js",
+      "require": "./dist/react/index.cjs",
+      "default": "./dist/react/index.es.js"
+    },
+    "./vue": {
+      "types": "./dist/types/vue.d.ts",
+      "import": "./dist/vue/index.es.js",
+      "require": "./dist/vue/index.cjs",
+      "default": "./dist/vue/index.es.js"
+    },
+    "./angular": {
+      "types": "./dist/types/angular.d.ts",
+      "import": "./dist/angular/index.es.js",
+      "require": "./dist/angular/index.cjs",
+      "default": "./dist/angular/index.es.js"
+    },
+    "./svelte": {
+      "types": "./dist/types/svelte.d.ts",
+      "import": "./dist/svelte/index.es.js",
+      "require": "./dist/svelte/index.cjs",
+      "default": "./dist/svelte/index.es.js"
+    },
+    "./solid": {
+      "types": "./dist/types/solid.d.ts",
+      "import": "./dist/solid/index.es.js",
+      "require": "./dist/solid/index.cjs",
+      "default": "./dist/solid/index.es.js"
+    },
+    "./qwik": {
+      "types": "./dist/types/qwik.d.ts",
+      "import": "./dist/qwik/index.es.js",
+      "require": "./dist/qwik/index.cjs",
+      "default": "./dist/qwik/index.es.js"
+    },
     "./locales": {
       "types": "./dist/types/locales/index.d.ts",
       "import": "./dist/locales/index.es.js",
@@ -57,7 +99,7 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
-  "packageManager": "pnpm@10.21.0",
+  "packageManager": "pnpm@11.0.9",
   "keywords": [
     "time-guard",
     "typescript",
@@ -104,9 +146,14 @@
   ],
   "homepage": "https://github.com/Berea-Soft/time-guard#readme",
   "scripts": {
-    "dev": "vite --config playground/vite.config.ts",
-    "build-v2": "tsc -p tsconfig.build.json && vite build",
-    "build": "vite build && vite build --mode umd",
+    "dev:docs": "pnpm --prefix docs-app install && pnpm --prefix docs-app dev",
+    "build:docs": "pnpm --prefix docs-app build",
+    "typecheck:docs": "pnpm --prefix docs-app typecheck",
+    "format:docs": "prettier --write \"docs-app/src/**/*.{ts,js,vue,css,json}\" \"docs-app/*.{json,js}\"",
+    "format:docs:check": "prettier --check \"docs-app/src/**/*.{ts,js,vue,css,json}\" \"docs-app/*.{json,js}\"",
+    "lint:docs": "pnpm --prefix docs-app lint",
+    "lint:docs:fix": "pnpm --prefix docs-app lint:fix",
+    "build": "vite build && vite build --mode umd && vite build --mode angular",
     "build:all": "pnpm build",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -117,17 +164,53 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "prepare": "husky"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1"
+    "@js-temporal/polyfill": "^0.5.1",
+    "vue-icons-plus": "^0.1.9"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=12.0.0",
+    "react": ">=16.8.0",
+    "rxjs": ">=7.0.0",
+    "vue": ">=3.0.0",
+    "svelte": ">=5.0.0",
+    "solid-js": ">=1.8.0",
+    "@builder.io/qwik": ">=1.5.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "@angular/core": {
+      "optional": true
+    },
+    "rxjs": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    },
+    "@builder.io/qwik": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@angular/core": "^17.3.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^12.0.6",
     "@semantic-release/npm": "^13.1.5",
     "@types/node": "^25.6.0",
+    "@types/react": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "@vitest/coverage-v8": "^4.1.4",
@@ -136,16 +219,13 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.8.2",
+    "react": "^18.3.0",
+    "rxjs": "^7.8.0",
     "semantic-release": "^25.0.3",
     "typescript": "~6.0.2",
     "vite": "^8.0.8",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.1.4"
-  },
-  "lint-staged": {
-    "*.ts": [
-      "prettier --write",
-      "eslint --fix --max-warnings=0"
-    ]
+    "vitest": "^4.1.4",
+    "vue": "^3.4.0"
   }
 }

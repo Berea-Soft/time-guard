@@ -6,6 +6,7 @@
 
 import type { ITimeGuardPlugin } from '../../types';
 import type { TimeGuard } from '../../index';
+import type { Temporal } from '@js-temporal/polyfill';
 import type {
   DurationInput,
   DurationObject,

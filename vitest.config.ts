@@ -7,6 +7,13 @@ export default defineConfig({
   define: {
     __VERSION__: JSON.stringify(pkg.version),
   },
+  esbuild: {
+    tsconfigRaw: JSON.stringify({
+      compilerOptions: {
+        experimentalDecorators: true,
+      },
+    }),
+  },
   test: {
     globals: true,
     environment: "node",
@@ -21,6 +28,17 @@ export default defineConfig({
         branches: 67,
         functions: 80,
         lines: 80,
+      },
+    },
+    server: {
+      deps: {
+        esbuild: {
+          tsconfigRaw: JSON.stringify({
+            compilerOptions: {
+              experimentalDecorators: true,
+            },
+          }),
+        },
       },
     },
   },
