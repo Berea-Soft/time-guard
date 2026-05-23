@@ -1778,5 +1778,7 @@ export function timeGuard(input?: unknown, config?: ITimeGuardConfig) {
 }
 
 // Convenience exports
-declare const __VERSION__: string;
-export const version: string = __VERSION__;
+declare const __VERSION__: string | undefined;
+/** The current version of TimeGuard */
+export const version: string =
+  typeof __VERSION__ !== 'undefined' ? __VERSION__ : '0.0.0';

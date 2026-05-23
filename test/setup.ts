@@ -1,3 +1,10 @@
+import { vi } from 'vitest';
+import { readFileSync } from 'fs';
+
+// Define __VERSION__ globally for tests (avoids vite define + oxc conflict)
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+vi.stubGlobal('__VERSION__', pkg.version);
+
 /**
  * Vitest setup file - Loads Temporal polyfill globally
  * This ensures Temporal API is available in all tests

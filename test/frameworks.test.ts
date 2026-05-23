@@ -10,6 +10,7 @@ import {
   Inject,
   Optional,
   ChangeDetectorRef,
+  inject as angularInject,
 } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -79,9 +80,6 @@ vi.mock('vue', () => {
   return { ref, watch, onUnmounted, inject, provide };
 });
 
-// Mock Angular — inject() function returns values in call order
-// vi.hoisted() ensures mockInject is defined before vi.mock() is hoisted
-const mockInject = vi.hoisted(() => vi.fn());
 vi.mock('@angular/core', () => {
   return {
     Pipe: () => () => {},
@@ -89,7 +87,7 @@ vi.mock('@angular/core', () => {
     InjectionToken: class {
       constructor(public desc: string) {}
     },
-    inject: mockInject,
+    inject: vi.fn(),
     NgZone: class {
       runOutsideAngular(fn: () => any) {
         return fn();
@@ -222,14 +220,14 @@ describe('Premium Framework Integration Enhancements', () => {
 
   describe('Angular Enhancements', () => {
     beforeEach(() => {
-      mockInject.mockReset();
+      vi.mocked(angularInject).mockReset();
     });
 
     it('Pipes and Services should support Injection Tokens via DI constructor', () => {
       const globalConfig = { locale: 'es' };
 
       // inject() is called once for each class: formatPipe gets config, relativePipe gets config
-      mockInject.mockReturnValue(globalConfig);
+      vi.mocked(angularInject).mockReturnValue(globalConfig);
 
       const formatPipe = new TimeGuardFormatPipe();
       const relativePipe = new TimeGuardRelativePipe();
@@ -257,7 +255,7 @@ describe('Premium Framework Integration Enhancements', () => {
       };
 
       // inject() call order: NgZone, config, Cdr, TimeGuardService, config (5 calls)
-      mockInject
+      vi.mocked(angularInject)
         .mockReturnValueOnce(mockNgZoneInstance) // NgZone for TimeGuardService
         .mockReturnValueOnce({ locale: 'es' }) // config for TimeGuardService
         .mockReturnValueOnce(mockCdr) // ChangeDetectorRef for LiveFormatPipe
