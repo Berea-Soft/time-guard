@@ -143,7 +143,7 @@ function initEditor(): void {
   ];
 
   const state = EditorState.create({
-    doc: fileContent.value,
+    doc: String(fileContent.value ?? ''),
     extensions,
   });
 
