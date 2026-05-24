@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
           </button>
           <router-link to="/" class="inline-block" aria-label="TimeGuard home">
             <img
-              src="@assets/logo.png"
+              src="https://raw.githubusercontent.com/Berea-Soft/time-guard/refs/heads/main/src/assets/logo.png"
               alt="TimeGuard"
               class="object-contain w-32 h-7"
             />

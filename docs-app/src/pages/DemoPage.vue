@@ -76,7 +76,7 @@ async function loadDemoBySlug(slug: string) {
       // Fallback dynamic import
       const raw = await import(/* @vite-ignore */ foundPath + '?raw');
       code.value = raw.default ?? raw;
-    } catch (e) {
+    } catch {
       code.value = t('demos.code_unavailable');
     }
   }

@@ -77,8 +77,8 @@ async function copyInstaller(command: string, id: string) {
         copiedId.value = null;
       }
     }, 2000);
-  } catch (e) {
-    /* ignore */
+  } catch {
+    console.error('Failed to copy installer command.');
   }
 }
 </script>

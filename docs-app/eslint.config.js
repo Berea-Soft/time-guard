@@ -30,7 +30,6 @@ export default [
       vue: vuePlugin,
     },
     rules: {
-      'vue/script-setup-uses-vars': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',

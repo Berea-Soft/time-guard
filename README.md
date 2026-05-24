@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/Logo.png" alt="Time Guard Logo" />
+  <img src="https://raw.githubusercontent.com/Berea-Soft/time-guard/refs/heads/main/src/assets/logo.png" alt="Time Guard Logo" />
   <h1 align="center">Time Guard</h1>
   <p align="center">
     Una biblioteca moderna y de nivel producción para manipulación de fechas/horas construida con <strong>TypeScript</strong>, <strong>Temporal API</strong> y <strong>SOLID principles</strong>. TimeGuard aprovecha los estándares de JavaScript modernos y las mejores prácticas.

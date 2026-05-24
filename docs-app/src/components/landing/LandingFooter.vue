@@ -40,7 +40,7 @@ defineProps<{ sticky?: boolean }>();
       class="absolute rounded-full -left-20 -bottom-20 w-60 h-60 bg-sky-500/5 blur-3xl"
     ></div>
     <div
-      class="absolute rounded-full -right-20 -top-20 w-48 h-48 bg-brand-500/10 blur-3xl"
+      class="absolute w-48 h-48 rounded-full -right-20 -top-20 bg-brand-500/10 blur-3xl"
     ></div>
 
     <div class="relative z-10 px-8 py-12 sm:py-16">
@@ -50,7 +50,7 @@ defineProps<{ sticky?: boolean }>();
         <div class="space-y-4 lg:col-span-2">
           <router-link to="/" class="inline-block">
             <img
-              src="@assets/logo.png"
+              src="https://raw.githubusercontent.com/Berea-Soft/time-guard/refs/heads/main/src/assets/logo.png"
               alt="TimeGuard"
               class="h-auto transition-transform w-36 hover:scale-105 brightness-0 invert"
             />
@@ -72,14 +72,14 @@ defineProps<{ sticky?: boolean }>();
             <li>
               <router-link
                 to="/docs"
-                class="text-sm text-white/80 hover:text-white transition-colors"
+                class="text-sm transition-colors text-white/80 hover:text-white"
                 >{{ t('footer.docs') }}</router-link
               >
             </li>
             <li>
               <router-link
                 to="/demos"
-                class="text-sm text-white/80 hover:text-white transition-colors"
+                class="text-sm transition-colors text-white/80 hover:text-white"
                 >{{ t('footer.examples') }}</router-link
               >
             </li>
@@ -87,7 +87,7 @@ defineProps<{ sticky?: boolean }>();
               <a
                 href="https://www.npmjs.com/package/@bereasoftware/time-guard"
                 target="_blank"
-                class="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white transition-colors"
+                class="inline-flex items-center gap-1 text-sm transition-colors text-white/80 hover:text-white"
                 >{{ t('footer.npm') }} <ExternalLink class="w-3 h-3"
               /></a>
             </li>
@@ -103,7 +103,7 @@ defineProps<{ sticky?: boolean }>();
               <a
                 href="https://github.com/Berea-Soft/time-guard"
                 target="_blank"
-                class="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
+                class="inline-flex items-center gap-2 text-sm transition-colors text-white/80 hover:text-white"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path
@@ -117,7 +117,7 @@ defineProps<{ sticky?: boolean }>();
               <a
                 href="https://github.com/Berea-Soft/time-guard/issues"
                 target="_blank"
-                class="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white transition-colors"
+                class="inline-flex items-center gap-1 text-sm transition-colors text-white/80 hover:text-white"
                 >{{ t('footer.issues') }} <ExternalLink class="w-3 h-3"
               /></a>
             </li>
@@ -125,7 +125,7 @@ defineProps<{ sticky?: boolean }>();
               <a
                 href="https://github.com/Berea-Soft/time-guard/blob/main/CONTRIBUTING.md"
                 target="_blank"
-                class="inline-flex items-center gap-1 text-sm text-white/80 hover:text-white transition-colors"
+                class="inline-flex items-center gap-1 text-sm transition-colors text-white/80 hover:text-white"
                 >{{ t('footer.contribute') }} <ExternalLink class="w-3 h-3"
               /></a>
             </li>
@@ -142,19 +142,19 @@ defineProps<{ sticky?: boolean }>();
         <div class="flex items-center gap-4">
           <router-link
             to="/docs"
-            class="text-xs text-white/50 hover:text-white/80 transition-colors"
+            class="text-xs transition-colors text-white/50 hover:text-white/80"
             >{{ t('footer.docs_link') }}</router-link
           >
           <a
             href="https://github.com/Berea-Soft/time-guard/blob/main/LICENSE"
             target="_blank"
-            class="text-xs text-white/50 hover:text-white/80 transition-colors"
+            class="text-xs transition-colors text-white/50 hover:text-white/80"
             >{{ t('footer.license') }}</a
           >
           <a
             href="https://github.com/Berea-Soft/time-guard/blob/main/CODE_OF_CONDUCT.md"
             target="_blank"
-            class="text-xs text-white/50 hover:text-white/80 transition-colors"
+            class="text-xs transition-colors text-white/50 hover:text-white/80"
             >{{ t('footer.code_of_conduct') }}</a
           >
         </div>
