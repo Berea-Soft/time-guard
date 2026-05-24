@@ -1,3 +1,10 @@
+## [2.7.2](https://github.com/Berea-Soft/time-guard/compare/v2.7.1...v2.7.2) (2026-05-24)
+
+
+### Bug Fixes
+
+* update raw module loading in DemoPage and enhance Vercel configuration ([1bd2f05](https://github.com/Berea-Soft/time-guard/commit/1bd2f05e1442411a619f498e5e8d5b97d3656b3f))
+
 ## [2.7.1](https://github.com/Berea-Soft/time-guard/compare/v2.7.0...v2.7.1) (2026-05-24)
 
 
