@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/Berea-Soft/time-guard/compare/v2.7.0...v2.7.1) (2026-05-24)
+
+
+### Bug Fixes
+
+* update image paths to use absolute URLs and improve error handling in various components ([1f5fa4d](https://github.com/Berea-Soft/time-guard/commit/1f5fa4d435a235398568a73f4b93aa9aa9ebb401))
+
 # [2.7.0](https://github.com/Berea-Soft/time-guard/compare/v2.6.1...v2.7.0) (2026-05-24)
 
 
