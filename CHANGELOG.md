@@ -1,3 +1,11 @@
+# [2.7.0](https://github.com/Berea-Soft/time-guard/compare/v2.6.1...v2.7.0) (2026-05-24)
+
+
+### Features
+
+* Add Svelte and Vue integrations for TimeGuard with reactive stores and lifecycle management ([8c6f970](https://github.com/Berea-Soft/time-guard/commit/8c6f9706cf9f1a78f3a9c5032eed084fa4b52d82))
+* Enhance deployment workflow and improve Angular testing setup ([9965dcb](https://github.com/Berea-Soft/time-guard/commit/9965dcb091e28fa8fa16554226bdefcc8a220352))
+
 ## [2.6.1](https://github.com/Berea-Soft/time-guard/compare/v2.6.0...v2.6.1) (2026-05-20)
 
 
