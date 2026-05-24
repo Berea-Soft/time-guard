@@ -66,7 +66,7 @@ onBeforeUnmount(() => {
     <div class="flex items-center space-x-3">
       <router-link to="/" class="inline-block" aria-label="TimeGuard home">
         <img
-          src="https://raw.githubusercontent.com/Berea-Soft/time-guard/refs/heads/main/src/assets/logo.pnglogo.png"
+          src="https://raw.githubusercontent.com/Berea-Soft/time-guard/refs/heads/main/src/assets/logo.png"
           alt="TimeGuard Logo"
           class="object-contain h-8 transition-transform w-36 hover:scale-105"
         />
