@@ -19,9 +19,10 @@ const componentModules = import.meta.glob('../examples/*.vue') as Record<
   () => Promise<any>
 >;
 /* eslint-enable @typescript-eslint/no-explicit-any */
-const rawModules = import.meta.glob('../examples/*.vue?raw', {
+const rawModules = import.meta.glob('../examples/*.vue', {
   as: 'raw',
-}) as Record<string, () => Promise<string>>;
+  eager: true,
+}) as Record<string, string>;
 
 // Eagerly load metadata so we can support custom titles/slugs exported from components
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -67,13 +68,13 @@ async function loadDemoBySlug(slug: string) {
   demo.value = mod.default || mod;
   title.value = entry.title || mod.default?.name || entry.fileName;
 
-  const rawKey = foundPath + '?raw';
-  const rawLoader = rawModules[rawKey];
-  if (rawLoader) {
-    code.value = await rawLoader();
+  const rawKey = foundPath;
+  const rawContent = rawModules[rawKey];
+  if (rawContent) {
+    code.value = rawContent;
   } else {
     try {
-      // Fallback dynamic import
+      // Fallback dynamic import for unusual environments
       const raw = await import(/* @vite-ignore */ foundPath + '?raw');
       code.value = raw.default ?? raw;
     } catch {

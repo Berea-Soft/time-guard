@@ -1,6 +1,13 @@
 {
   "buildCommand": "pnpm build:docs",
   "outputDirectory": "docs-app/dist",
+  "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile && pnpm --prefix docs-app install --frozen-lockfile",
-  "framework": "vite"
+  "devCommand": "pnpm dev:docs",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
