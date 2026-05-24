@@ -20,7 +20,8 @@ const componentModules = import.meta.glob('../examples/*.vue') as Record<
 >;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 const rawModules = import.meta.glob('../examples/*.vue', {
-  as: 'raw',
+  query: '?raw',
+  import: 'default',
   eager: true,
 }) as Record<string, string>;
 

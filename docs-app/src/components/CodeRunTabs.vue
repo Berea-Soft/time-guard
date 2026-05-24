@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import { I18N_KEY, type I18nContext } from '@/i18n';
 import CodeEditor from './CodeEditor.vue';
 import type { Component } from 'vue';
@@ -15,8 +15,8 @@ const props = defineProps<{
   editorHeight?: string;
 }>();
 
-const fileName = props.fileName ?? '/Demo.vue';
-const editorHeight = props.editorHeight ?? 'h-96';
+const fileName = computed(() => props.fileName ?? '/Demo.vue');
+const editorHeight = computed(() => props.editorHeight ?? 'h-[600px]');
 </script>
 
 <template>
@@ -26,7 +26,7 @@ const editorHeight = props.editorHeight ?? 'h-96';
     <!-- Split view -->
     <div class="flex flex-col h-full md:flex-row">
       <div class="p-2 md:w-1/2">
-        <div :class="[editorHeight, 'rounded overflow-hidden']">
+        <div :class="[editorHeight, ' rounded overflow-hidden']">
           <CodeEditor
             :files="{ [fileName]: code }"
             :activeFile="fileName"

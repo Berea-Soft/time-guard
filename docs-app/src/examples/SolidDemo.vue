@@ -21,7 +21,7 @@
         </div>
         <div class="stat">
           <span class="stat-label">ISO</span>
-          <span class="stat-value mono truncate">{{ isoStr }}</span>
+          <span class="truncate stat-value mono">{{ isoStr }}</span>
         </div>
       </div>
     </div>
@@ -192,7 +192,7 @@ onBeforeUnmount(() => {
 }
 .solid-theme .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
 .solid-theme .metric-card {
