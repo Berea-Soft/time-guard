@@ -77,9 +77,10 @@ jobs:
       - name: Deploy to Vercel (Preview)
         if: github.event.pull_request.head.repo.full_name == github.repository
         id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx vercel@latest deploy docs-app/dist \
-            --token ${{ secrets.VERCEL_TOKEN }} \
             --yes \
             --name time-guard-docs \
             2>&1 | tee deploy.log
@@ -111,4 +112,6 @@ jobs:
         run: pnpm build:docs
 
       - name: Deploy to Vercel (Production)
-        run: npx vercel@latest deploy docs-app/dist --token ${{ secrets.VERCEL_TOKEN }} --yes --prod --name time-guard-docs
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest deploy docs-app/dist --yes --prod --name time-guard-docs

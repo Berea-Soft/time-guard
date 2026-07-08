@@ -95,7 +95,7 @@ export default defineConfig(({ mode }): UserConfig => {
       },
       emptyOutDir: isUmd || isAngular ? false : true,
       sourcemap: false,
-      minify: false,
+      minify: true,
       reportCompressedSize: true,
     },
     plugins: [

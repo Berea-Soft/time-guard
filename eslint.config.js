@@ -7,7 +7,7 @@ export default [
     ignores: ['dist/**', 'node_modules/**'],
   },
   {
-    files: ['src/**/*.ts', 'test/**/*.ts', '!src/realtime/**/*', "*.js", '!src/http-client/node-http-adapter.ts', '!src/testing/**/*'],
+    files: ['src/**/*.ts', 'test/**/*.ts', '*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
