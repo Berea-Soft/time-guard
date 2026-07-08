@@ -181,6 +181,34 @@ console.log(rounded.format('HH:mm')); // 15:00 (redondea hacia arriba)`,
         ],
         playground: { enabled: true, mode: 'runner' },
       },
+      {
+        id: 'native-mode',
+        title: 'Native Mode — Build sin Polyfill',
+        subtitle: 'Elige el entry point según si tu entorno ya tiene Temporal',
+        description:
+          'TimeGuard expone dos puntos de entrada con el mismo API público: `@bereasoftware/time-guard` (incluye e instala el polyfill `@js-temporal/polyfill` automáticamente) y `@bereasoftware/time-guard/native` (asume que `globalThis.Temporal` ya existe en el entorno — Node.js/navegadores que ya implementen la propuesta TC39). El build nativo evita el peso del polyfill cuando no lo necesitas.',
+        features: [
+          '@bereasoftware/time-guard — instala el polyfill si `globalThis.Temporal` no existe (por defecto, máxima compatibilidad)',
+          '@bereasoftware/time-guard/native — cero polyfill; lanza un error explícito si `Temporal` no está disponible en el entorno',
+          'Mismo API — cambiar de entry point es un cambio de un import, no de código',
+        ],
+        examples: [
+          {
+            title: 'Elegir el entry point',
+            description:
+              'Usa /native solo cuando controles el runtime (Node reciente, edge functions, o navegadores con soporte nativo de Temporal).',
+            code: `// Por defecto — instala el polyfill automáticamente, funciona en cualquier entorno
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Native mode — sin polyfill, requiere que el entorno YA tenga Temporal.
+// Lanza: "Temporal API not loaded" si no está disponible.
+import { TimeGuard as NativeTimeGuard } from '@bereasoftware/time-guard/native';
+
+const date = NativeTimeGuard.from('2026-05-20');
+console.log(date.format('YYYY-MM-DD')); // "2026-05-20" — sin bytes de polyfill en el bundle`,
+          },
+        ],
+      },
     ],
   },
   {
@@ -194,12 +222,21 @@ console.log(rounded.format('HH:mm')); // 15:00 (redondea hacia arriba)`,
         subtitle: 'Soporte completo para más de 40 locales nativos',
         description:
           'TimeGuard utiliza un gestor de locales (`LocaleManager`) que permite registrar y cargar idiomas bajo demanda. La biblioteca soporta familias lingüísticas como Español, Románicas, Eslavas, Nórdicas, Asiáticas, de Oriente Medio y africanas sin sobrecargar el tamaño de tu bundle inicial.',
+        features: [
+          'loadAllLocales() — registra los locales bundleados en el LocaleManager global',
+          'getAvailableLocales() — lista de códigos de locale disponibles para registrar',
+          'LOCALES_COUNT — total de locales bundleados (constante, sin necesidad de cargarlos)',
+          'registerAllLocales(map) — variante de bajo nivel para inyectar en tu propio Map/Record en vez del LocaleManager global',
+        ],
         examples: [
           {
             title: 'Formateo con Locales Dinámicos',
             description:
               'Cambio dinámico del idioma de una instancia para formatear meses y días de la semana.',
-            code: `import { TimeGuard } from '@bereasoftware/time-guard';
+            code: `import { TimeGuard, loadAllLocales } from '@bereasoftware/time-guard';
+
+// El core solo trae en/es por defecto — carga el resto una sola vez:
+loadAllLocales();
 
 const date = TimeGuard.from('2026-05-20');
 
@@ -214,6 +251,19 @@ console.log(date.locale('ja').format('YYYY年M月D日'));
 // Formatear en Swahili (África)
 console.log(date.locale('sw').format('dddd, DD MMMM YYYY'));
 // Output: "Jumatano, 20 Mei 2026"`,
+          },
+          {
+            title: 'Inspeccionar el Registro de Locales',
+            description:
+              'Consultar cuántos locales hay disponibles sin cargarlos, y sus códigos exactos.',
+            code: `import { LOCALES_COUNT, getAvailableLocales } from '@bereasoftware/time-guard';
+
+// Constante — no requiere loadAllLocales() previo
+console.log(LOCALES_COUNT); // 47
+
+// Códigos exactos (útil para poblar un <select> de idiomas)
+console.log(getAvailableLocales());
+// ['en', 'es', 'fr', 'de', 'ja', 'ar', 'zh-cn', 'ru', 'pt-br', 'sw', ...]`,
           },
         ],
         playground: { enabled: true, mode: 'runner' },
@@ -369,7 +419,43 @@ manager.register(new IslamicCalendar());
 
 // El gregoriano es el default
 const gregory = manager.getDefault();
-console.log(gregory.daysInMonth(2026, 2));   // 28 (Febrero no bisiesto)`,
+console.log(gregory.daysInMonth(2026, 2));   // 28 (Febrero no bisiesto)
+
+// Chino: signo zodiacal del año
+import { ChineseCalendar } from '@bereasoftware/time-guard/calendars';
+console.log(new ChineseCalendar().getZodiacSign(2026)); // "Horse" (Caballo)`,
+          },
+          {
+            title: 'Registrar un Calendario Personalizado',
+            description:
+              'Cualquier sistema que implemente `ICalendarSystem` puede registrarse junto a los 6 built-in.',
+            code: `import { CalendarManager } from '@bereasoftware/time-guard';
+import type { ICalendarSystem } from '@bereasoftware/time-guard';
+
+class FiscalYearCalendar implements ICalendarSystem {
+  id = 'fiscal-year';
+  name = 'Fiscal Year (Apr-Mar)';
+  // Año fiscal que arranca en abril — delega el resto en el gregoriano.
+  getMonthName(month: number): string {
+    return ['Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar'][month - 1];
+  }
+  getWeekdayName(day: number): string {
+    return ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'][day - 1];
+  }
+  isLeapYear(year: number): boolean {
+    return new Date(year, 1, 29).getMonth() === 1;
+  }
+  daysInMonth(year: number, month: number): number {
+    return new Date(year, month, 0).getDate();
+  }
+  daysInYear(year: number): number {
+    return this.isLeapYear(year) ? 366 : 365;
+  }
+}
+
+CalendarManager.getInstance().register(new FiscalYearCalendar());
+console.log(CalendarManager.getInstance().list());
+// ['gregory', 'islamic', 'hebrew', 'chinese', 'japanese', 'buddhist', 'fiscal-year']`,
           },
         ],
         playground: { enabled: true, mode: 'runner' },
@@ -402,7 +488,7 @@ const past = TimeGuard.from('2026-05-20T08:00:00');
 const now = TimeGuard.from('2026-05-20T09:30:00');
 
 console.log(past.since(now).humanize({ locale: 'es' }));
-// Output: "hace 1 hora y media"`,
+// Output: "hace 1 hora"`,
           },
           {
             title: 'ISO Duration Plugin',
@@ -419,6 +505,89 @@ console.log(duration.asDays()); // 1159 días aproximados`,
           },
         ],
         playground: { enabled: true, mode: 'runner', exampleIndex: 0 },
+      },
+      {
+        id: 'advanced-format-plugin',
+        title: 'Advanced Format Plugin',
+        subtitle:
+          'Tokens de formato adicionales: trimestre, ordinales, semana ISO',
+        description:
+          'El plugin `advanced-format` extiende `.format()` con tokens que no forman parte del set base — útil para reportes de negocio (trimestres), UI legible (ordinales "1st", "13th") y semántica ISO (semana del año, hora 1-24, timestamps Unix).',
+        features: [
+          'Q — trimestre del año (1-4)',
+          'Do — día ordinal (1st, 2nd, 3rd, 4th...)',
+          'w / ww, W / WW — semana del año (locale vs. ISO), con o sin cero relleno',
+          'gggg / GGGG — año de semana (locale vs. ISO)',
+          'k / kk — hora en formato 1-24 (en vez de 0-23)',
+          'X / x — timestamp Unix en segundos / milisegundos',
+        ],
+        examples: [
+          {
+            title: 'Tokens de formato avanzado',
+            description:
+              'Registrar el plugin una vez y combinar sus tokens con el formato estándar.',
+            code: `import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import advancedFormatPlugin from '@bereasoftware/time-guard/plugins/advanced-format';
+
+PluginManager.use(advancedFormatPlugin, TimeGuard);
+
+const date = TimeGuard.from('2026-07-15T14:30:00');
+
+console.log(date.format('Q [T]YYYY'));      // "3 T2026" (Q3)
+console.log(date.format('Do MMMM YYYY'));   // "15th July 2026"
+console.log(date.format('w'));              // semana del año
+console.log(date.format('X'));               // timestamp Unix en segundos`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
+        id: 'plugin-authoring',
+        title: 'Crear un Plugin Personalizado',
+        subtitle:
+          'La interfaz ITimeGuardPlugin — extiende TimeGuard sin tocar el core',
+        description:
+          'Cualquier funcionalidad que no necesite todos los consumidores (tiempo relativo, duraciones ISO, tokens avanzados) vive fuera del core como plugin. Escribir uno propio solo requiere implementar `ITimeGuardPlugin`: un `name`, una `version`, y un método `install()` que reciba la clase `TimeGuard` y le añada métodos vía su `prototype`.',
+        features: [
+          'install(TimeGuardClass, config?) — punto de entrada único, llamado por PluginManager.use()',
+          'Los métodos se añaden al prototype — cada instancia existente y futura los hereda',
+          'PluginManager.hasPlugin() / listPlugins() / unuse() — introspección y ciclo de vida',
+          'Los plugins built-in (relative-time, duration, advanced-format) usan exactamente este mismo contrato',
+        ],
+        examples: [
+          {
+            title: 'Plugin mínimo: fiscalQuarter()',
+            description:
+              'Un plugin que añade un método `fiscalQuarter()` a todas las instancias de TimeGuard.',
+            code: `import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import type { ITimeGuardPlugin } from '@bereasoftware/time-guard';
+
+class FiscalQuarterPlugin implements ITimeGuardPlugin {
+  name = 'fiscal-quarter';
+  version = '1.0.0';
+
+  install(TimeGuardClass: typeof TimeGuard): void {
+    (TimeGuardClass.prototype as any).fiscalQuarter = function (
+      fiscalYearStartMonth = 4, // ej. año fiscal empieza en abril
+    ): number {
+      const month = this.month(); // 1-12
+      const shifted = ((month - fiscalYearStartMonth + 12) % 12) + 1;
+      return Math.ceil(shifted / 3);
+    };
+  }
+}
+
+PluginManager.use(new FiscalQuarterPlugin(), TimeGuard);
+
+const date = TimeGuard.from('2026-05-20');
+console.log((date as any).fiscalQuarter()); // 2 (año fiscal desde abril)
+
+// Introspección
+console.log(PluginManager.hasPlugin('fiscal-quarter')); // true
+console.log(PluginManager.listPlugins()); // [..., 'fiscal-quarter']`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -788,7 +957,7 @@ export default function App() {
         playground: { enabled: true, mode: 'app', framework: 'react' },
       },
       {
-        id: 'fw-svelte',
+        id: 'fw-svelte-playground',
         title: 'Svelte 5',
         subtitle: 'Wrapper oficial @bereasoftware/time-guard/svelte + stores',
         description:
@@ -877,7 +1046,7 @@ export class AppComponent {}
         playground: { enabled: true, mode: 'app', framework: 'angular' },
       },
       {
-        id: 'fw-solid',
+        id: 'fw-solid-playground',
         title: 'SolidJS',
         subtitle: 'Wrapper oficial @bereasoftware/time-guard/solid + signals',
         description:
@@ -914,7 +1083,7 @@ export default function App() {
         playground: { enabled: true, mode: 'app', framework: 'solid' },
       },
       {
-        id: 'fw-qwik',
+        id: 'fw-qwik-playground',
         title: 'Qwik',
         subtitle: 'Wrapper oficial @bereasoftware/time-guard/qwik + signals',
         description:

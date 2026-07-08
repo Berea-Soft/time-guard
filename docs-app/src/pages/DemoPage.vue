@@ -69,6 +69,15 @@ async function loadDemoBySlug(slug: string) {
   demo.value = mod.default || mod;
   title.value = entry.title || mod.default?.name || entry.fileName;
 
+  // Prefer a named `code` export (the isolated, real framework snippet) over
+  // the raw .vue file text — sandbox-backed demos (React/Svelte/Solid/Qwik/
+  // Angular) export their example source this way so the code panel shows
+  // just the example, not FrameworkSandbox's wiring/imports too.
+  if (typeof mod.code === 'string') {
+    code.value = mod.code;
+    return;
+  }
+
   const rawKey = foundPath;
   const rawContent = rawModules[rawKey];
   if (rawContent) {
@@ -99,7 +108,7 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold">{{ title }}</h2>
       <router-link to="/demos" class="text-sm text-slate-500 hover:underline">{{

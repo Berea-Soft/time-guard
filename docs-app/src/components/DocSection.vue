@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, inject, toRef, computed, type Component } from 'vue';
-import { Check, Copy, Code, Sparkles } from '@lucide/vue';
+import { inject, toRef, computed, type Component } from 'vue';
+import { Sparkles } from '@lucide/vue';
 import type { DocItem } from '@/types';
 import { I18N_KEY, type I18nContext } from '@/i18n';
-import CodeEditor from '@/components/CodeEditor.vue';
+import FrameworkSandbox from '@/components/FrameworkSandbox.vue';
 
 // Demo components registry
 import SvelteDemo from '@/examples/SvelteDemo.vue';
@@ -32,37 +32,26 @@ const demoComponent = computed(() => {
   return id ? (DEMO_REGISTRY[id] ?? null) : null;
 });
 
-/** Limpia la indentación base del código inyectado */
-function formatSnippet(code: string): string {
-  const lines = code.split('\n');
-  if (lines.length <= 1) {
-    return code.trim();
+// Renders a live StackBlitz sandbox for items with `playground.enabled`
+// (the "Frameworks Playground" section, plus the i18n "runner" example) — see
+// FrameworkSandbox.vue. `mode: 'app'` items ship a framework-specific full
+// component; `mode: 'runner'` items ship a generic TS snippet wrapped in a
+// universal console.log runner (defaults to the 'vanilla' template).
+const playgroundSandbox = computed(() => {
+  const pg = item.value?.playground;
+  if (!pg?.enabled) {
+    return null;
   }
-
-  const minIndent = lines
-    .filter((l) => l.trim().length > 0)
-    .reduce((min, line) => {
-      const match = line.match(/^(\s*)/);
-      const len = match ? match[1].length : 0;
-      return len < min ? len : min;
-    }, Infinity);
-
-  return lines
-    .map((line) => line.slice(minIndent === Infinity ? 0 : minIndent))
-    .join('\n')
-    .trim();
-}
-
-const copiedIndex = ref<number | null>(null);
-
-const copyToClipboard = (text: string, index: number) => {
-  navigator.clipboard.writeText(text).then(() => {
-    copiedIndex.value = index;
-    setTimeout(() => {
-      copiedIndex.value = null;
-    }, 2000);
-  });
-};
+  const code = item.value?.examples?.[pg.exampleIndex ?? 0]?.code;
+  if (!code) {
+    return null;
+  }
+  return {
+    framework: pg.framework ?? 'vanilla',
+    mode: pg.mode ?? 'runner',
+    code,
+  };
+});
 
 // Playground helpers removed (not used currently)
 </script>
@@ -132,53 +121,46 @@ const copyToClipboard = (text: string, index: number) => {
       </div>
     </div>
 
-    <!-- Code Examples List -->
-    <div class="space-y-6">
-      <!-- Standard TS Examples -->
+    <!-- Live StackBlitz Playground (si el item tiene playground.enabled) -->
+    <div v-if="playgroundSandbox" class="space-y-4">
       <div
-        v-for="(eg, index) in item.examples"
-        :key="eg.title"
-        class="flex flex-col overflow-hidden border bg-white/40 dark:bg-slate-900/30 rounded-2xl border-slate-200/60 dark:border-slate-800/60"
+        class="p-4 border bg-white/40 dark:bg-slate-900/30 rounded-2xl border-slate-200/60 dark:border-slate-800/60"
       >
-        <div
-          class="flex items-center justify-between px-5 py-3.5 bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-200/60 dark:border-slate-800/60"
-        >
-          <div class="flex items-center space-x-2">
-            <Code class="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <div>
-              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                {{ eg.title }}
-              </h4>
-              <p class="text-[10px] text-slate-500 dark:text-slate-300 mt-0.5">
-                {{ eg.description }}
-              </p>
-            </div>
-          </div>
-
-          <button
-            @click="copyToClipboard(eg.code, index)"
-            class="p-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800/80 active:scale-95 transition-all duration-200 flex items-center space-x-1 shadow-sm"
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span
+            class="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
+            >Playground StackBlitz</span
           >
-            <Check
-              v-if="copiedIndex === index"
-              class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse"
-            />
-            <Copy v-else class="w-3.5 h-3.5" />
-            <span class="text-[10px] px-0.5 font-medium">{{
-              copiedIndex === index
-                ? t('doc_section.copied')
-                : t('doc_section.copy')
-            }}</span>
-          </button>
         </div>
+        <FrameworkSandbox
+          :framework="playgroundSandbox.framework"
+          :mode="playgroundSandbox.mode"
+          :code="playgroundSandbox.code"
+          :title="item.title"
+        />
+      </div>
+    </div>
 
-        <div class="h-auto overflow-auto min-h-25 max-h-105">
-          <CodeEditor
-            :files="{ 'main.ts': formatSnippet(eg.code) }"
-            active-file="main.ts"
-            read-only
-          />
-        </div>
+    <!-- Static code block fallback: items without a playground (ej. Native
+    Mode, que no puede asumir que el sandbox tenga Temporal global) todavía
+    necesitan mostrar su(s) ejemplo(s) — sin esto, `item.examples` nunca se
+    renderiza en ningún lado. -->
+    <div v-else-if="item.examples?.length" class="space-y-4">
+      <div
+        v-for="example in item.examples"
+        :key="example.title"
+        class="p-4 space-y-2 border bg-white/40 dark:bg-slate-900/30 rounded-2xl border-slate-200/60 dark:border-slate-800/60"
+      >
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {{ example.title }}
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          {{ example.description }}
+        </p>
+        <pre
+          class="overflow-x-auto p-3 text-xs rounded-xl bg-slate-950 text-slate-100"
+        ><code>{{ example.code }}</code></pre>
       </div>
     </div>
   </div>
