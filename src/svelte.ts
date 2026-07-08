@@ -20,7 +20,15 @@
  */
 
 import { writable, readable, derived, type Readable } from 'svelte/store';
-import { TimeGuard, type ITimeGuardConfig, TimeRange } from './core';
+import {
+  TimeGuard,
+  type ITimeGuardConfig,
+  type TimeRange,
+  DEFAULT_TICK_INTERVAL_MS,
+  DEFAULT_RELATIVE_INTERVAL_MS,
+  computeRelativeTime,
+  createTimeRangeFrom,
+} from './core';
 
 /**
  * Duck-type check: is this a Svelte store (has `subscribe`)?
@@ -98,7 +106,7 @@ export function useCurrentTime(options?: {
   interval?: number;
   config?: ITimeGuardConfig;
 }): Readable<TimeGuard> {
-  const interval = options?.interval ?? 1000;
+  const interval = options?.interval ?? DEFAULT_TICK_INTERVAL_MS;
   const config = options?.config;
 
   const store = writable(TimeGuard.now(config), () => {
@@ -134,15 +142,11 @@ export function useRelativeTime(
     numeric?: 'always' | 'auto';
   },
 ): Readable<string> {
-  const interval = options?.interval ?? 60000;
+  const interval = options?.interval ?? DEFAULT_RELATIVE_INTERVAL_MS;
   const locale = options?.locale;
   const numeric = options?.numeric;
 
-  const compute = () => {
-    const tgDate = TimeGuard.from(date);
-    const now = TimeGuard.now();
-    return tgDate.since(now).humanize({ locale, numeric });
-  };
+  const compute = () => computeRelativeTime(date, { locale, numeric });
 
   const store = writable(compute(), () => {
     const timer = setInterval(() => {
@@ -186,13 +190,7 @@ export function useTimeRange(
   const startStore = toStore(start);
   const endStore = toStore(end);
 
-  return derived(
-    [startStore, endStore],
-    ([$start, $end]: [unknown, unknown]) => {
-      return new TimeRange(
-        TimeGuard.from($start, config),
-        TimeGuard.from($end, config),
-      );
-    },
+  return derived([startStore, endStore], ([$start, $end]: [unknown, unknown]) =>
+    createTimeRangeFrom($start, $end, config),
   );
 }

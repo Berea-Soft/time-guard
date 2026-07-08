@@ -24,7 +24,15 @@
  */
 
 import { createSignal, createEffect, onCleanup, type Accessor } from 'solid-js';
-import { TimeGuard, type ITimeGuardConfig, TimeRange } from './core';
+import {
+  TimeGuard,
+  type ITimeGuardConfig,
+  type TimeRange,
+  DEFAULT_TICK_INTERVAL_MS,
+  DEFAULT_RELATIVE_INTERVAL_MS,
+  computeRelativeTime,
+  createTimeRangeFrom,
+} from './core';
 
 /**
  * Context key for providing global TimeGuard configuration.
@@ -69,7 +77,7 @@ export function useCurrentTime(options?: {
   interval?: number;
   config?: ITimeGuardConfig;
 }): Accessor<TimeGuard> {
-  const interval = options?.interval ?? 1000;
+  const interval = options?.interval ?? DEFAULT_TICK_INTERVAL_MS;
   const config = options?.config;
 
   const [time, setTime] = createSignal(TimeGuard.now(config));
@@ -102,15 +110,11 @@ export function useRelativeTime(
     numeric?: 'always' | 'auto';
   },
 ): Accessor<string> {
-  const interval = options?.interval ?? 60000;
+  const interval = options?.interval ?? DEFAULT_RELATIVE_INTERVAL_MS;
   const locale = options?.locale;
   const numeric = options?.numeric;
 
-  const compute = () => {
-    const tgDate = TimeGuard.from(date);
-    const now = TimeGuard.now();
-    return tgDate.since(now).humanize({ locale, numeric });
-  };
+  const compute = () => computeRelativeTime(date, { locale, numeric });
 
   const [relative, setRelative] = createSignal(compute());
 
@@ -138,18 +142,14 @@ export function useTimeRange(
   end: unknown,
   config?: ITimeGuardConfig,
 ): Accessor<TimeRange> {
-  const initial = new TimeRange(
-    TimeGuard.from(start, config),
-    TimeGuard.from(end, config),
+  const [range, setRange] = createSignal(
+    createTimeRangeFrom(start, end, config),
   );
-  const [range, setRange] = createSignal(initial);
 
   createEffect(() => {
     const _start = start;
     const _end = end;
-    const startTg = TimeGuard.from(_start, config);
-    const endTg = TimeGuard.from(_end, config);
-    setRange(() => new TimeRange(startTg, endTg));
+    setRange(() => createTimeRangeFrom(_start, _end, config));
   });
 
   return range;

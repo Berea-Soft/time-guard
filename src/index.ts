@@ -1,7 +1,9 @@
 /**
  * TimeGuard - Modern date/time library using Temporal API
- * Full bundle (backward compatible)
- * Includes: core + all locales + all plugins + all calendars + polyfill (auto-loaded)
+ * Full bundle (Temporal polyfill auto-loaded)
+ * Includes: core + polyfill (auto-loaded). Only `en`/`es` locales are
+ * registered by default — call `loadAllLocales()` (or import the standalone
+ * `./locales` entry) to register the rest on demand.
  *
  * @author Berea-Soft
  * @license MIT
@@ -18,12 +20,6 @@ if (
 ) {
   (globalThis as Record<string, unknown>).Temporal = Temporal;
 }
-
-import { LocaleManager } from './locales/locale.manager';
-import { ALL_LOCALES } from './locales/index';
-
-// Auto-register all locales into LocaleManager
-LocaleManager.getInstance().loadLocales(ALL_LOCALES);
 
 // Export everything from core
 export * from './core';

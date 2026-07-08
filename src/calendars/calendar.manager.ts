@@ -109,6 +109,11 @@ export class CalendarManager implements ICalendarManager {
    * Register a new calendar system
    */
   register(calendar: ICalendarSystem): void {
+    if (this.calendars.has(calendar.id)) {
+      console.warn(
+        `Calendar "${calendar.id}" is already registered. Overwriting...`,
+      );
+    }
     this.calendars.set(calendar.id, calendar);
   }
 
@@ -130,9 +135,13 @@ export class CalendarManager implements ICalendarManager {
    * Set default calendar
    */
   setDefault(id: string): void {
-    if (this.calendars.has(id)) {
-      this.defaultCalendar = id;
+    if (!this.calendars.has(id)) {
+      console.warn(
+        `Calendar "${id}" is not registered. Keeping "${this.defaultCalendar}" as default.`,
+      );
+      return;
     }
+    this.defaultCalendar = id;
   }
 
   /**

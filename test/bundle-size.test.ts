@@ -37,8 +37,8 @@ describe('Bundle Size Report', () => {
           !f.includes('.umd.') &&
           !f.includes('.iife.') &&
           !f.includes('/') &&
-          !/locales-[A-Za-z0-9]+\.(js|cjs)$/.test(f) &&
-          !/^core-[A-Za-z0-9]+\.js$/.test(f.split('/').pop() || '')),
+          !/locales-[A-Za-z0-9_-]+\.(js|cjs)$/.test(f) &&
+          !/^core-[A-Za-z0-9_-]+\.js$/.test(f.split('/').pop() || '')),
     );
     expect(
       unwanted,

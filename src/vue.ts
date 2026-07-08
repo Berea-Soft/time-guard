@@ -8,7 +8,13 @@ import {
   type Directive,
   type DirectiveBinding,
 } from 'vue';
-import { TimeGuard, type ITimeGuardConfig } from './core';
+import {
+  TimeGuard,
+  type ITimeGuardConfig,
+  DEFAULT_TICK_INTERVAL_MS,
+  DEFAULT_RELATIVE_INTERVAL_MS,
+  computeRelativeTime,
+} from './core';
 
 /**
  * Unique symbol key for injecting TimeGuard global configuration.
@@ -117,12 +123,13 @@ export function useTimeGuard(
   watch(
     [
       () => input,
-      () => (activeConfig ? JSON.stringify(activeConfig) : undefined),
+      () => activeConfig?.locale,
+      () => activeConfig?.timezone,
+      () => activeConfig?.strict,
     ],
     () => {
       tg.value = TimeGuard.from(input, activeConfig);
     },
-    { deep: true },
   );
 
   return tg;
@@ -142,7 +149,7 @@ export function useCurrentTime(options?: {
     undefined,
   );
   const activeConfig = options?.config ?? globalConfig;
-  const interval = options?.interval ?? 1000;
+  const interval = options?.interval ?? DEFAULT_TICK_INTERVAL_MS;
   const time = ref(TimeGuard.now(activeConfig)) as Ref<TimeGuard>;
 
   const timer = setInterval(() => {
@@ -172,18 +179,13 @@ export function useRelativeTime(
     TimeGuardConfigKey,
     undefined,
   );
-  const interval = options?.interval ?? 60000;
+  const interval = options?.interval ?? DEFAULT_RELATIVE_INTERVAL_MS;
   const locale = options?.locale ?? globalConfig?.locale;
   const numeric = options?.numeric;
   const relative = ref('');
 
   const update = () => {
-    const tgDate = TimeGuard.from(date);
-    const now = TimeGuard.now();
-    relative.value = tgDate.since(now).humanize({
-      locale,
-      numeric,
-    });
+    relative.value = computeRelativeTime(date, { locale, numeric });
   };
 
   update();

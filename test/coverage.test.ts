@@ -1574,38 +1574,42 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle Islamic calendar methods', () => {
     const calendar = new IslamicCalendar();
-    expect(calendar.getMonthName(1)).toBeDefined();
-    expect(calendar.isLeapYear(1445)).toBeDefined();
+    expect(calendar.getMonthName(1)).toBe('Muharram');
+    // 1445 % 30 === 5, which is a leap year in the 30-year Islamic cycle
+    expect(calendar.isLeapYear(1445)).toBe(true);
   });
 
   it('should handle Hebrew calendar methods', () => {
     const calendar = new HebrewCalendar();
-    expect(calendar.getMonthName(1)).toBeDefined();
+    expect(calendar.getMonthName(1)).toBe('Tishrei');
   });
 
   it('should handle Chinese calendar methods', () => {
     const calendar = new ChineseCalendar();
-    expect(calendar.getMonthName(1)).toBeDefined();
+    expect(calendar.getMonthName(1)).toBe('正月');
   });
 
   it('should handle Japanese calendar methods', () => {
     const calendar = new JapaneseCalendar();
-    expect(calendar.getMonthName(1)).toBeDefined();
+    expect(calendar.getMonthName(1)).toBe('1月');
   });
 
   it('should handle Buddhist calendar methods', () => {
     const calendar = new BuddhistCalendar();
-    expect(calendar.getMonthName(1)).toBeDefined();
+    expect(calendar.getMonthName(1)).toBe('January');
   });
 
   it('should handle Islamic calendar daysInMonth with leap year', () => {
     const calendar = new IslamicCalendar();
-    expect(calendar.daysInMonth(1445, 12)).toBeDefined();
+    // Month 12 (even) has 30 days only on leap years, otherwise 29
+    expect(calendar.daysInMonth(1445, 12)).toBe(30);
+    expect(calendar.daysInMonth(1446, 12)).toBe(29);
   });
 
   it('should handle Buddhist calendar daysInMonth edge case', () => {
     const calendar = new BuddhistCalendar();
-    expect(calendar.daysInMonth(2567, 2)).toBeDefined();
+    // BE 2567 -> CE 2024, a Gregorian leap year, so February has 29 days
+    expect(calendar.daysInMonth(2567, 2)).toBe(29);
   });
 
   it('should handle duration humanize with singular units', () => {

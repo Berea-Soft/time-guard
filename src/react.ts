@@ -5,7 +5,15 @@ import React, {
   useContext,
   type ReactNode,
 } from 'react';
-import { TimeGuard, type ITimeGuardConfig, TimeRange } from './core';
+import {
+  TimeGuard,
+  type ITimeGuardConfig,
+  type TimeRange,
+  DEFAULT_TICK_INTERVAL_MS,
+  DEFAULT_RELATIVE_INTERVAL_MS,
+  computeRelativeTime,
+  createTimeRangeFrom,
+} from './core';
 
 /**
  * Context to share global TimeGuard configuration across the React component tree.
@@ -53,7 +61,12 @@ export function useTimeGuard(
 
   useEffect(() => {
     setTg(TimeGuard.from(input, activeConfig));
-  }, [input, activeConfig ? JSON.stringify(activeConfig) : undefined]);
+  }, [
+    input,
+    activeConfig?.locale,
+    activeConfig?.timezone,
+    activeConfig?.strict,
+  ]);
 
   return tg;
 }
@@ -69,7 +82,7 @@ export function useCurrentTime(options?: {
 }): TimeGuard {
   const globalConfig = useTimeGuardConfig();
   const activeConfig = options?.config ?? globalConfig;
-  const interval = options?.interval ?? 1000;
+  const interval = options?.interval ?? DEFAULT_TICK_INTERVAL_MS;
   const [time, setTime] = useState(() => TimeGuard.now(activeConfig));
 
   useEffect(() => {
@@ -77,7 +90,12 @@ export function useCurrentTime(options?: {
       setTime(TimeGuard.now(activeConfig));
     }, interval);
     return () => clearInterval(timer);
-  }, [interval, activeConfig ? JSON.stringify(activeConfig) : undefined]);
+  }, [
+    interval,
+    activeConfig?.locale,
+    activeConfig?.timezone,
+    activeConfig?.strict,
+  ]);
 
   return time;
 }
@@ -95,21 +113,14 @@ export function useRelativeTime(
   },
 ): string {
   const globalConfig = useTimeGuardConfig();
-  const interval = options?.interval ?? 60000; // default 1 minute
+  const interval = options?.interval ?? DEFAULT_RELATIVE_INTERVAL_MS;
   const locale = options?.locale ?? globalConfig?.locale;
   const numeric = options?.numeric;
   const [relative, setRelative] = useState('');
 
   useEffect(() => {
     const update = () => {
-      const tgDate = TimeGuard.from(date);
-      const now = TimeGuard.now();
-      setRelative(
-        tgDate.since(now).humanize({
-          locale,
-          numeric,
-        }),
-      );
+      setRelative(computeRelativeTime(date, { locale, numeric }));
     };
 
     update();
@@ -131,17 +142,19 @@ export function useTimeRange(
 ): TimeRange {
   const globalConfig = useTimeGuardConfig();
   const activeConfig = config ?? globalConfig;
-  const [range, setRange] = useState(() => {
-    const startTg = TimeGuard.from(start, activeConfig);
-    const endTg = TimeGuard.from(end, activeConfig);
-    return new TimeRange(startTg, endTg);
-  });
+  const [range, setRange] = useState(() =>
+    createTimeRangeFrom(start, end, activeConfig),
+  );
 
   useEffect(() => {
-    const startTg = TimeGuard.from(start, activeConfig);
-    const endTg = TimeGuard.from(end, activeConfig);
-    setRange(new TimeRange(startTg, endTg));
-  }, [start, end, activeConfig ? JSON.stringify(activeConfig) : undefined]);
+    setRange(createTimeRangeFrom(start, end, activeConfig));
+  }, [
+    start,
+    end,
+    activeConfig?.locale,
+    activeConfig?.timezone,
+    activeConfig?.strict,
+  ]);
 
   return range;
 }

@@ -155,7 +155,9 @@ export class LocaleManager implements ILocaleManager {
     const result = this.locales.get(target);
 
     if (!result) {
-      // Fallback to English if locale not found
+      console.warn(
+        `Locale "${target}" is not registered. Falling back to "en".`,
+      );
       return this.locales.get('en') || EN_LOCALE;
     }
 

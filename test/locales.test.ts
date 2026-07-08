@@ -4,7 +4,12 @@
  */
 
 import { TimeGuard } from '../src/index';
-import { getAvailableLocales, LOCALES_COUNT } from '../src/locales/index';
+import {
+  getAvailableLocales,
+  loadAllLocales,
+  LOCALES_COUNT,
+} from '../src/locales/index';
+import { LocaleManager } from '../src/locales/locale.manager';
 
 describe('TimeGuard Locales', () => {
   it('should have 40+ locales available', () => {
@@ -69,6 +74,24 @@ describe('TimeGuard Locales', () => {
         console.log(`${locale.padEnd(8)}: (error)`);
       }
     });
+  });
+});
+
+describe('Default locale registration (v3 lazy-loading)', () => {
+  it('only registers en/es by default on a fresh LocaleManager instance', () => {
+    (LocaleManager as unknown as { instance?: LocaleManager }).instance =
+      undefined;
+    const manager = LocaleManager.getInstance();
+    expect(manager.listLocales().sort()).toEqual(['en', 'es']);
+  });
+
+  it('loadAllLocales() registers every bundled locale', () => {
+    (LocaleManager as unknown as { instance?: LocaleManager }).instance =
+      undefined;
+    loadAllLocales();
+    const manager = LocaleManager.getInstance();
+    expect(manager.listLocales().length).toBe(LOCALES_COUNT);
+    expect(manager.getLocale('fr').name).toBe('fr');
   });
 });
 
