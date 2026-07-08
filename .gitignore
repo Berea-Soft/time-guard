@@ -6,7 +6,9 @@
 /build
 /.vite
 .npmrc
-.qwen/*
+
+# Vercel
+.vercel
 
 # Test and coverage
 coverage/
@@ -35,6 +37,10 @@ pnpm-debug.log*
 /.idea/
 *.swp
 *.swo
+
+# AI tooling (local dev artifacts, not project source)
+/.claude/
+/.codegraph/
 
 # OS files
 .DS_Store
