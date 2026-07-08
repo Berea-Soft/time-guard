@@ -141,38 +141,35 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
     const thresholds = this.config.thresholds || DEFAULT_THRESHOLDS;
     const rounding = this.config.rounding || Math.round;
 
+    // Thresholds without an explicit `d` (e.g. 'm', 'h', 'd', 'M', 'y') carry
+    // forward the unit of the last entry that specified one, and `r` is
+    // interpreted in THAT unit — matching dayjs's relativeTime convention
+    // this table was written against. `r` is never in a fixed unit like
+    // milliseconds/seconds regardless of position.
+    let unit = 'second';
     for (let i = 0; i < thresholds.length; i++) {
       const threshold = thresholds[i];
-      const nextThreshold =
-        i + 1 < thresholds.length ? thresholds[i + 1] : null;
+      unit = threshold.d || unit;
+      const value = milliseconds / this.getUnitMilliseconds(unit);
+      const isLast = i === thresholds.length - 1;
 
-      // Skip if we haven't reached this threshold
-      if (nextThreshold && threshold.r && milliseconds < threshold.r * 1000) {
-        continue;
+      if (isLast || threshold.r === undefined || value <= threshold.r) {
+        const roundedValue = rounding(value);
+        const label = threshold.l;
+        const format =
+          this.formats[label as keyof typeof this.formats] || label;
+
+        if (typeof format === 'string') {
+          return format.includes('%d')
+            ? format.replace('%d', String(roundedValue))
+            : format;
+        }
+
+        return format;
       }
-
-      // Convert to appropriate unit
-      let value: number;
-      if (threshold.d) {
-        const unitMs = this.getUnitMilliseconds(threshold.d);
-        value = rounding(milliseconds / unitMs);
-      } else {
-        value = 1;
-      }
-
-      const label = threshold.l;
-      const format = this.formats[label as keyof typeof this.formats] || label;
-
-      if (typeof format === 'string') {
-        return format.includes('%d')
-          ? format.replace('%d', String(value))
-          : format;
-      }
-
-      return format;
     }
 
-    // Fallback
+    // Fallback (unreachable — the last threshold always matches above)
     return `${rounding(milliseconds / 1000)} seconds`;
   }
 

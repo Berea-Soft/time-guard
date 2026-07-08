@@ -18,7 +18,6 @@ import type {
   DurationParts,
   TemporalPlainDateTimePolyfill,
   TemporalZonedDateTimePolyfill,
-  DurationLike,
   IDiffResult,
   IDiffOptions,
   IDurationExplanation,
@@ -40,6 +39,31 @@ import { LocaleManager, EN_LOCALE, ES_LOCALE } from './locales/locale.manager';
 // --- Internal Constants and Helpers (from time-guard.ts) ---
 
 type TemporalDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
+
+/** Numeric field names shared by every non-`'week'` {@link Unit} on `Temporal.PlainDateTime`. */
+type GetNumericField =
+  | 'year'
+  | 'month'
+  | 'day'
+  | 'hour'
+  | 'minute'
+  | 'second'
+  | 'millisecond'
+  | 'microsecond'
+  | 'nanosecond';
+
+/** Plural numeric field names on `Temporal.Duration`, keyed by every {@link Unit}. */
+type DurationPluralField =
+  | 'years'
+  | 'months'
+  | 'weeks'
+  | 'days'
+  | 'hours'
+  | 'minutes'
+  | 'seconds'
+  | 'milliseconds'
+  | 'microseconds'
+  | 'nanoseconds';
 
 // Time conversion constants (hoisted to avoid recalculation)
 const MS_PER_SECOND = 1000;
@@ -256,7 +280,10 @@ export class DurationResult implements DurationParts, IFormattableDuration {
       { unit: 'millisecond', value: this.milliseconds },
     ];
 
-    const nonZeroParts = parts.filter((p) => p.value > 0);
+    // `value > 0` would drop every part of a negative (this-is-earlier)
+    // duration — e.g. `past.since(now)` — silently collapsing to "0
+    // seconds" instead of "3 days ago". Filter on magnitude, not sign.
+    const nonZeroParts = parts.filter((p) => p.value !== 0);
 
     if (nonZeroParts.length === 0) {
       return '0 seconds';
@@ -269,18 +296,22 @@ export class DurationResult implements DurationParts, IFormattableDuration {
           numeric,
           style: 'long',
         });
+        // Intl.RelativeTimeFormat is sign-aware by design (negative ->
+        // "ago", positive -> "in ...") — pass the signed value through.
         return rtf.format(
           largest.value,
           largest.unit as Intl.RelativeTimeFormatUnit,
         );
       } catch {
-        return `${largest.value} ${this.pluralizeUnit(largest.unit, largest.value, locale)}`;
+        const abs = Math.abs(largest.value);
+        return `${abs} ${this.pluralizeUnit(largest.unit, abs, locale)}`;
       }
     }
 
     const formatted = nonZeroParts.map((p) => {
-      const label = getDurationUnitLabel(p.unit, locale, p.value);
-      return `${p.value} ${label}`;
+      const abs = Math.abs(p.value);
+      const label = getDurationUnitLabel(p.unit, locale, abs);
+      return `${abs} ${label}`;
     });
 
     return joinDurationParts(formatted, locale);
@@ -474,6 +505,10 @@ export class DurationResult implements DurationParts, IFormattableDuration {
 export class TimeRange {
   private _start: TimeGuard;
   private _end: TimeGuard;
+  // `_start`/`_end` never change after construction (no setters), so the
+  // ordered/validated pair only needs to be computed once and reused across
+  // contains()/overlaps()/intersect()/union() instead of on every call.
+  private _ordered?: [Temporal.PlainDateTime, Temporal.PlainDateTime];
 
   constructor(start: TimeGuard, end: TimeGuard) {
     this._start = start;
@@ -489,9 +524,13 @@ export class TimeRange {
   }
 
   private getOrdered(): [Temporal.PlainDateTime, Temporal.PlainDateTime] {
-    const t1 = TemporalAdapter.toPlainDateTime(this._start.toTemporal());
-    const t2 = TemporalAdapter.toPlainDateTime(this._end.toTemporal());
-    return TemporalAdapter.compare(t1, t2) <= 0 ? [t1, t2] : [t2, t1];
+    if (!this._ordered) {
+      const t1 = TemporalAdapter.toPlainDateTime(this._start.toTemporal());
+      const t2 = TemporalAdapter.toPlainDateTime(this._end.toTemporal());
+      this._ordered =
+        TemporalAdapter.compare(t1, t2) <= 0 ? [t1, t2] : [t2, t1];
+    }
+    return this._ordered;
   }
 
   toDuration(): DurationResult {
@@ -575,8 +614,16 @@ export class TimeGuard implements ITimeGuard {
   private config: Required<ITimeGuardConfig>;
   private formatterInstance: DateFormatter;
 
+  /** Process-wide holiday registry, shared by every `TimeGuard` instance. See `registerHolidays()`. */
   private static holidays: Set<string> = new Set();
 
+  /**
+   * Registers holiday dates in the process-wide registry used by
+   * `isHoliday()`/`isBusinessDay()`/`addBusinessDays()`. Additive, with no
+   * cap or eviction — call this once at startup with your full holiday
+   * calendar, not per-request or per-tenant in a long-running server (use
+   * `clearHolidays()` between tenants if you need per-tenant calendars).
+   */
   static registerHolidays(dates: string[]): void {
     dates.forEach((d) => {
       try {
@@ -633,7 +680,12 @@ export class TimeGuard implements ITimeGuard {
       strict: config?.strict ?? false,
     };
 
-    this.temporal = TemporalAdapter.parseToPlainDateTime(input);
+    // A TimeGuard instance has no public year/month/day fields for
+    // TemporalAdapter to read (its Temporal value is private), so unwrap it
+    // explicitly instead of falling through to the generic object branch.
+    const resolvedInput =
+      input instanceof TimeGuard ? input.toTemporal() : input;
+    this.temporal = TemporalAdapter.parseToPlainDateTime(resolvedInput);
 
     // Convert to ZonedDateTime if timezone is specified
     if (this.config.timezone && this.config.timezone !== 'UTC') {
@@ -789,10 +841,13 @@ export class TimeGuard implements ITimeGuard {
   get(component: Unit): number {
     const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
 
-    const unitMap: Record<Unit, string> = {
+    if (component === 'week') {
+      return (plainDT as TemporalPlainDateTimePolyfill).weekOfYear;
+    }
+
+    const unitMap: Record<Exclude<Unit, 'week'>, GetNumericField> = {
       year: 'year',
       month: 'month',
-      week: 'year', // Special handling below
       day: 'day',
       hour: 'hour',
       minute: 'minute',
@@ -802,13 +857,7 @@ export class TimeGuard implements ITimeGuard {
       nanosecond: 'nanosecond',
     };
 
-    if (component === 'week') {
-      return (plainDT as TemporalPlainDateTimePolyfill).weekOfYear;
-    }
-
-    return (plainDT as unknown as Record<string, unknown>)[
-      unitMap[component]
-    ] as number;
+    return plainDT[unitMap[component]];
   }
 
   /** Map from singular Unit to plural Temporal polyfill key */
@@ -868,9 +917,7 @@ export class TimeGuard implements ITimeGuard {
       return this;
     }
 
-    plainDT = (plainDT as TemporalPlainDateTimePolyfill).add(
-      duration as unknown as DurationLike,
-    );
+    plainDT = (plainDT as TemporalPlainDateTimePolyfill).add(duration);
     return TimeGuard.fromTemporal(plainDT, this.config);
   }
 
@@ -893,7 +940,7 @@ export class TimeGuard implements ITimeGuard {
     const plainDT1 = TemporalAdapter.toPlainDateTime(this.temporal);
     const plainDT2 = TemporalAdapter.toPlainDateTime(other.temporal);
 
-    const unitMap: Record<Unit, string> = {
+    const unitMap: Record<Unit, DurationPluralField> = {
       year: 'years',
       month: 'months',
       week: 'weeks',
@@ -908,29 +955,22 @@ export class TimeGuard implements ITimeGuard {
 
     if (typeof unitOrOptions === 'string') {
       const unit = unitOrOptions;
-      const mappedUnit = unitMap[unit] as keyof {
-        years?: number;
-        months?: number;
-        weeks?: number;
-        days?: number;
-        hours?: number;
-        minutes?: number;
-        seconds?: number;
-        milliseconds?: number;
-        microseconds?: number;
-        nanoseconds?: number;
-      };
+      const mappedUnit = unitMap[unit];
+      // largestUnit must match smallestUnit — otherwise Temporal balances
+      // the difference across larger units first (years/months/days/...)
+      // and `duration[mappedUnit]` only holds the leftover remainder below
+      // whichever unit it picked, not the total (e.g. diff(x, 'minute')
+      // for a 5-hour gap would return 0, since the 5 hours get absorbed
+      // into an implicit `hours` component instead of being expressed as
+      // 300 minutes).
       const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
         plainDT2,
         {
+          largestUnit: unit,
           smallestUnit: unit,
         },
       );
-      const durationObj = duration as unknown as Record<
-        string,
-        number | undefined
-      >;
-      return Math.round(durationObj[mappedUnit] || 0);
+      return Math.round(duration[mappedUnit] || 0);
     }
 
     const options = (unitOrOptions as IDiffOptions) || {};
@@ -939,29 +979,14 @@ export class TimeGuard implements ITimeGuard {
     const locale = options.locale || this.config.locale;
 
     if (mode === 'exact') {
-      const mappedUnit = unitMap[unit] as keyof {
-        years?: number;
-        months?: number;
-        weeks?: number;
-        days?: number;
-        hours?: number;
-        minutes?: number;
-        seconds?: number;
-        milliseconds?: number;
-        microseconds?: number;
-        nanoseconds?: number;
-      };
+      const mappedUnit = unitMap[unit];
       const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
         plainDT2,
         {
           smallestUnit: unit,
         },
       );
-      const durationObj = duration as unknown as Record<
-        string,
-        number | undefined
-      >;
-      const result = Math.round(durationObj[mappedUnit] || 0);
+      const result = Math.round(duration[mappedUnit] || 0);
 
       if (unitOrOptions === undefined || typeof unitOrOptions === 'object') {
         const totalMs = calculateTotalMs(duration);
@@ -979,8 +1004,15 @@ export class TimeGuard implements ITimeGuard {
     }
 
     if (mode === 'calendar') {
-      const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
-        plainDT2,
+      // Calendar-mode breakdowns describe the gap between two dates, not a
+      // signed vector — always diff from the earlier date to the later one
+      // so `a.diff(b, {mode: 'calendar'})` and `b.diff(a, {mode: 'calendar'})`
+      // report the same positive months/days, matching between()'s contract.
+      const isReversed = TemporalAdapter.compare(plainDT1, plainDT2) < 0;
+      const laterDT = isReversed ? plainDT2 : plainDT1;
+      const earlierDT = isReversed ? plainDT1 : plainDT2;
+      const duration = (laterDT as TemporalPlainDateTimePolyfill).since(
+        earlierDT,
         {
           largestUnit: 'month',
           smallestUnit: 'millisecond',
@@ -1133,7 +1165,7 @@ export class TimeGuard implements ITimeGuard {
   }
 
   clone(): TimeGuard {
-    return new TimeGuard(this.toDate(), this.config);
+    return TimeGuard.fromTemporal(this.temporal, this.config);
   }
 
   startOf(unit: Unit): TimeGuard {
@@ -1276,17 +1308,19 @@ export class TimeGuard implements ITimeGuard {
     const startTime = performance.now();
 
     try {
-      const temporalOptions: Record<string, string> = {};
-      if (options?.largestUnit) {
-        temporalOptions.largestUnit = options.largestUnit;
-      }
+      // Default to a calendar-aware years/months/days/... breakdown —
+      // Temporal's own default largestUnit ('auto') caps balancing at
+      // 'day', which would silently collapse months/years into days.
+      const temporalOptions: Record<string, string> = {
+        largestUnit: options?.largestUnit || 'year',
+      };
       if (options?.smallestUnit) {
         temporalOptions.smallestUnit = options.smallestUnit;
       }
 
       const duration = (plainDT2 as TemporalPlainDateTimePolyfill).since(
         plainDT1,
-        Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined,
+        temporalOptions,
       );
       const parts = TimeGuard.toDurationParts(duration);
 
@@ -1540,17 +1574,19 @@ export class TimeGuard implements ITimeGuard {
     const startTime = performance.now();
 
     try {
-      const temporalOptions: Record<string, string> = {};
-      if (options?.largestUnit) {
-        temporalOptions.largestUnit = options.largestUnit;
-      }
+      // Default to a calendar-aware years/months/days/... breakdown —
+      // Temporal's own default largestUnit ('auto') caps balancing at
+      // 'day', which would silently collapse months/years into days.
+      const temporalOptions: Record<string, string> = {
+        largestUnit: options?.largestUnit || 'year',
+      };
       if (options?.smallestUnit) {
         temporalOptions.smallestUnit = options.smallestUnit;
       }
 
       const duration = (plainDT1 as TemporalPlainDateTimePolyfill).since(
         plainDT2,
-        Object.keys(temporalOptions).length > 0 ? temporalOptions : undefined,
+        temporalOptions,
       );
       const parts = TimeGuard.toDurationParts(duration);
 
@@ -1646,8 +1682,12 @@ export class TimeGuard implements ITimeGuard {
   }
 
   isHoliday(): boolean {
-    const dateStr = this.format('YYYY-MM-DD');
-    return TimeGuard.holidays.has(dateStr);
+    // Build the lookup key directly from numeric fields instead of running
+    // it through the full pattern formatter (regex + token replacement).
+    const year = String(this.get('year')).padStart(4, '0');
+    const month = String(this.get('month')).padStart(2, '0');
+    const day = String(this.get('day')).padStart(2, '0');
+    return TimeGuard.holidays.has(`${year}-${month}-${day}`);
   }
 
   isBusinessDay(): boolean {
@@ -1675,6 +1715,45 @@ export class TimeGuard implements ITimeGuard {
   subtractBusinessDays(days: number): TimeGuard {
     return this.addBusinessDays(-days);
   }
+}
+
+// --- Shared reactive-integration helpers ---
+// Used by the React/Vue/Svelte/Solid/Qwik wrappers (src/react.ts, src/vue.ts,
+// src/svelte.ts, src/solid.ts, src/qwik.ts) to avoid re-implementing the same
+// default intervals and since()/humanize() computation in every framework.
+
+/** Default polling interval (ms) used by "current time" reactive hooks. */
+export const DEFAULT_TICK_INTERVAL_MS = 1000;
+
+/** Default recompute interval (ms) used by "relative time" reactive hooks. */
+export const DEFAULT_RELATIVE_INTERVAL_MS = 60000;
+
+/**
+ * Computes a relative-time string for `date` against `TimeGuard.now()`.
+ * Shared logic behind every framework's `useRelativeTime` hook.
+ */
+export function computeRelativeTime(
+  date: unknown,
+  options?: { locale?: string; numeric?: 'always' | 'auto' },
+): string {
+  const tgDate = TimeGuard.from(date);
+  const now = TimeGuard.now();
+  return tgDate.since(now).humanize(options);
+}
+
+/**
+ * Builds a TimeRange from raw start/end inputs and a shared config.
+ * Shared logic behind every framework's `useTimeRange` hook.
+ */
+export function createTimeRangeFrom(
+  start: unknown,
+  end: unknown,
+  config?: ITimeGuardConfig,
+): TimeRange {
+  return new TimeRange(
+    TimeGuard.from(start, config),
+    TimeGuard.from(end, config),
+  );
 }
 
 // --- Exports ---
@@ -1719,6 +1798,7 @@ export {
   LOCALES_COUNT,
   ALL_LOCALES,
   registerAllLocales,
+  loadAllLocales,
 } from './locales/index';
 
 // Formatter exports

@@ -67,7 +67,7 @@ export class TemporalAdapter {
 
     if (this.isPlainTime(input)) {
       const now = Temporal.Now.plainDateTimeISO();
-      return now.with(input as Temporal.PlainTimeLike);
+      return now.withPlainTime(input as Temporal.PlainTime);
     }
 
     if (
@@ -119,8 +119,12 @@ export class TemporalAdapter {
     try {
       // Try as full ISO datetime (with T or space separator)
       if (iso.includes('T') || / \d{2}:\d{2}/.test(iso)) {
-        // Normalize space to T for Temporal parsing
-        const normalized = iso.replace(' ', 'T');
+        // Normalize space to T, and strip any offset/Z designator —
+        // Temporal.PlainDateTime.from() rejects them outright since a
+        // PlainDateTime is offset-naive (matches fromDate()'s handling).
+        const normalized = iso
+          .replace(' ', 'T')
+          .replace(/(?:Z|[+-]\d{2}:\d{2})$/i, '');
         return Temporal.PlainDateTime.from(normalized);
       }
       // Try as date only
@@ -187,7 +191,14 @@ export class TemporalAdapter {
   static toISOString(
     temporal: TemporalPlainDateTime | TemporalZonedDateTime,
   ): string {
-    return this.toPlainDateTime(temporal).toString() + 'Z';
+    // Force millisecond precision — Temporal's toString() omits the
+    // fractional part entirely when it's zero, unlike Date#toISOString()
+    // which always shows `.000`.
+    return (
+      this.toPlainDateTime(temporal).toString({
+        smallestUnit: 'millisecond',
+      }) + 'Z'
+    );
   }
 
   /**
@@ -263,7 +274,7 @@ export class TemporalAdapter {
       'millisecond',
     ] as const;
     for (const field of fields) {
-      const value = (dt as unknown as Record<string, unknown>)[field];
+      const value = dt[field];
       if (
         typeof value !== 'number' ||
         !Number.isFinite(value) ||

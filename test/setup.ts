@@ -10,14 +10,17 @@ vi.stubGlobal('__VERSION__', pkg.version);
  * This ensures Temporal API is available in all tests
  */
 
-// First, try to import the mock to ensure it's always available
-import('./temporal-mock');
-
-// Then try to import real polyfill (may override mock)
+// Install the real polyfill as globalThis.Temporal (the package only
+// exposes named exports, it doesn't set the global itself). Only fall
+// back to the hand-rolled mock if the real polyfill fails to load —
+// awaiting this before the mock import avoids a race where the mock's
+// own `if (!globalThis.Temporal)` guard wins and silently shadows the
+// real implementation for the rest of the test run.
 try {
-  await import('@js-temporal/polyfill');
+  const { Temporal } = await import('@js-temporal/polyfill');
+  (globalThis as unknown as { Temporal: unknown }).Temporal = Temporal;
 } catch {
-  // Mock is already loaded, continue
+  await import('./temporal-mock');
   console.warn('Real @js-temporal/polyfill not loaded, using mock Temporal');
 }
 

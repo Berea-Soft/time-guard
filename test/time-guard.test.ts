@@ -31,6 +31,14 @@ describe('TimeGuard - Core Functionality', () => {
       expect(tg.format('YYYY-MM-DD')).toBe('2024-03-13');
     });
 
+    it('should create a TimeGuard instance from another TimeGuard instance', () => {
+      const original = new TimeGuard('2024-03-13T10:30:00.123456789');
+      const copy = new TimeGuard(original);
+      expect(copy.format('YYYY-MM-DD HH:mm:ss')).toBe('2024-03-13 10:30:00');
+      expect(copy.get('nanosecond')).toBe(original.get('nanosecond'));
+      expect(copy.valueOf()).toBe(original.valueOf());
+    });
+
     it('should create using static factory TimeGuard.now()', () => {
       const tg = TimeGuard.now();
       expect(tg).toBeDefined();
@@ -383,6 +391,24 @@ describe('TimeGuard - Core Functionality', () => {
       expect(Math.abs(diff)).toBeGreaterThan(5);
     });
 
+    it('should return the TOTAL difference in a small unit, not the remainder below a larger implicit unit', () => {
+      // Regression test: diff(other, unit) used to pass smallestUnit without
+      // a matching largestUnit, so Temporal balanced the gap into whatever
+      // larger unit fit first — e.g. a 5-hour gap became `{hours: 5}` with
+      // `minutes: 0`, so diff(..., 'minute') returned 0 instead of 300.
+      const tg1 = new TimeGuard('2024-03-13T10:00:00');
+      const tg2 = new TimeGuard('2024-03-13T15:00:00'); // 5 hours later
+      expect(tg2.diff(tg1, 'minute')).toBe(300);
+      expect(tg2.diff(tg1, 'second')).toBe(18000);
+      expect(tg2.diff(tg1, 'millisecond')).toBe(18000000);
+    });
+
+    it('should return the total difference in hours across a multi-day gap', () => {
+      const tg1 = new TimeGuard('2024-03-13T00:00:00');
+      const tg2 = new TimeGuard('2024-03-15T00:00:00'); // 2 days later
+      expect(tg2.diff(tg1, 'hour')).toBe(48);
+    });
+
     it('diffResult should support numeric operations', () => {
       const tg1 = new TimeGuard('2024-01-01T00:00:00');
       const tg2 = new TimeGuard('2024-01-11T00:00:00');
@@ -488,6 +514,31 @@ describe('TimeGuard - Core Functionality', () => {
       const tg2 = tg1.locale('es');
       expect(tg1.locale()).toBe('en');
       expect(tg2.locale()).toBe('es');
+    });
+  });
+
+  describe('Sub-millisecond precision', () => {
+    it('should preserve nanosecond precision through clone()', () => {
+      const tg = new TimeGuard('2024-03-13T10:30:00.123456789');
+      const cloned = tg.clone();
+      expect(cloned.get('microsecond')).toBe(tg.get('microsecond'));
+      expect(cloned.get('nanosecond')).toBe(tg.get('nanosecond'));
+    });
+
+    it('should preserve nanosecond precision through locale()', () => {
+      const tg = new TimeGuard('2024-03-13T10:30:00.123456789', {
+        locale: 'en',
+      });
+      const withLocale = tg.locale('es');
+      expect(withLocale.get('microsecond')).toBe(tg.get('microsecond'));
+      expect(withLocale.get('nanosecond')).toBe(tg.get('nanosecond'));
+    });
+
+    it('should preserve nanosecond precision through timezone()', () => {
+      const tg = new TimeGuard('2024-03-13T10:30:00.123456789');
+      const withTz = tg.timezone('America/New_York');
+      expect(withTz.get('microsecond')).toBe(tg.get('microsecond'));
+      expect(withTz.get('nanosecond')).toBe(tg.get('nanosecond'));
     });
   });
 

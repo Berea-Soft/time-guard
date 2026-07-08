@@ -176,7 +176,9 @@ describe('Given duration calculations', () => {
   it('When diff with specific unit, Then should return numeric value', () => {
     const end = new TimeGuard('2024-03-20');
     const diff = baseDate.diff(end, 'day');
-    expect([7, -7, 22]).toContain(Math.abs(diff));
+    // baseDate is 2024-03-13T10:30:45, end is 2024-03-20T00:00:00 — that's
+    // -6.56 days, truncated towards zero (Temporal's default) to -6.
+    expect(diff).toBe(-6);
   });
 
   it('When toDurationString(), Then should return ISO 8601 string', () => {

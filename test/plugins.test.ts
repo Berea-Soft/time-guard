@@ -91,6 +91,25 @@ describe('Plugin System', () => {
       const result = (pastDate as any).fromNow(true);
       expect(result).not.toContain('ago');
     });
+
+    it('should pick the "hh" (hours) threshold, not fall back to seconds, for a multi-hour gap', () => {
+      // Regression test: getRelativeTimeString() used to compare `r`
+      // (interpreted in the wrong unit) with an inverted condition, so any
+      // gap bigger than 44s matched the smallest ('a few seconds') bucket
+      // instead of the correct one.
+      const pastDate = TimeGuard.now().subtract({ hour: 5 }) as any;
+      expect(pastDate.fromNow()).toBe('5 hours ago');
+    });
+
+    it('should pick the "dd" (days) threshold for a multi-day gap', () => {
+      const pastDate = TimeGuard.now().subtract({ day: 2 }) as any;
+      expect(pastDate.fromNow()).toBe('2 days ago');
+    });
+
+    it('should pick the "hh" threshold for a future multi-hour gap via toNow()', () => {
+      const futureDate = TimeGuard.now().add({ hour: 5 }) as any;
+      expect(futureDate.toNow()).toBe('in 5 hours');
+    });
   });
 
   describe('DurationPlugin', () => {

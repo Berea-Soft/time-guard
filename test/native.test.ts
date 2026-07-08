@@ -26,9 +26,10 @@ describe('TimeGuard Native Mode Entry Point', () => {
     const start = TimeGuard.from('2026-05-18');
     const end = TimeGuard.from('2026-05-25');
     const diff = start.diff(end, 'day');
-    // diff() returns absolute difference in the specified unit
+    // diff() is signed: this - other, so an earlier `start` diffed
+    // against a later `end` comes back negative (matches moment/dayjs).
     expect(typeof diff).toBe('number');
-    expect(diff).toBeGreaterThan(0);
+    expect(diff).toBe(-7);
 
     const range = TimeGuard.range(start, end);
     expect(range.toDuration().total('day')).toBe(7);
