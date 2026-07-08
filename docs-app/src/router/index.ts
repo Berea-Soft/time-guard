@@ -1,28 +1,41 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import DocsLayout from '@/layouts/DocsLayout.vue';
-import DemosLayout from '@/layouts/DemosLayout.vue';
-import HomePage from '@/pages/HomePage.vue';
-import DocPage from '@/pages/DocPage.vue';
-import LandingPage from '@/pages/LandingPage.vue';
-import DemosList from '@/pages/DemosList.vue';
-import DemoPage from '@/pages/DemoPage.vue';
 
 const routes = [
-  { path: '/', name: 'landing', component: LandingPage },
+  {
+    path: '/',
+    name: 'landing',
+    component: () => import('@/pages/LandingPage.vue'),
+  },
   {
     path: '/docs',
-    component: DocsLayout,
+    component: () => import('@/layouts/DocsLayout.vue'),
     children: [
-      { path: '', name: 'docs', component: HomePage },
-      { path: ':slug', name: 'doc-page', component: DocPage },
+      {
+        path: '',
+        name: 'docs',
+        component: () => import('@/pages/HomePage.vue'),
+      },
+      {
+        path: ':slug',
+        name: 'doc-page',
+        component: () => import('@/pages/DocPage.vue'),
+      },
     ],
   },
   {
     path: '/demos',
-    component: DemosLayout,
+    component: () => import('@/layouts/DemosLayout.vue'),
     children: [
-      { path: '', name: 'demos', component: DemosList },
-      { path: ':slug', name: 'demo', component: DemoPage },
+      {
+        path: '',
+        name: 'demos',
+        component: () => import('@/pages/DemosList.vue'),
+      },
+      {
+        path: ':slug',
+        name: 'demo',
+        component: () => import('@/pages/DemoPage.vue'),
+      },
     ],
   },
   // Legacy redirect /examples → /demos

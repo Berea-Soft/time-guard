@@ -1,5 +1,5 @@
 /**
- * Tipos para la integración CodeSandbox Playground.
+ * Tipos para la integración StackBlitz Playground.
  * Define los frameworks soportados y la forma de los proyectos generados.
  */
 
@@ -23,21 +23,12 @@ export interface FrameworkMeta {
   iconName: string;
 }
 
-export type SandpackTemplate =
-  | 'angular-cli'
-  | 'create-react-app'
-  | 'create-react-app-typescript'
-  | 'svelte'
-  | 'parcel'
-  | 'vue-cli'
-  | 'static'
-  | 'solid'
-  | 'nextjs'
-  | 'node';
-
 export interface PlaygroundProject {
-  /** Plantilla para CodeSandbox. Usamos 'node' porque generamos package.json completo. */
-  template: SandpackTemplate;
+  /**
+   * Plantilla StackBlitz. Siempre 'node' (entorno WebContainers) porque cada
+   * builder genera un `package.json` + config de build completos.
+   */
+  template: 'node';
   title: string;
   description?: string;
   files: Record<string, string>;
@@ -68,24 +59,3 @@ export const FRAMEWORKS: readonly FrameworkMeta[] = [
 
 /** Versión por defecto del paquete time-guard a instalar en los sandboxes. */
 export const TIME_GUARD_VERSION = 'latest';
-
-/**
- * Mapea cada Framework al template oficial de Sandpack.
- * Usamos 'static' para todos: es el más estable, no requiere bundler
- * en el navegador y evita errores de entorno Node.
- */
-export function sandpackTemplateFor(_framework: Framework): string {
-  return 'static';
-}
-
-/**
- * Convierte el formato de archivos plano (Record<string, string>) al formato
- * que espera sandpack-client (Record<string, { code: string }>).
- */
-export function toSandpackFiles(
-  files: Record<string, string>,
-): Record<string, { code: string }> {
-  return Object.fromEntries(
-    Object.entries(files).map(([path, content]) => [path, { code: content }]),
-  );
-}

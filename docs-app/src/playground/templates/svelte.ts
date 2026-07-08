@@ -46,8 +46,8 @@ export function buildSvelteRunner(opts: BuildOptions): PlaygroundProject {
             svelte: 'latest',
           },
           devDependencies: {
-            vite: 'latest',
-            '@sveltejs/vite-plugin-svelte': 'latest',
+            vite: '^6.3.0',
+            '@sveltejs/vite-plugin-svelte': '^4.0.0',
           },
         },
         null,
@@ -80,8 +80,8 @@ export function buildSvelteApp(opts: BuildOptions): PlaygroundProject {
             svelte: 'latest',
           },
           devDependencies: {
-            vite: 'latest',
-            '@sveltejs/vite-plugin-svelte': 'latest',
+            vite: '^6.3.0',
+            '@sveltejs/vite-plugin-svelte': '^4.0.0',
           },
         },
         null,

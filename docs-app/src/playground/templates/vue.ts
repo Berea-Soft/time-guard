@@ -44,7 +44,7 @@ export function buildVueRunner(opts: BuildOptions): PlaygroundProject {
             '@bereasoftware/time-guard': opts.version ?? TIME_GUARD_VERSION,
             vue: 'latest',
           },
-          devDependencies: { vite: 'latest', '@vitejs/plugin-vue': 'latest' },
+          devDependencies: { vite: '^6.3.0', '@vitejs/plugin-vue': '^5.2.1' },
         },
         null,
         2,
@@ -74,15 +74,41 @@ export function buildVueApp(opts: BuildOptions): PlaygroundProject {
             '@bereasoftware/time-guard': opts.version ?? TIME_GUARD_VERSION,
             vue: 'latest',
           },
-          devDependencies: { vite: 'latest', '@vitejs/plugin-vue': 'latest' },
+          devDependencies: {
+            vite: '^6.3.0',
+            '@vitejs/plugin-vue': '^5.2.1',
+            // Tailwind v3 (pure JS/PostCSS, no native/WASM engine) —
+            // several demos (Locales/Calendars/Plugins/TimeRange/
+            // BusinessDay) use Tailwind utility classes with no custom
+            // <style> block. v4's Vite plugin was tried first but its
+            // oxide engine hung indefinitely inside StackBlitz's
+            // WebContainers (confirmed live: "npm run dev" never printed
+            // "ready" after 70s+) — v3's classic PostCSS pipeline is the
+            // well-proven path here.
+            tailwindcss: '^3.4.0',
+            postcss: '^8.4.0',
+            autoprefixer: '^10.4.0',
+          },
         },
         null,
         2,
       ),
       'tsconfig.json': `{"compilerOptions": {"target": "ESNext", "module": "ESNext", "moduleResolution": "Bundler", "strict": true, "jsx": "preserve", "lib": ["ESNext", "DOM"]}}`,
       'vite.config.js': `import vue from '@vitejs/plugin-vue'; export default { plugins: [vue()], server: { host: true } };`,
-      'index.html': `<!doctype html><html><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>`,
-      'src/main.ts': `import { createApp } from 'vue'; import App from './App.vue'; createApp(App).mount('#app');`,
+      // package.json above has "type": "module" — these must be ESM
+      // (`export default`), not CommonJS `module.exports`, or PostCSS
+      // throws "module is not defined in ES module scope".
+      // darkMode 'class' + a light-mode body (bg-slate-50/text-slate-900)
+      // matches docs-app's own convention exactly (see src/assets/main.css)
+      // — these demos are light-mode-first with `dark:` as an opt-in
+      // enhancement, not the reverse. Forcing a dark body text color here
+      // while cards stayed `bg-white` (since no `.dark` class is ever
+      // present to trigger the `dark:` variants) made text unreadable.
+      'tailwind.config.js': `export default { content: ['./index.html', './src/**/*.{vue,js,ts}'], darkMode: 'class', theme: { extend: {} }, plugins: [] };`,
+      'postcss.config.js': `export default { plugins: { tailwindcss: {}, autoprefixer: {} } };`,
+      'index.html': `<!doctype html><html><body class="bg-slate-50 text-slate-900 p-6"><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>`,
+      'src/style.css': `@tailwind base;\n@tailwind components;\n@tailwind utilities;`,
+      'src/main.ts': `import './style.css'; import { createApp } from 'vue'; import App from './App.vue'; createApp(App).mount('#app');`,
       'src/App.vue': opts.code,
     },
     openFile: 'src/App.vue',

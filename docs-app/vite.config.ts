@@ -11,10 +11,25 @@ const rootPkg = JSON.parse(
   readFileSync(resolve(__dirname, '../package.json'), 'utf-8'),
 );
 
+// Required so the StackBlitz (WebContainers) embeds in FrameworkSandbox.vue
+// can run cross-origin-isolated — see playground/index.ts. 'credentialless'
+// (vs. 'require-corp') avoids requiring CORP headers on every third-party
+// resource (fonts, images, GitHub API, etc.) this page also loads.
+const crossOriginIsolationHeaders = {
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'credentialless',
+};
+
 export default defineConfig({
   appType: 'spa',
   define: {
     __VERSION__: JSON.stringify(rootPkg.version),
+  },
+  server: {
+    headers: crossOriginIsolationHeaders,
+  },
+  preview: {
+    headers: crossOriginIsolationHeaders,
   },
   plugins: [
     VueDevTools(),

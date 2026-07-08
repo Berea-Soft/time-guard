@@ -55,8 +55,8 @@ export function buildAngularRunner(opts: BuildOptions): PlaygroundProject {
             'zone.js': 'latest',
           },
           devDependencies: {
-            vite: 'latest',
-            '@analogjs/vite-plugin-angular': 'latest',
+            vite: '^6.3.0',
+            '@analogjs/vite-plugin-angular': '^1.19.1',
             typescript: 'latest',
           },
         },
@@ -94,8 +94,8 @@ export function buildAngularApp(opts: BuildOptions): PlaygroundProject {
             'zone.js': 'latest',
           },
           devDependencies: {
-            vite: 'latest',
-            '@analogjs/vite-plugin-angular': 'latest',
+            vite: '^6.3.0',
+            '@analogjs/vite-plugin-angular': '^1.19.1',
             typescript: 'latest',
           },
         },

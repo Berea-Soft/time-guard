@@ -65,6 +65,10 @@
   "demo.copy": "Copy",
   "demo.days": "days",
   "demo.code_unavailable": "No demo available",
+  "sandbox.open": "Open in StackBlitz",
+  "sandbox.loading": "Booting live sandbox…",
+  "sandbox.error": "Couldn't load the live sandbox. Try opening it in StackBlitz instead.",
+  "sandbox.slow_hint": "Taking a while? The first run installs dependencies right in your browser — it can take a bit. You can also open it directly on",
 
   "sponsors.badge": "Sponsors",
   "sponsors.title": "Support the Project",

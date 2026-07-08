@@ -57,7 +57,7 @@ export function buildVanillaRunner(opts: BuildOptions): PlaygroundProject {
           dependencies: {
             '@bereasoftware/time-guard': opts.version ?? TIME_GUARD_VERSION,
           },
-          devDependencies: { vite: 'latest', typescript: 'latest' },
+          devDependencies: { vite: '^6.3.0', typescript: 'latest' },
         },
         null,
         2,
@@ -86,7 +86,7 @@ export function buildVanillaApp(opts: BuildOptions): PlaygroundProject {
           dependencies: {
             '@bereasoftware/time-guard': opts.version ?? TIME_GUARD_VERSION,
           },
-          devDependencies: { vite: 'latest', typescript: 'latest' },
+          devDependencies: { vite: '^6.3.0', typescript: 'latest' },
         },
         null,
         2,

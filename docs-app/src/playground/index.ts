@@ -1,24 +1,21 @@
 /**
  * Punto de entrada público del módulo Playground.
  * Construye proyectos para los 7 frameworks soportados y los abre/embebe en
- * CodeSandbox mediante sandpack-client (o la API de CodeSandbox).
+ * StackBlitz (WebContainers) — corre 100% en el navegador del usuario, sin
+ * depender de un bundler externo con subdominios por-sandbox (a diferencia
+ * de CodeSandbox/Sandpack, cuyo relay quedaba bloqueado por Cloudflare en
+ * localhost).
  */
 
-import { loadSandpackClient } from '@codesandbox/sandpack-client';
-import type { SandpackClient } from '@codesandbox/sandpack-client';
-import { compressToBase64 } from 'lz-string';
+import sdk from '@stackblitz/sdk';
+import type { VM } from '@stackblitz/sdk';
 import type {
   BuildOptions,
   Framework,
   PlaygroundMode,
   PlaygroundProject,
 } from './types';
-import {
-  FRAMEWORKS,
-  TIME_GUARD_VERSION,
-  sandpackTemplateFor,
-  toSandpackFiles,
-} from './types';
+import { FRAMEWORKS, TIME_GUARD_VERSION } from './types';
 import { buildVanillaRunner, buildVanillaApp } from './templates/vanilla';
 import { buildVueRunner, buildVueApp } from './templates/vue';
 import { buildReactRunner, buildReactApp } from './templates/react';
@@ -27,7 +24,7 @@ import { buildAngularRunner, buildAngularApp } from './templates/angular';
 import { buildSolidRunner, buildSolidApp } from './templates/solid';
 import { buildQwikRunner, buildQwikApp } from './templates/qwik';
 
-export { FRAMEWORKS, TIME_GUARD_VERSION, sandpackTemplateFor, toSandpackFiles };
+export { FRAMEWORKS, TIME_GUARD_VERSION };
 export type {
   BuildOptions,
   Framework,
@@ -59,7 +56,7 @@ const APPS: Record<Framework, Builder> = {
 };
 
 /**
- * Construye un proyecto CodeSandbox para el framework solicitado.
+ * Construye un proyecto StackBlitz para el framework solicitado.
  *
  * - `runner`: envuelve un snippet TS genérico en un runner universal que
  *   captura `console.log` y lo muestra en pantalla en cualquier framework.
@@ -75,79 +72,61 @@ export function buildProject(
   return builder(opts);
 }
 
-/** Abre el proyecto en una pestaña nueva de CodeSandbox usando la API define con LZ64. */
-export function openInCodeSandbox(
+function toStackBlitzProject(project: PlaygroundProject) {
+  return {
+    title: project.title,
+    description: project.description ?? '',
+    template: project.template,
+    files: project.files,
+  };
+}
+
+/** Abre el proyecto en una pestaña nueva de StackBlitz. */
+export function openInStackBlitz(
   framework: Framework,
   mode: PlaygroundMode,
   opts: BuildOptions,
 ): void {
   const project = buildProject(framework, mode, opts);
-
-  const parameters = compressToBase64(
-    JSON.stringify({
-      files: Object.fromEntries(
-        Object.entries(project.files).map(([path, content]) => [
-          path,
-          { content },
-        ]),
-      ),
-    }),
-  );
-
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://codesandbox.io/api/v1/sandboxes/define';
-  form.target = '_blank';
-
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'parameters';
-  input.value = parameters;
-  form.appendChild(input);
-
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
+  sdk.openProject(toStackBlitzProject(project), {
+    openFile: project.openFile,
+    newWindow: true,
+  });
 }
 
 export interface EmbedOptions {
-  /** Altura del iframe en píxeles. Default 540. */
+  /** Altura del embed en píxeles. Default 540. */
   height?: number;
 }
 
 /**
- * Crea un sandbox inline usando sandpack-client.
- * Usa `SandpackRuntime` (bundler en navegador) con el template adecuado
- * para cada framework.
- *
- * Nota: el bundler de CodeSandbox pasa por Cloudflare. En localhost
- * puede mostrar un challenge de seguridad. En producción (dominio real)
- * funciona sin problemas.
+ * Crea un sandbox inline usando el SDK de StackBlitz (WebContainers).
+ * El SDK inyecta su propio iframe dentro de `container` y ejecuta
+ * `npm install` + el script `dev` del `package.json` generado, enteramente
+ * en el navegador — no depende de un bundler externo por-sandbox.
  */
-export async function embedInCodeSandbox(
-  iframe: HTMLIFrameElement,
+export async function embedInStackBlitz(
+  container: HTMLElement,
   framework: Framework,
   mode: PlaygroundMode,
   opts: BuildOptions,
-  _embedOpts: EmbedOptions = {},
-): Promise<SandpackClient> {
+  embedOpts: EmbedOptions = {},
+): Promise<VM> {
   const project = buildProject(framework, mode, opts);
 
-  const client = await loadSandpackClient(
-    iframe,
-    {
-      files: toSandpackFiles(project.files),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      template: sandpackTemplateFor(framework) as any,
-    },
-    {
-      bundlerURL: 'https://sandpack-bundler.codesandbox.io',
-      height: `${_embedOpts.height ?? 540}`,
-      showErrorScreen: true,
-      showLoadingScreen: true,
-      showOpenInCodeSandbox: false,
-    },
-  );
-
-  return client;
+  return sdk.embedProject(container, toStackBlitzProject(project), {
+    height: embedOpts.height ?? 540,
+    openFile: project.openFile,
+    // 'default' shows editor + preview side by side ("both"); StackBlitz
+    // has no explicit 'both' value — omitting `view`/using 'default' is it.
+    view: 'default',
+    hideNavigation: true,
+    hideDevTools: true,
+    theme: 'dark',
+    clickToLoad: false,
+    // Our own server sends COOP/COEP (see vite.config.ts / vercel.json), so
+    // the embed can run cross-origin-isolated instead of falling back to
+    // (or failing with) the non-isolated WebContainers path.
+    crossOriginIsolated: true,
+  });
 }

@@ -65,6 +65,10 @@
   "demo.copy": "Copiar",
   "demo.days": "días",
   "demo.code_unavailable": "No demo disponible",
+  "sandbox.open": "Abrir en StackBlitz",
+  "sandbox.loading": "Iniciando sandbox en vivo…",
+  "sandbox.error": "No se pudo cargar el sandbox en vivo. Prueba abrirlo en StackBlitz.",
+  "sandbox.slow_hint": "¿Tarda mucho? La primera vez instala dependencias en tu navegador — puede tardar. También puedes abrirlo directamente en",
 
   "sponsors.badge": "Sponsors",
   "sponsors.title": "Apoya el Proyecto",
