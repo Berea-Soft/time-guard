@@ -1,3 +1,20 @@
+# [2.8.0](https://github.com/Berea-Soft/time-guard/compare/v2.7.2...v2.8.0) (2026-07-08)
+
+
+### Bug Fixes
+
+* **build:** apply security and performance fixes from repo audit ([7464697](https://github.com/Berea-Soft/time-guard/commit/7464697cf8c5d32d2118dfa862f294a629e912ff))
+* **core:** install real Temporal in tests, fixing bugs it was masking ([1778942](https://github.com/Berea-Soft/time-guard/commit/177894217e19100250d02bfa3fca729127dbdbc0))
+* correct logo image URL in LandingNavbar component ([6f0bc52](https://github.com/Berea-Soft/time-guard/commit/6f0bc52201346654d53572b4be9a761c89071b45))
+* ensure fileContent is a string in CodeEditor and add Vercel configuration ([fec9b54](https://github.com/Berea-Soft/time-guard/commit/fec9b5488551cab71f236da89c86528b14a4f9bd))
+
+
+### Features
+
+* **docs-app:** embed every demo in StackBlitz, expand gallery, close /docs gaps ([59d318e](https://github.com/Berea-Soft/time-guard/commit/59d318ec72557ed4efa351e34081f658d23b496e))
+* **docs-app:** migrate playground from CodeSandbox to StackBlitz ([bb1a321](https://github.com/Berea-Soft/time-guard/commit/bb1a3213955e0ccc92235fc175766f636337ec70))
+* enhance CodeRunTabs with computed properties and update SolidDemo layout ([a51940c](https://github.com/Berea-Soft/time-guard/commit/a51940cb767fe46e8964c3547d399e288c82b405))
+
 ## [2.7.2](https://github.com/Berea-Soft/time-guard/compare/v2.7.1...v2.7.2) (2026-05-24)
 
 
