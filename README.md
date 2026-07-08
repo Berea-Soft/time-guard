@@ -197,9 +197,13 @@ console.log(inTokyo.format('YYYY-MM-DD HH:mm:ss Z'));
 
 ### 3. Localización
 
-Soporte para 40+ idiomas y locales:
+Soporte para 40+ idiomas y locales. El core solo trae `en`/`es` registrados; llama `loadAllLocales()` una vez (o registra solo los que uses vía `/locales`, ver [Bundle Modular](#bundle-modular)):
 
 ```typescript
+import { TimeGuard, loadAllLocales } from '@bereasoftware/time-guard';
+
+loadAllLocales(); // una sola vez, al iniciar tu app
+
 const date = TimeGuard.from('2024-03-13');
 
 date.locale('en').format('MMMM DD, YYYY'); // March 13, 2024

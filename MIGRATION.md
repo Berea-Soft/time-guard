@@ -2,6 +2,37 @@
 
 Guidelines and checklist for performing migrations (breaking changes, major version upgrades, build-system or publishing changes).
 
+## Breaking changes
+
+### v3.0.0 — Main entry no longer auto-registers all locales
+
+Previously, `import { TimeGuard } from '@bereasoftware/time-guard'` eagerly registered
+all ~47 bundled locales into `LocaleManager` as a module side effect, even if the
+app only ever used one or two of them. This ran on every import regardless of
+`"sideEffects": false`, and blocked real lazy-loading of locale data.
+
+As of v3.0.0, the main entry only registers `en`/`es` by default (same as before
+for the *built-in* locales, unrelated to this change). If your app relies on other
+locales being available without extra setup, call `loadAllLocales()` once at startup:
+
+```typescript
+import { loadAllLocales } from '@bereasoftware/time-guard';
+loadAllLocales();
+```
+
+Or register only the locales you actually use, from the standalone `/locales`
+entry (so unused locale data can still be tree-shaken by your bundler):
+
+```typescript
+import { LocaleManager } from '@bereasoftware/time-guard';
+import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
+LocaleManager.getInstance().loadLocales({ fr: ALL_LOCALES.fr, de: ALL_LOCALES.de });
+```
+
+Nothing else changes: `TimeGuard`, plugins, calendars, and the Temporal polyfill
+auto-load exactly as before — only the locale auto-registration moved from
+implicit (import side effect) to explicit (opt-in function call).
+
 ## Migrating from other libraries
 
 ### From date-fns

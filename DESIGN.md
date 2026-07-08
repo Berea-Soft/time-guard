@@ -145,14 +145,16 @@ interface ICalendarSystem {
 
 #### Built-in Calendars
 
-| Calendar | ID | Description |
-|----------|----|-------------|
-| Gregorian | `gregory` | Standard international calendar |
-| Islamic | `islamic` | Hijri calendar for Islamic dates |
-| Hebrew | `hebrew` | Jewish calendar |
-| Chinese | `chinese` | Traditional Chinese calendar |
-| Japanese | `japanese` | Japanese imperial calendar |
-| Buddhist | `buddhist` | Buddhist Era calendar |
+| Calendar | ID | Description | Accuracy |
+|----------|----|-------------|----------|
+| Gregorian | `gregory` | Standard international calendar | Exact (ISO 8601) |
+| Islamic | `islamic` | Hijri calendar for Islamic dates | ⚠️ Experimental — simplified 30-year cycle approximation |
+| Hebrew | `hebrew` | Jewish calendar | ⚠️ Experimental — simplified approximation, not astronomically accurate |
+| Chinese | `chinese` | Traditional Chinese calendar | ⚠️ Experimental — simplified approximation, does **not** implement the real lunisolar leap-month cycle |
+| Japanese | `japanese` | Japanese imperial calendar | Uses Gregorian rules post-1873; historical dates may not be accurate |
+| Buddhist | `buddhist` | Buddhist Era calendar | Gregorian rules with a CE + 543 year offset |
+
+> **Note:** Islamic, Hebrew, and Chinese calendars use simplified date math for `isLeapYear`/`daysInMonth` (see the `@experimental` annotations in `src/calendars/index.ts`) and should not be relied on for authoritative religious or civil dates. They're suitable for display/labeling purposes, not precise historical or liturgical calculations.
 
 #### Creating a Custom Calendar
 

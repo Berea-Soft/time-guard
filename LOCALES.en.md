@@ -174,12 +174,17 @@ export const ALL_LOCALES: Record<string, ILocale> = {
 
 ## 🔄 LocaleManager
 
-The `LocaleManager` automatically loads all locales when initialized:
+> **Breaking change in v3:** by default, `LocaleManager` only registers `en`/`es` on init (it used to register all ~47 locales). This keeps the main import lightweight. To restore the old behavior, call `loadAllLocales()` once at app startup:
+>
+> ```typescript
+> import { loadAllLocales } from "@bereasoftware/time-guard";
+> loadAllLocales();
+> ```
 
 ```typescript
 const manager = LocaleManager.getInstance();
 manager.setLocale("es");
-manager.listLocales(); // Returns all registered locales
+manager.listLocales(); // Returns the registered locales (en/es by default)
 ```
 
 ## 📝 Adding New Locales
