@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/Berea-Soft/time-guard/compare/v2.8.0...v2.9.0) (2026-07-09)
+
+
+### Features
+
+* enhance TimeGuard functionality and reactivity ([28cf7eb](https://github.com/Berea-Soft/time-guard/commit/28cf7ebf8f07b56e61a8434442b158c657381584))
+
 # [2.8.0](https://github.com/Berea-Soft/time-guard/compare/v2.7.2...v2.8.0) (2026-07-08)
 
 
