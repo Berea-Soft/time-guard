@@ -2,6 +2,101 @@ import type { DocCategory } from '../types';
 
 export const DOCS_DATA: DocCategory[] = [
   {
+    id: 'getting-started',
+    title: 'Empezando',
+    iconName: 'Rocket',
+    items: [
+      {
+        id: 'installation',
+        title: 'Instalación',
+        subtitle: 'Un solo paquete, cero peer dependencies obligatorias',
+        description:
+          'TimeGuard se instala como un único paquete. Los frameworks (React, Vue, Angular, Svelte, Solid, Qwik) son peer dependencies *opcionales* — solo se necesitan si importas el subpath correspondiente (ej. `@bereasoftware/time-guard/react`). Un proyecto sin ningún framework instala y usa la librería sin advertencias.',
+        features: [
+          'npm install @bereasoftware/time-guard · pnpm add @bereasoftware/time-guard · yarn add @bereasoftware/time-guard',
+          'Sin dependencias obligatorias más allá de @js-temporal/polyfill (auto-instalado como dependency, no peer)',
+          'TypeScript incluido de fábrica — declaraciones .d.ts publicadas junto al paquete, sin @types/ por separado',
+          'Elige el entry point: @bereasoftware/time-guard (con polyfill) vs. /native (sin polyfill) — ver "Native Mode" más abajo',
+        ],
+        examples: [
+          {
+            title: 'Instalar y usar en 3 líneas',
+            description:
+              'El caso más simple: instalar, importar, formatear. Sin configuración adicional.',
+            code: `// 1. Instalar
+// npm install @bereasoftware/time-guard
+
+// 2. Importar (el polyfill de Temporal se auto-instala al importar este entry point)
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// 3. Usar
+const now = TimeGuard.now();
+console.log(now.format('dddd, DD MMMM YYYY')); // "Wednesday, 20 May 2026"
+
+// Los wrappers de frameworks son subpaths independientes — solo se resuelven
+// (y solo requieren el framework como peer dependency) si los importas:
+// import { useCurrentTime } from '@bereasoftware/time-guard/react';
+// import { useCurrentTime } from '@bereasoftware/time-guard/vue';`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+    ],
+  },
+  {
+    id: 'migration',
+    title: 'Migración desde Otras Librerías',
+    iconName: 'ArrowRightLeft',
+    items: [
+      {
+        id: 'from-other-libraries',
+        title: 'date-fns, Day.js y Luxon → TimeGuard',
+        subtitle: 'Tablas de equivalencia verificadas contra la API real',
+        description:
+          'Si ya conoces date-fns, Day.js o Luxon, la curva de aprendizaje es corta — TimeGuard usa una API encadenable similar a Day.js/Luxon, pero inmutable y con `add()`/`subtract()` basados en objeto (`{ day: 7 }`) en vez de argumentos posicionales.',
+        features: [
+          'date-fns es funcional (funciones puras sobre Date) — TimeGuard es orientado a objetos y encadenable, como Day.js/Luxon',
+          "Day.js: la API es casi 1:1 — la diferencia principal es add({day:7}) en vez de add(7, 'day'), y PluginManager.use() en vez de dayjs.extend()",
+          'Luxon: TimeGuard.range(start, end) es el equivalente a Interval.fromDateTimes(), y .toPlainDate() a .toObject()',
+          'Ver también "Instalación" para elegir entry point, y "Native Mode" si tu proyecto no necesita el polyfill de Temporal',
+        ],
+        examples: [
+          {
+            title: 'Equivalencias verificadas',
+            description:
+              'Cada línea fue ejecutada contra la versión actual de TimeGuard para confirmar el output.',
+            code: `import { TimeGuard, timeGuard } from '@bereasoftware/time-guard';
+
+// ── Desde date-fns ──────────────────────────────────────────
+// addDays(date, 7)              →
+timeGuard('2024-01-01').add({ day: 7 }).format('YYYY-MM-DD'); // "2024-01-08"
+// differenceInDays(d1, d2)      →
+timeGuard('2024-01-08').diff(timeGuard('2024-01-01'), 'day');  // 7
+// format(date, 'yyyy-MM-dd')    →
+timeGuard('2024-01-01').format('YYYY-MM-DD');                  // "2024-01-01"
+
+// ── Desde Day.js (API casi idéntica) ────────────────────────
+// dayjs().startOf('month')      →
+timeGuard('2024-01-15').startOf('month').format('YYYY-MM-DD'); // "2024-01-01"
+// d1.isBefore(d2)               →
+timeGuard('2024-01-01').isBefore(timeGuard('2024-01-15'));     // true
+// dayjs.extend(relativeTime)    →
+// PluginManager.use(relativeTimePlugin, TimeGuard) — ver "Relative Time Plugin"
+
+// ── Desde Luxon ──────────────────────────────────────────────
+// Interval.fromDateTimes(s, e).toDuration().humanize() →
+TimeGuard.range(timeGuard('2024-01-01'), timeGuard('2024-01-15'))
+  .toDuration()
+  .humanize({ locale: 'en' }); // "in 14 days"
+// dt.toObject()                 →
+timeGuard('2024-01-01').toPlainDate(); // { year: 2024, month: 1, day: 1, dayOfWeek: 1 }`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+    ],
+  },
+  {
     id: 'core',
     title: 'Conceptos Core',
     iconName: 'Compass',
@@ -30,8 +125,8 @@ const now = TimeGuard.now();
 const specific = TimeGuard.from('2026-05-20');
 
 // Manipular de forma fluida (inmutable)
-const tomorrow = specific.add(1, 'day');
-const lastMonth = specific.subtract(1, 'month');
+const tomorrow = specific.add({ day: 1 });
+const lastMonth = specific.subtract({ month: 1 });
 
 console.log(specific.format('YYYY-MM-DD')); // "2026-05-20"
 console.log(tomorrow.format('YYYY-MM-DD')); // "2026-05-21" (Nueva instancia)`,
@@ -191,6 +286,7 @@ console.log(rounded.format('HH:mm')); // 15:00 (redondea hacia arriba)`,
           '@bereasoftware/time-guard — instala el polyfill si `globalThis.Temporal` no existe (por defecto, máxima compatibilidad)',
           '@bereasoftware/time-guard/native — cero polyfill; lanza un error explícito si `Temporal` no está disponible en el entorno',
           'Mismo API — cambiar de entry point es un cambio de un import, no de código',
+          '⚠️ Los subpaths de framework (/react, /vue, /svelte, /solid, /qwik, /angular) importan el core directamente — se comportan como /native (sin auto-instalar el polyfill), aunque los importes sin pasar por /native explícitamente',
         ],
         examples: [
           {
@@ -206,6 +302,109 @@ import { TimeGuard as NativeTimeGuard } from '@bereasoftware/time-guard/native';
 
 const date = NativeTimeGuard.from('2026-05-20');
 console.log(date.format('YYYY-MM-DD')); // "2026-05-20" — sin bytes de polyfill en el bundle`,
+          },
+        ],
+      },
+      {
+        id: 'error-handling',
+        title: 'Manejo de Errores y Casos Límite',
+        subtitle: 'Qué pasa con entradas inválidas — verificado, no supuesto',
+        description:
+          'TimeGuard prioriza nunca lanzar excepciones en el camino feliz, pero eso tiene una contrapartida importante: varias entradas inválidas fallan **en silencio** en vez de lanzar un error. Esta página documenta el comportamiento real (verificado ejecutándolo), no el que "debería" tener — para que sepas exactamente qué esperar antes de que te sorprenda en producción.',
+        features: [
+          "TimeGuard.from('texto inválido') — NO lanza; devuelve silenciosamente la fecha/hora actual (equivalente a TimeGuard.now())",
+          ".timezone('Zona/Inexistente') — NO lanza; ignora la conversión y mantiene la instancia sin zona horaria (getTimeZoneId() devuelve null)",
+          'No existe un método isValid() — si necesitas distinguir "fecha real" de "fallback silencioso", valida el string de entrada tú mismo antes de llamar a from()',
+          'ITimeGuardConfig.strict — el flag existe en el tipo y se acepta en el constructor, pero HOY no se lee ni se aplica en ninguna validación interna (es un no-op reservado para uso futuro)',
+        ],
+        examples: [
+          {
+            title: 'Comportamiento real ante entradas inválidas',
+            description:
+              'Salidas verificadas — no asumidas — contra la versión actual de la librería.',
+            code: `import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Un string que no es una fecha real NO lanza — cae silenciosamente a "ahora"
+const garbage = TimeGuard.from('esto no es una fecha');
+console.log(garbage.format('YYYY-MM-DD HH:mm:ss'));
+// Imprime la fecha/hora ACTUAL al momento de ejecutar (varía cada vez) —
+// no un error, no "Invalid Date". Fácil de confundir con una fecha real.
+
+// Una zona horaria inexistente tampoco lanza — simplemente no aplica el cambio
+const badTz = TimeGuard.now().timezone('Zona/Inexistente');
+console.log(badTz.getTimeZoneId()); // null — sigue siendo un PlainDateTime, no ZonedDateTime
+
+// Recomendación: si el input viene de un formulario/API externa y necesitas
+// detectar el caso inválido, valida el string ANTES de pasarlo a from() —
+// TimeGuard no te avisará por sí solo.`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
+        id: 'typescript-usage',
+        title: 'TypeScript',
+        subtitle: 'Tipos incluidos, null-safety real, y cómo tipar tus plugins',
+        description:
+          'Las declaraciones `.d.ts` se publican junto al paquete — no hay que instalar `@types/` por separado. La mayoría de los tipos públicos (`ITimeGuardConfig`, `DurationParts`, `Unit`, etc.) se importan con `import type` desde el mismo entry point que usas para el valor. Varios métodos devuelven explícitamente `T | null` — vale la pena conocerlos si usas `strictNullChecks` (activado por defecto en proyectos modernos).',
+        features: [
+          "import type { ... } from '@bereasoftware/time-guard' — todos los tipos públicos se re-exportan desde el mismo entry point, sin subpath especial",
+          'Métodos que devuelven `T | null`: `getTimeZoneId()`, `TimeRange.intersect()`, `DiffResult.breakdown()` (null salvo en modo calendar), `CalendarManager.get(id)`',
+          'declare module + interface merging — la forma correcta de tipar métodos añadidos por un plugin propio (ver "Crear un Plugin Personalizado")',
+          "Unit — el tipo unión usado en add()/subtract()/diff()/startOf()/endOf() ('year' | 'month' | 'week' | 'day' | 'hour' | 'minute' | 'second' | 'millisecond' | 'microsecond' | 'nanosecond')",
+        ],
+        examples: [
+          {
+            title: 'Importar tipos y manejar los null explícitos',
+            description:
+              'Los tipos viven junto al valor — no hay un subpath /types separado.',
+            code: `import { TimeGuard, CalendarManager } from '@bereasoftware/time-guard';
+import type { ITimeGuardConfig, Unit } from '@bereasoftware/time-guard';
+
+const config: ITimeGuardConfig = { locale: 'es', timezone: 'America/Bogota' };
+const date = TimeGuard.from('2026-05-20', config);
+
+// getTimeZoneId() es string | null — TypeScript te obliga a manejarlo
+const zoneId: string | null = date.getTimeZoneId();
+console.log(zoneId ?? 'sin zona asociada');
+
+// CalendarManager.get() también es T | null — devuelve undefined/null si el id no existe
+const calendar = CalendarManager.getInstance().get('no-existe');
+console.log(calendar?.name ?? 'calendario no encontrado');
+
+// Unit es un literal union — el autocompletado de tu editor lista las 10 unidades válidas
+const unit: Unit = 'day';
+console.log(date.add({ [unit]: 5 }).format('YYYY-MM-DD'));`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
+        id: 'bundle-size',
+        title: 'Tamaño del Bundle y Entry Points',
+        subtitle: 'Qué pesa cada subpath — medido, no estimado',
+        description:
+          'TimeGuard se distribuye en subpaths independientes para que solo pagues por lo que usas. Todos los subpaths (salvo el entry principal) comparten un chunk `core` común — se descarga una sola vez sin importar cuántos subpaths importes. Los números de abajo son gzip real de la build actual, no estimaciones.',
+        features: [
+          '@bereasoftware/time-guard (default, incluye @js-temporal/polyfill) — ~52 KB gzip, autocontenido',
+          '@bereasoftware/time-guard/native + chunk core compartido — ~10 KB gzip totales (cuando el entorno ya tiene Temporal global)',
+          'Wrappers de framework (react/vue/svelte/solid/qwik/angular) — entre 0.5 y 1.6 KB gzip cada uno, ENCIMA del chunk core (no lo duplican)',
+          'Plugins (relative-time/advanced-format/duration) — 1-1.5 KB gzip cada uno, 100% opt-in vía PluginManager.use()',
+          'calendars (los 5 sistemas no-gregorianos juntos) — ~1.35 KB gzip; locales (todos los ~47 idiomas) se cargan bajo demanda con loadAllLocales(), no de fábrica',
+        ],
+        examples: [
+          {
+            title: 'El bundle más liviano posible (y su trampa)',
+            description:
+              'Los subpaths de framework (react/vue/svelte/solid/qwik/angular) importan el core directamente — NO instalan el polyfill por sí solos, igual que /native.',
+            code: `// Costo total aproximado: chunk core compartido (~9.2 KB gzip) + react/index (~0.7 KB gzip)
+import { useCurrentTime } from '@bereasoftware/time-guard/react';
+
+// TRAMPA: si tu entorno NO tiene globalThis.Temporal nativo, esto lanzará
+// "Temporal API not loaded" en cuanto se use — /react (como /native) asume
+// que Temporal ya existe, no lo instala. Para arreglarlo, importa el entry
+// principal UNA VEZ en cualquier parte de tu app (basta el side-effect):
+import '@bereasoftware/time-guard'; // instala el polyfill globalmente (+~52 KB gzip)`,
           },
         ],
       },
@@ -227,6 +426,7 @@ console.log(date.format('YYYY-MM-DD')); // "2026-05-20" — sin bytes de polyfil
           'getAvailableLocales() — lista de códigos de locale disponibles para registrar',
           'LOCALES_COUNT — total de locales bundleados (constante, sin necesidad de cargarlos)',
           'registerAllLocales(map) — variante de bajo nivel para inyectar en tu propio Map/Record en vez del LocaleManager global',
+          '⚠️ Pluralización simplificada: humanize()/duration usan un switch singular/plural binario (1 vs. resto) — no las reglas completas de Intl.PluralRules, así que idiomas con más de 2 categorías (ruso, polaco, árabe, etc.) pueden mostrar una forma gramaticalmente incorrecta para ciertos números',
         ],
         examples: [
           {
@@ -333,6 +533,47 @@ console.log(delivery.format('dddd, DD MMMM YYYY'));
         playground: { enabled: true, mode: 'runner' },
       },
       {
+        id: 'diff-modes',
+        title: 'diff() — Modos Exact y Calendar',
+        subtitle: 'Diferencias con signo en una unidad, o desglose sin signo',
+        description:
+          'El método `diff()` tiene dos formas: `diff(other, unit)` devuelve un número con signo (this - other) en una sola unidad — igual convención que moment/dayjs. `diff(other, { mode, unit? })` devuelve un `DiffResult` con más poder: modo `exact` (total exacto en la unidad pedida) o `calendar` (desglose sin signo en años/meses/días, igual que `between()`).',
+        features: [
+          'diff(other, unit) — número con signo, this menos other (negativo si this es anterior)',
+          "diff(other, { mode: 'exact', unit }) — DiffResult.as(unit) para el total exacto en cualquier unidad",
+          "diff(other, { mode: 'calendar' }) — DiffResult.breakdown() con años/meses/días, siempre positivo (como between())",
+          'DiffResult.format(locale) — texto humanizado directo, sin llamar humanize() por separado',
+          'DiffResult.getMode() — inspecciona qué modo generó el resultado',
+        ],
+        examples: [
+          {
+            title: 'Signo, modo exacto y modo calendario',
+            description:
+              'Los tres estilos de diff() sobre el mismo par de fechas.',
+            code: `import { TimeGuard } from '@bereasoftware/time-guard';
+
+const start = TimeGuard.from('2026-01-15');
+const end = TimeGuard.from('2026-03-20');
+
+// Forma corta: número con signo (this - other)
+console.log(start.diff(end, 'day')); // -64 (start es anterior a end)
+
+// Modo exact: total exacto en la unidad pedida
+const exact = start.diff(end, { mode: 'exact', unit: 'day' });
+console.log(exact.as('day'));      // -64
+console.log(exact.breakdown());    // null — exact no genera desglose
+
+// Modo calendar: desglose años/meses/días, siempre positivo
+const cal = start.diff(end, { mode: 'calendar' });
+console.log(cal.breakdown());
+// { years: 0, months: 2, weeks: 0, days: 5, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }
+console.log(cal.format('en')); // "2 months and 5 days"
+console.log(cal.format('es')); // "2 meses y 5 días"`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
         id: 'duration-result',
         title: 'DurationResult — Explicación y Métricas',
         subtitle: 'humanize, total() y explain() para cálculos profundos',
@@ -386,14 +627,14 @@ console.log(explanation.steps);
         title: 'Calendarios Built-in',
         subtitle: 'Gregoriano, Islámico, Hebreo, Chino, Japonés y Budista',
         description:
-          'TimeGuard incluye soporte nativo para 6 sistemas de calendario a través del `CalendarManager`. Cada calendario implementa la interfaz `ICalendarSystem` con métodos para obtener nombres de meses/días, verificar años bisiestos y calcular días por mes/año. Puedes registrar calendarios personalizados fácilmente.',
+          'TimeGuard incluye soporte nativo para 6 sistemas de calendario a través del `CalendarManager`. Cada calendario implementa la interfaz `ICalendarSystem` con métodos para obtener nombres de meses/días, verificar años bisiestos y calcular días por mes/año. Puedes registrar calendarios personalizados fácilmente. ⚠️ Islámico, Hebreo y Chino usan aproximaciones simplificadas (marcadas `@experimental` en el código fuente) — no son válidos para fechas religiosas o civiles oficiales.',
         features: [
-          'Gregoriano (gregory) — calendario ISO estándar internacional',
-          'Islámico (islamic) — calendario Hijri para fechas islámicas',
-          'Hebreo (hebrew) — calendario judío',
-          'Chino (chinese) — calendario tradicional chino',
-          'Japonés (japanese) — calendario imperial japonés',
-          'Budista (buddhist) — calendario de la Era Budista',
+          'Gregoriano (gregory) — calendario ISO estándar internacional, exacto',
+          'Japonés (japanese) — calendario imperial japonés, exacto',
+          'Budista (buddhist) — calendario de la Era Budista, exacto',
+          '⚠️ Islámico (islamic) — calendario Hijri, aproximación experimental',
+          '⚠️ Hebreo (hebrew) — calendario judío, aproximación experimental',
+          '⚠️ Chino (chinese) — calendario tradicional chino, aproximación experimental (incluye getZodiacSign())',
         ],
         examples: [
           {
@@ -472,7 +713,7 @@ console.log(CalendarManager.getInstance().list());
         title: 'Sistema de Plugins Modular',
         subtitle: 'Extensibilidad y ligereza bajo demanda',
         description:
-          'Mediante el `PluginManager`, puedes inyectar módulos avanzados a la clase principal de `TimeGuard`. Esto mantiene el core súper ligero (~5KB gzipped) y carga características pesadas solo si tu aplicación las requiere.',
+          'Mediante el `PluginManager`, puedes inyectar módulos avanzados a la clase principal de `TimeGuard`. Esto mantiene el core ligero y carga características pesadas solo si tu aplicación las requiere — ver el tamaño exacto de cada plugin en "Tamaño del Bundle y Entry Points".',
         examples: [
           {
             title: 'Relative Time Plugin',
@@ -507,6 +748,57 @@ console.log(duration.asDays()); // 1159 días aproximados`,
         playground: { enabled: true, mode: 'runner', exampleIndex: 0 },
       },
       {
+        id: 'relative-time-plugin',
+        title: 'Relative Time Plugin — En Profundidad',
+        subtitle: 'fromNow(), toNow(), y umbrales/formatos personalizados',
+        description:
+          'Además de habilitar `since().humanize()`, el plugin añade sus propios métodos `fromNow()`/`toNow()` a `TimeGuard`, con un algoritmo de umbrales configurable (igual convención que dayjs: `{ l, r, d }` — etiqueta, rango, unidad). Puedes instanciar `new RelativeTimePlugin(config)` para personalizar los umbrales o la función de redondeo antes de registrarlo.',
+        features: [
+          'fromNow(withoutSuffix?) — "hace 5 horas" / "5 horas" sin el sufijo',
+          'toNow(withoutSuffix?) — misma lógica en sentido futuro ("en 5 horas")',
+          'new RelativeTimePlugin({ thresholds, rounding }) — umbrales y redondeo personalizados en el constructor',
+          'plugin.setFormats({ ... }) / plugin.getFormats() — sobrescribe las plantillas de texto (ej. "hace %d horas") sin tocar los umbrales',
+        ],
+        examples: [
+          {
+            title: 'fromNow()/toNow() con umbrales personalizados',
+            description:
+              'Registra el plugin con una instancia configurada en vez del default.',
+            code: `import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import { RelativeTimePlugin } from '@bereasoftware/time-guard/plugins/relative-time';
+
+// Umbral personalizado: "un instante" hasta los 10s, luego segundos exactos.
+// Nota: setFormats() sobrescribe TODAS las plantillas usadas — incluyendo
+// future/past ("en %s" / "hace %s") — no solo las etiquetas de umbral (s/ss).
+// Si solo cambias s/ss y dejas future/past en su valor inglés por defecto
+// ("in %s"/"%s ago"), el resultado mezcla idiomas (ej. "hace 30 segundos ago").
+const plugin = new RelativeTimePlugin({
+  thresholds: [
+    { l: 's', r: 10, d: 'second' },
+    { l: 'ss', d: 'second' },
+  ],
+  rounding: Math.floor,
+});
+plugin.setFormats({
+  future: 'en %s',
+  past: 'hace %s',
+  s: 'un instante',
+  ss: '%d segundos',
+});
+
+PluginManager.use(plugin, TimeGuard);
+
+const past = TimeGuard.now().subtract({ second: 30 }) as any;
+console.log(past.fromNow());               // "hace 30 segundos"
+console.log(past.fromNow(true));           // "30 segundos" (sin sufijo)
+
+const veryRecent = TimeGuard.now().subtract({ second: 3 }) as any;
+console.log(veryRecent.fromNow());         // "hace un instante"`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
         id: 'advanced-format-plugin',
         title: 'Advanced Format Plugin',
         subtitle:
@@ -520,6 +812,7 @@ console.log(duration.asDays()); // 1159 días aproximados`,
           'gggg / GGGG — año de semana (locale vs. ISO)',
           'k / kk — hora en formato 1-24 (en vez de 0-23)',
           'X / x — timestamp Unix en segundos / milisegundos',
+          'z — offset UTC (ej. "+09:00") · zzz — id de zona IANA (ej. "Asia/Tokyo"), vacío si la instancia no tiene zona asociada',
         ],
         examples: [
           {
@@ -536,7 +829,60 @@ const date = TimeGuard.from('2026-07-15T14:30:00');
 console.log(date.format('Q [T]YYYY'));      // "3 T2026" (Q3)
 console.log(date.format('Do MMMM YYYY'));   // "15th July 2026"
 console.log(date.format('w'));              // semana del año
-console.log(date.format('X'));               // timestamp Unix en segundos`,
+console.log(date.format('X'));               // timestamp Unix en segundos
+
+const paris = date.timezone('Europe/Paris');
+console.log(paris.format('z'));              // "+02:00"
+console.log(paris.format('zzz'));            // "Europe/Paris"`,
+          },
+        ],
+        playground: { enabled: true, mode: 'runner' },
+      },
+      {
+        id: 'duration-plugin',
+        title: 'Duration Plugin — En Profundidad',
+        subtitle:
+          'La clase Duration completa: conversión, ISO 8601, aritmética',
+        description:
+          'Más allá de `fromISO()`, `Duration` cubre construcción entre fechas, desde milisegundos, conversión a cualquier unidad, serialización ISO 8601 e inspección de signo. El plugin también añade un método de instancia `.duration(other)` a `TimeGuard` y expone la clase como `TimeGuard.Duration` una vez registrado.',
+        features: [
+          'Duration.between(from, to) — duración entre dos TimeGuard (equivalente a from.duration(to) tras registrar el plugin)',
+          'Duration.fromMilliseconds(ms) — construye desde un total de milisegundos',
+          '.as(unit) / .asDays() / .asHours() / .asWeeks() / etc. — conversión a cualquier unidad',
+          '.toISO() — serializa a ISO 8601 (los años/meses se mantienen, semanas se pliegan en días: weeks*7 + days)',
+          '.isNegative() / .abs() — inspección y normalización de signo',
+          '.toObject() — desglose plano { years, months, weeks, days, hours, minutes, seconds, milliseconds }',
+        ],
+        examples: [
+          {
+            title: 'API completa de Duration',
+            description:
+              'Construcción, conversión, ISO 8601 y aritmética de signo.',
+            code: `import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
+import { Duration, durationPlugin } from '@bereasoftware/time-guard/plugins/duration';
+
+PluginManager.use(durationPlugin, TimeGuard);
+
+const start = TimeGuard.from('2026-03-13');
+const end = TimeGuard.from('2026-03-20');
+
+// Método de instancia (añadido por el plugin) vs. estático — mismo resultado
+console.log(start.duration(end).asDays());   // 7
+console.log(Duration.between(start, end).asDays()); // 7
+
+// Desde milisegundos, y conversión a cualquier unidad
+const fromMs = Duration.fromMilliseconds(1000 * 60 * 60 * 36);
+console.log(fromMs.as('hours')); // 36
+
+// Signo
+const negative = new Duration({ days: -5 });
+console.log(negative.isNegative());     // true
+console.log(negative.abs().asDays());   // 5
+
+// ISO 8601 — semanas se pliegan en días en la SALIDA (no en la entrada)
+const iso = new Duration({ years: 1, months: 2, weeks: 3, days: 4, hours: 5 });
+console.log(iso.toISO());     // "P1Y2M25DT5H" (3 semanas + 4 días = 25 días)
+console.log(iso.toObject());  // { years: 1, months: 2, weeks: 3, days: 4, hours: 5, ... }`,
           },
         ],
         playground: { enabled: true, mode: 'runner' },
@@ -553,23 +899,38 @@ console.log(date.format('X'));               // timestamp Unix en segundos`,
           'Los métodos se añaden al prototype — cada instancia existente y futura los hereda',
           'PluginManager.hasPlugin() / listPlugins() / unuse() — introspección y ciclo de vida',
           'Los plugins built-in (relative-time, duration, advanced-format) usan exactamente este mismo contrato',
+          "declare module + interface merging — así los 3 plugins built-in tipan sus propios métodos añadidos, en vez de castear a 'any' del lado del consumidor",
         ],
         examples: [
           {
-            title: 'Plugin mínimo: fiscalQuarter()',
+            title: 'Plugin mínimo: fiscalQuarter() con tipado real',
             description:
-              'Un plugin que añade un método `fiscalQuarter()` a todas las instancias de TimeGuard.',
+              'Un plugin que añade fiscalQuarter() a todas las instancias — y lo tipa vía declaration merging, para no forzar "as any" en quien lo consume.',
             code: `import { TimeGuard, PluginManager } from '@bereasoftware/time-guard';
 import type { ITimeGuardPlugin } from '@bereasoftware/time-guard';
+
+// Declaration merging: TypeScript une esta interfaz con la clase TimeGuard.
+// Cualquier archivo que importe TimeGuard después de este verá el método
+// tipado — sin necesidad de "as any" en el sitio de la llamada.
+declare module '@bereasoftware/time-guard' {
+  interface TimeGuard {
+    fiscalQuarter(fiscalYearStartMonth?: number): number;
+  }
+}
 
 class FiscalQuarterPlugin implements ITimeGuardPlugin {
   name = 'fiscal-quarter';
   version = '1.0.0';
 
   install(TimeGuardClass: typeof TimeGuard): void {
-    (TimeGuardClass.prototype as any).fiscalQuarter = function (
-      fiscalYearStartMonth = 4, // ej. año fiscal empieza en abril
-    ): number {
+    // El cast sigue siendo necesario AQUÍ (install() modifica el prototype
+    // dinámicamente) — pero solo una vez, dentro del plugin. El consumidor
+    // nunca lo ve gracias al "declare module" de arriba.
+    (
+      TimeGuardClass.prototype as unknown as {
+        fiscalQuarter: (fiscalYearStartMonth?: number) => number;
+      }
+    ).fiscalQuarter = function (fiscalYearStartMonth = 4): number {
       const month = this.month(); // 1-12
       const shifted = ((month - fiscalYearStartMonth + 12) % 12) + 1;
       return Math.ceil(shifted / 3);
@@ -580,7 +941,7 @@ class FiscalQuarterPlugin implements ITimeGuardPlugin {
 PluginManager.use(new FiscalQuarterPlugin(), TimeGuard);
 
 const date = TimeGuard.from('2026-05-20');
-console.log((date as any).fiscalQuarter()); // 2 (año fiscal desde abril)
+console.log(date.fiscalQuarter()); // 2 (año fiscal desde abril) — totalmente tipado
 
 // Introspección
 console.log(PluginManager.hasPlugin('fiscal-quarter')); // true
@@ -662,6 +1023,49 @@ providers: [
   }
 ]`,
           },
+          {
+            title: 'React · useTimeGuard() y useTimeGuardConfig()',
+            description:
+              'El hook genérico detrás de useCurrentTime, y cómo leer la config heredada del Provider sin crear una instancia.',
+            code: `import { useTimeGuard, useTimeGuardConfig } from '@bereasoftware/time-guard/react';
+
+function LastUpdated({ isoString }: { isoString: string }) {
+  // useTimeGuard(input, config?) — instancia reactiva a partir de CUALQUIER
+  // input (no solo "ahora" tickeando); se recalcula si input o config cambian.
+  const tg = useTimeGuard(isoString);
+  return <span>{tg.format('DD MMM YYYY, HH:mm')}</span>;
+}
+
+function ConfigDebug() {
+  // Lee la config activa del TimeGuardProvider más cercano (o undefined si no hay uno)
+  const config = useTimeGuardConfig();
+  return <pre>{JSON.stringify(config)}</pre>;
+}`,
+          },
+          {
+            title: 'Vue · useTimeGuard() genérico',
+            description:
+              'Pásale un Ref (o un getter) para que reaccione a sus cambios — un valor plano se lee una sola vez y no se actualiza solo.',
+            code: `<script setup lang="ts">
+import { ref } from 'vue';
+import { useTimeGuard } from '@bereasoftware/time-guard/vue';
+
+const deadline = ref('2026-12-25');
+
+// Pasar el Ref (no deadline.value) — useTimeGuard usa toValue() internamente
+// para desenvolverlo dentro de su propio watch, y así rastrear el cambio.
+const tg = useTimeGuard(deadline);
+
+function changeDeadline() {
+  deadline.value = '2027-01-01'; // tg se recalcula automáticamente
+}
+</script>
+
+<template>
+  <p>{{ tg.format('dddd, DD MMMM YYYY') }}</p>
+  <button @click="changeDeadline">Cambiar fecha</button>
+</template>`,
+          },
         ],
       },
       {
@@ -700,6 +1104,25 @@ providers: [
   h1 { font-size: 28px; margin: 0 0 8px; }
   p { font-size: 48px; font-weight: 700; color: #ff3e00; font-family: 'JetBrains Mono', monospace; }
 </style>`,
+          },
+          {
+            title: 'Svelte · useTimeGuard() con un store como input',
+            description:
+              'El hook genérico acepta un valor plano O un store Svelte — si detecta un store (duck-typing), deriva de él automáticamente.',
+            code: `<script lang="ts">
+  import { writable } from 'svelte/store';
+  import { useTimeGuard } from '@bereasoftware/time-guard/svelte';
+
+  // Un store normal de la app — ej. la fecha seleccionada en un date picker
+  const selectedDate = writable('2026-05-20');
+
+  // useTimeGuard detecta que selectedDate es un store y deriva de él:
+  // cada vez que selectedDate cambia, el store devuelto se recalcula.
+  const tg = useTimeGuard(selectedDate);
+</script>
+
+<p>{$tg.format('dddd, DD MMMM YYYY')}</p>
+<button on:click={() => selectedDate.set('2026-12-25')}>Ir a Navidad</button>`,
           },
         ],
         demoComponentId: 'svelte-demo',
@@ -740,6 +1163,28 @@ export default function Clock() {
         {now().format('HH:mm:ss.SSS')}
       </p>
     </main>
+  );
+}`,
+          },
+          {
+            title: 'SolidJS · useTimeGuard() genérico',
+            description:
+              'A diferencia de useCurrentTime, useTimeGuard no tickea por sí solo — reacciona cuando cambia el Accessor que le pasas. Importante: pásale el Accessor (deadline), no su valor (deadline()).',
+            code: `import { createSignal } from 'solid-js';
+import { useTimeGuard } from '@bereasoftware/time-guard/solid';
+
+export default function DueDate() {
+  const [deadline, setDeadline] = createSignal('2026-12-25');
+
+  // deadline (el accessor), NO deadline() — así useTimeGuard puede
+  // llamarlo dentro de su propio createEffect y rastrear el cambio.
+  const tg = useTimeGuard(deadline);
+
+  return (
+    <>
+      <p>{tg().format('dddd, DD MMMM YYYY')}</p>
+      <button onClick={() => setDeadline('2027-01-01')}>Cambiar fecha</button>
+    </>
   );
 }`,
           },
@@ -789,6 +1234,30 @@ export default component$(() => {
         {TimeGuard.from(iso.value).format('HH:mm:ss.SSS')}
       </p>
     </main>
+  );
+});`,
+          },
+          {
+            title: 'Qwik · useTimeGuard() genérico',
+            description:
+              'Pásale un Signal para que reaccione a sus cambios vía track() — un valor plano se lee una sola vez, igual que en Vue/Solid.',
+            code: `import { component$, useSignal } from '@builder.io/qwik';
+import { useTimeGuard } from '@bereasoftware/time-guard/qwik';
+
+export default component$(() => {
+  const deadline = useSignal('2026-12-25');
+
+  // Pasar el Signal (no deadline.value) — useTimeGuard lo detecta con
+  // isSignal() y rastrea deadline.value dentro de su propio useTask$.
+  const tg = useTimeGuard(deadline);
+
+  return (
+    <>
+      <p>{tg.value.format('dddd, DD MMMM YYYY')}</p>
+      <button onClick$={() => (deadline.value = '2027-01-01')}>
+        Cambiar fecha
+      </button>
+    </>
   );
 });`,
           },

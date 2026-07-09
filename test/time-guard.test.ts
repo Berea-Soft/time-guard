@@ -1472,4 +1472,54 @@ describe('TimeGuard - Core Functionality', () => {
       expect(explanation.explanation).toContain('Calculated');
     });
   });
+
+  describe('TimeGuard.now() carries real zone info (regression)', () => {
+    // TimeGuard.now() used to produce an offset-naive PlainDateTime
+    // mislabeled with a default config.timezone of 'UTC' — format()
+    // correctly showed local wall-clock time, but toISOString()/
+    // getOffset()/format('utc'|'iso'|'rfc2822'|'rfc3339') just appended a
+    // literal 'Z' to those LOCAL digits without ever converting them,
+    // so TimeGuard.now().toISOString() lied about being UTC. Separately,
+    // isZonedDateTime()'s duck-type check looked for a `timeZone`
+    // property that this polyfill's ZonedDateTime doesn't have (it's
+    // `timeZoneId`), so the guard never matched a real zoned value at all.
+
+    it('getTimeZoneId()/getOffset() report the real system zone, not the null/"Z" defaults', () => {
+      const now = TimeGuard.now();
+      expect(now.getTimeZoneId()).not.toBeNull();
+      expect(now.getOffset()).toMatch(/^[+-]\d{2}:\d{2}$/);
+    });
+
+    it('toISOString() performs a genuine UTC conversion matching Date#toISOString()', () => {
+      const now = TimeGuard.now();
+      const nativeUtcMinute = new Date().toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+      expect(now.toISOString().slice(0, 16)).toBe(nativeUtcMinute);
+    });
+
+    it('format("utc"/"iso"/"rfc3339") convert to UTC instead of relabeling local digits', () => {
+      const now = TimeGuard.now();
+      const nativeUtcMinute = new Date().toISOString().slice(0, 16);
+      expect(now.format('utc').slice(0, 16)).toBe(nativeUtcMinute);
+      expect(now.format('iso').slice(0, 16)).toBe(nativeUtcMinute);
+      expect(now.format('rfc3339').slice(0, 16)).toBe(nativeUtcMinute);
+    });
+
+    it('an explicit timezone computes "now" as observed there, not a relabeled local reading', () => {
+      const tokyo = TimeGuard.now({ timezone: 'Asia/Tokyo' });
+      const bogota = TimeGuard.now({ timezone: 'America/Bogota' });
+      // Different wall-clock (different zones)...
+      expect(tokyo.getTimeZoneId()).toBe('Asia/Tokyo');
+      expect(bogota.getTimeZoneId()).toBe('America/Bogota');
+      // ...but the same underlying instant, down to the minute.
+      expect(tokyo.toISOString().slice(0, 16)).toBe(
+        bogota.toISOString().slice(0, 16),
+      );
+    });
+
+    it('format() with a non-UTC pattern still shows local wall-clock time, unaffected', () => {
+      const now = TimeGuard.now();
+      const nativeLocalMinute = new Date().toString().match(/\d{2}:\d{2}/)?.[0];
+      expect(now.format('HH:mm')).toBe(nativeLocalMinute);
+    });
+  });
 });

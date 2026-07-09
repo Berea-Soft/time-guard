@@ -12,12 +12,24 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
   name = 'advanced-format';
   version = '1.0.0';
 
+  // Keyed by class (not just one field) in case this plugin instance is
+  // ever installed on more than one TimeGuard-like class — each install()
+  // call must restore exactly the format() it wrapped, not some other
+  // class's.
+  private originalFormats = new WeakMap<
+    typeof TimeGuard,
+    typeof TimeGuard.prototype.format
+  >();
+
   /**
    * Install plugin into TimeGuard
    */
   install(TimeGuardClass: typeof TimeGuard): void {
-    // Store original format method
+    // Store original format method so uninstall() can restore it — this
+    // is what makes clear() + re-registering safe instead of stacking a
+    // new wrapper on top of this one.
     const originalFormat = TimeGuardClass.prototype.format;
+    this.originalFormats.set(TimeGuardClass, originalFormat);
 
     (
       TimeGuardClass.prototype as unknown as {
@@ -28,7 +40,7 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
         return originalFormat.call(this, pattern);
       }
 
-      if (!/Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz?/.test(pattern)) {
+      if (!/Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz|z/.test(pattern)) {
         return originalFormat.call(this, pattern);
       }
 
@@ -102,7 +114,7 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
 
       // Replace advanced tokens - wrap results in brackets to protect from standard formatter
       const result = pattern.replace(
-        /Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz?/g,
+        /Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz|z/g,
         (match) => {
           let replacement = '';
           switch (match) {
@@ -166,12 +178,20 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
               );
               break;
 
+            // Offset, e.g. "+09:00"
             case 'z':
-              replacement = `${(this as unknown as { getTimezoneOffset(): number }).getTimezoneOffset()}`;
+              replacement = (
+                this as unknown as { getOffset(): string }
+              ).getOffset();
               break;
 
+            // IANA zone id, e.g. "Asia/Tokyo" (empty if the instance has no
+            // zone attached — it's a PlainDateTime, not a ZonedDateTime)
             case 'zzz':
-              replacement = `${(this as unknown as { getTimezoneOffsetLong(): string }).getTimezoneOffsetLong()}`;
+              replacement =
+                (
+                  this as unknown as { getTimeZoneId(): string | null }
+                ).getTimeZoneId() ?? '';
               break;
 
             default:
@@ -185,6 +205,20 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
       // Apply standard format to the result
       return originalFormat.call(this, result);
     };
+  }
+
+  /**
+   * Reverse install() — restores format() to exactly what it was before
+   * this plugin wrapped it, instead of leaving the wrapper in place
+   * (which is what caused re-registration after clear() to stack a
+   * second wrapper on top of the first).
+   */
+  uninstall(TimeGuardClass: typeof TimeGuard): void {
+    const original = this.originalFormats.get(TimeGuardClass);
+    if (original) {
+      TimeGuardClass.prototype.format = original;
+      this.originalFormats.delete(TimeGuardClass);
+    }
   }
 }
 

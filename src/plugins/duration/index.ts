@@ -51,12 +51,14 @@ export class Duration implements IDuration {
       throw new Error(`Invalid ISO 8601 duration: ${iso}`);
     }
 
-    const [, negative, years, months, , days, hours, minutes, seconds] = match;
+    const [, negative, years, months, weeks, days, hours, minutes, seconds] =
+      match;
     const multiplier = negative ? -1 : 1;
 
     return new Duration({
       years: parseInt(years || '0', 10) * multiplier,
       months: parseInt(months || '0', 10) * multiplier,
+      weeks: parseInt(weeks || '0', 10) * multiplier,
       days: parseInt(days || '0', 10) * multiplier,
       hours: parseInt(hours || '0', 10) * multiplier,
       minutes: parseInt(minutes || '0', 10) * multiplier,
@@ -410,6 +412,18 @@ export class DurationPlugin implements ITimeGuardPlugin {
         Duration.between(from, to),
       fromMilliseconds: (ms: number): Duration => Duration.fromMilliseconds(ms),
     };
+  }
+
+  /**
+   * Reverse install() — none of these (instance `.duration()`, static
+   * `Duration`/`duration`) pre-exist on TimeGuard, so undoing this is
+   * just deleting them.
+   */
+  uninstall(TimeGuardClass: typeof TimeGuard): void {
+    delete (TimeGuardClass.prototype as unknown as Record<string, unknown>)
+      .duration;
+    delete (TimeGuardClass as unknown as Record<string, unknown>).Duration;
+    delete (TimeGuardClass as unknown as Record<string, unknown>).duration;
   }
 }
 

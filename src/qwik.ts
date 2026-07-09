@@ -29,6 +29,7 @@ import {
   useSignal,
   useVisibleTask$,
   useTask$,
+  isSignal,
 } from '@builder.io/qwik';
 import {
   TimeGuard,
@@ -42,18 +43,31 @@ import {
 
 /**
  * Creates a Qwik Signal of a TimeGuard instance.
- * Uses `useTask$` to reactively update when input changes.
+ * Uses `useTask$` to reactively update when input changes — pass a Signal
+ * for `input` to make this actually track it via `track()`; a plain value
+ * is used once and won't update on its own (`track()` only registers a
+ * dependency when it reads a Signal's `.value`, not a closed-over plain
+ * variable).
  * Must be called inside `component$`.
  */
 export function useTimeGuard(
   input?: unknown,
   config?: ITimeGuardConfig,
 ): Signal<TimeGuard> {
-  const tg = useSignal(TimeGuard.from(input, config));
+  const tg = useSignal(
+    TimeGuard.from(isSignal(input) ? input.value : input, config),
+  );
 
   useTask$(({ track }) => {
-    track(() => input);
-    tg.value = TimeGuard.from(input, config);
+    if (isSignal(input)) {
+      const source = input;
+      tg.value = TimeGuard.from(
+        track(() => source.value),
+        config,
+      );
+    } else {
+      tg.value = TimeGuard.from(input, config);
+    }
   });
 
   return tg;

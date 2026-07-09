@@ -144,7 +144,7 @@
     "not IE 11",
     "> 1%"
   ],
-  "homepage": "https://github.com/Berea-Soft/time-guard#readme",
+  "homepage": "https://time-guard.bereasoft.com/",
   "scripts": {
     "dev:docs": "pnpm --prefix docs-app install && pnpm --prefix docs-app dev",
     "build:docs": "pnpm --prefix docs-app build",

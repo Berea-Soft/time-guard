@@ -191,6 +191,18 @@ export class TemporalAdapter {
   static toISOString(
     temporal: TemporalPlainDateTime | TemporalZonedDateTime,
   ): string {
+    if (this.isZonedDateTime(temporal)) {
+      // A real offset/zone is attached (e.g. TimeGuard.now(), or after
+      // .timezone()) — convert to the actual UTC instant instead of
+      // just relabeling local wall-clock digits with a trailing 'Z',
+      // which used to make e.g. TimeGuard.now().toISOString() lie about
+      // being UTC (it was really local time in a UTC costume).
+      return temporal.toInstant().toString({ smallestUnit: 'millisecond' });
+    }
+    // No zone info at all (bare PlainDateTime, e.g. TimeGuard.from(iso
+    // string with no offset)) — there's no real timezone to convert
+    // from, so format the wall-clock digits as-is with a trailing 'Z'
+    // (unchanged, pre-existing behavior for these offset-naive inputs).
     // Force millisecond precision — Temporal's toString() omits the
     // fractional part entirely when it's zero, unlike Date#toISOString()
     // which always shows `.000`.
@@ -223,12 +235,19 @@ export class TemporalAdapter {
       'year' in obj &&
       'month' in obj &&
       'day' in obj &&
-      'hour' in obj
+      'hour' in obj &&
+      // A real Temporal.ZonedDateTime also has year/month/day/hour —
+      // exclude it explicitly so this only matches genuine, offset-naive
+      // PlainDateTime values (see isZonedDateTime below).
+      !('timeZoneId' in obj)
     );
   }
 
   static isZonedDateTime(obj: unknown): obj is TemporalZonedDateTime {
-    return obj !== null && typeof obj === 'object' && 'timeZone' in obj;
+    // This polyfill's Temporal.ZonedDateTime exposes `timeZoneId`, not
+    // `timeZone` — the old check here never matched a real instance,
+    // silently defeating every isZonedDateTime()-guarded branch.
+    return obj !== null && typeof obj === 'object' && 'timeZoneId' in obj;
   }
 
   static isPlainDate(obj: unknown): obj is Temporal.PlainDate {
@@ -308,9 +327,13 @@ export class TemporalAdapter {
   }
 
   /**
-   * Get current time as ZonedDateTime with timezone
+   * Get current time as a ZonedDateTime, carrying real offset/zone info.
+   * With no `timezone`, uses the system's own default zone (still a real
+   * zone, not the offset-naive PlainDateTime `now()` above returns) —
+   * this is what TimeGuard.now() uses, so toISOString()/getOffset() can
+   * perform a genuine conversion instead of mislabeling local time as UTC.
    */
-  static nowInTimezone(timezone: string): TemporalZonedDateTime {
+  static nowInTimezone(timezone?: string): TemporalZonedDateTime {
     const Temporal = useTemporal();
     return Temporal.Now.zonedDateTimeISO(timezone);
   }

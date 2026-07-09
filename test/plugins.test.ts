@@ -51,6 +51,32 @@ describe('Plugin System', () => {
       PluginManager.clear();
       expect(PluginManager.listPlugins()).toHaveLength(0);
     });
+
+    it('should remove prototype members added by a plugin on unuse()', () => {
+      PluginManager.use(relativeTimePlugin, TimeGuard);
+      expect(typeof (TimeGuard.prototype as any).fromNow).toBe('function');
+
+      PluginManager.unuse('relative-time');
+      expect((TimeGuard.prototype as any).fromNow).toBeUndefined();
+    });
+
+    it('should restore the original format() on clear(), not stack a wrapper', () => {
+      // Regression: clear()/unuse() used to only forget the plugin in the
+      // manager's bookkeeping Map, never actually undoing install()'s
+      // prototype patch — re-registering the same plugin after a clear()
+      // wrapped format() a second time on top of the first, and once 2+
+      // layers were stacked, escaped `[...]` literal text containing a
+      // token-trigger letter (e.g. the "k" in a timezone id) got corrupted
+      // by the inner layer's own token regex.
+      PluginManager.use(advancedFormatPlugin, TimeGuard);
+      PluginManager.clear();
+      PluginManager.use(advancedFormatPlugin, TimeGuard);
+      PluginManager.clear();
+      PluginManager.use(advancedFormatPlugin, TimeGuard);
+
+      const date = TimeGuard.from('2024-03-13').timezone('Europe/Paris');
+      expect(date.format('zzz')).toBe('Europe/Paris');
+    });
   });
 
   describe('RelativeTimePlugin', () => {
@@ -247,6 +273,21 @@ describe('Plugin System', () => {
       const date = TimeGuard.from('2024-03-13 00:00:00');
       const result = date.format('x');
       expect(parseInt(result, 10)).toBeGreaterThan(0);
+    });
+
+    it('should support z token for the UTC-style offset', () => {
+      // Regression: 'z' used to call a nonexistent getTimezoneOffset()
+      // method and throw; the regex (`zzz?`) also never matched a lone
+      // 'z' in the first place (required 2+ z's).
+      const date = TimeGuard.from('2024-03-13').timezone('Europe/Paris');
+      expect(date.format('z')).toBe('+01:00');
+    });
+
+    it('should support zzz token for the IANA zone id', () => {
+      // Regression: 'zzz' used to call a nonexistent
+      // getTimezoneOffsetLong() method and throw.
+      const date = TimeGuard.from('2024-03-13').timezone('Europe/Paris');
+      expect(date.format('zzz')).toBe('Europe/Paris');
     });
 
     it('should combine advanced tokens with standard format', () => {

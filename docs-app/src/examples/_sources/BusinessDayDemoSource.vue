@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center gap-3">
       <div
-        class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg"
+        class="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg"
       >
         📆
       </div>

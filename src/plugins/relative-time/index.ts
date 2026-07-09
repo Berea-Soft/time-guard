@@ -111,6 +111,20 @@ export class RelativeTimePlugin implements ITimeGuardPlugin {
   }
 
   /**
+   * Reverse install() — none of fromNow/toNow/humanize pre-exist on
+   * TimeGuard, so undoing this is just deleting them, not restoring a
+   * prior value.
+   */
+  uninstall(TimeGuardClass: typeof TimeGuard): void {
+    delete (TimeGuardClass.prototype as unknown as Record<string, unknown>)
+      .fromNow;
+    delete (TimeGuardClass.prototype as unknown as Record<string, unknown>)
+      .toNow;
+    delete (TimeGuardClass.prototype as unknown as Record<string, unknown>)
+      .humanize;
+  }
+
+  /**
    * Format relative time
    */
   private formatRelativeTime(

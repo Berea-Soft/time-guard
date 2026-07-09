@@ -680,6 +680,22 @@ export class TimeGuard implements ITimeGuard {
       strict: config?.strict ?? false,
     };
 
+    if (input === undefined) {
+      // TimeGuard.now() — capture the actual current instant with real
+      // offset/zone info attached (config?.timezone, NOT this.config.timezone
+      // — the latter has already been defaulted to the 'UTC' sentinel used
+      // elsewhere to mean "no explicit zone requested"). With no explicit
+      // timezone, Temporal.Now.zonedDateTimeISO(undefined) uses the
+      // system's own zone — same wall-clock reading format() already
+      // showed, but now genuinely zoned instead of a bare, offset-naive
+      // PlainDateTime mislabeled as UTC by toISOString()/getOffset().
+      // An explicit timezone computes "now" AS OBSERVED there directly,
+      // fixing the previous bug where it took the system's local reading
+      // and just relabeled it with the requested zone without converting.
+      this.temporal = TemporalAdapter.nowInTimezone(config?.timezone);
+      return;
+    }
+
     // A TimeGuard instance has no public year/month/day fields for
     // TemporalAdapter to read (its Temporal value is private), so unwrap it
     // explicitly instead of falling through to the generic object branch.
@@ -818,7 +834,6 @@ export class TimeGuard implements ITimeGuard {
   }
 
   format(pattern: string | FormatPreset): string {
-    const plainDT = TemporalAdapter.toPlainDateTime(this.temporal);
     const knownPresets = [
       'iso',
       'date',
@@ -828,6 +843,20 @@ export class TimeGuard implements ITimeGuard {
       'rfc3339',
       'utc',
     ];
+    // These 4 presets denote UTC (their pattern ends in a literal "Z") —
+    // if this instance carries real zone/offset info (e.g. TimeGuard.now()),
+    // convert to the actual UTC instant first instead of formatting local
+    // wall-clock digits with a "Z" stapled on (the same mislabeling bug
+    // toISOString() had).
+    const utcPresets = ['iso', 'rfc2822', 'rfc3339', 'utc'];
+    const plainDT =
+      utcPresets.includes(pattern as string) &&
+      TemporalAdapter.isZonedDateTime(this.temporal)
+        ? (this.temporal as TemporalZonedDateTimePolyfill)
+            .toInstant()
+            .toZonedDateTimeISO('UTC')
+            .toPlainDateTime()
+        : TemporalAdapter.toPlainDateTime(this.temporal);
     const formatPattern = knownPresets.includes(pattern as string)
       ? this.formatterInstance.getPreset(pattern as FormatPreset)
       : (pattern as string);

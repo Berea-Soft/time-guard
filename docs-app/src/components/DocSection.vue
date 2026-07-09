@@ -134,6 +134,7 @@ const playgroundSandbox = computed(() => {
           >
         </div>
         <FrameworkSandbox
+          :key="item.id"
           :framework="playgroundSandbox.framework"
           :mode="playgroundSandbox.mode"
           :code="playgroundSandbox.code"

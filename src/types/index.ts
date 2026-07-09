@@ -732,6 +732,16 @@ export interface ITimeGuardPlugin {
   name: string;
   version: string;
   install(timeGuard: typeof TimeGuard, config?: unknown): void;
+  /**
+   * Reverses whatever install() did to `timeGuard`'s prototype/static
+   * surface (deleting added members, restoring wrapped ones). Optional
+   * for backward compatibility with plugins written before this hook
+   * existed — PluginManager.unuse()/clear() only call it if present, so
+   * omitting it just means re-registering the same plugin after a clear()
+   * stacks a new patch instead of starting clean (the pre-existing
+   * behavior, unchanged for plugins that don't implement this).
+   */
+  uninstall?(timeGuard: typeof TimeGuard): void;
 }
 
 /**

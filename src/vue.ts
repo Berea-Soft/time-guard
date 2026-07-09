@@ -3,6 +3,8 @@ import {
   watch,
   onUnmounted,
   inject,
+  toValue,
+  type MaybeRefOrGetter,
   type Ref,
   type Plugin,
   type Directive,
@@ -106,11 +108,13 @@ export const TimeGuardVuePlugin: Plugin = {
 
 /**
  * Vue Composable to create a reactive Ref of a TimeGuard instance.
- * Automatically updates when input or configuration changes.
+ * Automatically updates when input or configuration changes — input may be
+ * a plain value, a Ref, or a getter (anything toValue() accepts); passing a
+ * Ref/getter is what makes this actually reactive to that source changing.
  * Inherits global injected configuration as fallback.
  */
 export function useTimeGuard(
-  input?: unknown,
+  input?: MaybeRefOrGetter<unknown>,
   config?: ITimeGuardConfig,
 ): Ref<TimeGuard> {
   const globalConfig = inject<ITimeGuardConfig | undefined>(
@@ -118,17 +122,19 @@ export function useTimeGuard(
     undefined,
   );
   const activeConfig = config ?? globalConfig;
-  const tg = ref(TimeGuard.from(input, activeConfig)) as Ref<TimeGuard>;
+  const tg = ref(
+    TimeGuard.from(toValue(input), activeConfig),
+  ) as Ref<TimeGuard>;
 
   watch(
     [
-      () => input,
+      () => toValue(input),
       () => activeConfig?.locale,
       () => activeConfig?.timezone,
       () => activeConfig?.strict,
     ],
     () => {
-      tg.value = TimeGuard.from(input, activeConfig);
+      tg.value = TimeGuard.from(toValue(input), activeConfig);
     },
   );
 

@@ -125,6 +125,10 @@ export class TimeGuardService {
  * - Real-time clock: `{{ 'now' | timeGuardLiveFormat:'HH:mm:ss':1000 }}`
  * - Ticking static date: `{{ date | timeGuardLiveFormat:'YYYY-MM-DD HH:mm:ss':5000 }}`
  */
+@Pipe({
+  name: 'timeGuardLiveFormat',
+  pure: false,
+})
 export class TimeGuardLiveFormatPipe implements PipeTransform, OnDestroy {
   private latestValue: string = '';
   private subscription?: Subscription;

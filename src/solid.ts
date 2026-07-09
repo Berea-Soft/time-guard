@@ -41,11 +41,24 @@ import {
 export const TimeGuardConfigContext = Symbol('TimeGuardConfig');
 
 /**
+ * Resolves a value that may be a plain value or a Solid Accessor. Calling
+ * the accessor here — inside whatever tracking scope this is used from —
+ * is what registers Solid's reactive dependency; reading a closed-over
+ * plain variable does not.
+ */
+function resolveInput(input: unknown): unknown {
+  return typeof input === 'function' ? (input as Accessor<unknown>)() : input;
+}
+
+/**
  * Creates a reactive signal of a TimeGuard instance.
- * The signal updates reactively when `input` changes.
+ * The signal updates reactively when `input` changes — pass an Accessor
+ * (e.g. a signal getter) for `input` to make this actually track it; a
+ * plain value is used once and won't update on its own.
  *
  * ```tsx
- * const tg = useTimeGuard('2026-05-20');
+ * const [dateStr, setDateStr] = createSignal('2026-05-20');
+ * const tg = useTimeGuard(dateStr); // note: dateStr, not dateStr()
  * return <p>{tg().format('dddd, DD MMMM YYYY')}</p>;
  * ```
  */
@@ -53,12 +66,10 @@ export function useTimeGuard(
   input?: unknown,
   config?: ITimeGuardConfig,
 ): Accessor<TimeGuard> {
-  const [tg, setTg] = createSignal(TimeGuard.from(input, config));
+  const [tg, setTg] = createSignal(TimeGuard.from(resolveInput(input), config));
 
   createEffect(() => {
-    // Re-create when input or config serialized signature changes
-    const _input = input;
-    setTg(() => TimeGuard.from(_input, config));
+    setTg(() => TimeGuard.from(resolveInput(input), config));
   });
 
   return tg;

@@ -1427,9 +1427,12 @@ describe('Coverage Tests - Missing Branches', () => {
   });
 
   it('should handle duration fromISO with weeks', () => {
+    // Regression: fromISO()'s destructuring used to skip the weeks capture
+    // group entirely, silently dropping it (always 0) instead of the 2
+    // weeks in this string.
     const dur = Duration.fromISO('P2W3D');
-    expect(dur).toBeDefined();
-    expect(dur.days).toBeGreaterThanOrEqual(3);
+    expect(dur.toObject().weeks).toBe(2);
+    expect(dur.toObject().days).toBe(3);
   });
 
   it('should handle advanced format with Unix timestamp tokens', () => {
@@ -1881,7 +1884,14 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle duration fromISO with full ISO string', () => {
     const dur = Duration.fromISO('P1Y2M3W4DT5H6M7S');
-    expect(dur).toBeDefined();
+    const obj = dur.toObject();
+    expect(obj.years).toBe(1);
+    expect(obj.months).toBe(2);
+    expect(obj.weeks).toBe(3);
+    expect(obj.days).toBe(4);
+    expect(obj.hours).toBe(5);
+    expect(obj.minutes).toBe(6);
+    expect(obj.seconds).toBe(7);
   });
 
   it('should handle format with all weekday tokens', () => {

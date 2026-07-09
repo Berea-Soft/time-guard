@@ -7,13 +7,18 @@
 import type { ITimeGuardPlugin } from '../types';
 import type { TimeGuard } from '../index';
 
+interface PluginEntry {
+  plugin: ITimeGuardPlugin;
+  timeGuardClass: typeof TimeGuard;
+}
+
 /**
  * Plugin Manager - handles plugin registration and initialization
  * Uses Singleton pattern to ensure single instance across application
  */
 export class PluginManager {
   private static instance: PluginManager;
-  private plugins: Map<string, ITimeGuardPlugin> = new Map();
+  private plugins: Map<string, PluginEntry> = new Map();
 
   /**
    * Get singleton instance
@@ -64,7 +69,7 @@ export class PluginManager {
    */
   static getPlugin(name: string): ITimeGuardPlugin | undefined {
     const manager = PluginManager.getInstance();
-    return manager.plugins.get(name);
+    return manager.plugins.get(name)?.plugin;
   }
 
   /**
@@ -87,19 +92,31 @@ export class PluginManager {
   }
 
   /**
-   * Unregister a plugin
+   * Unregister a plugin — calls its uninstall() hook (if implemented) to
+   * reverse whatever install() did, so re-registering the same plugin
+   * later starts from a clean prototype instead of stacking a new patch
+   * on top of the old one.
    * @param name - Plugin name
    */
   static unuse(name: string): boolean {
     const manager = PluginManager.getInstance();
+    const entry = manager.plugins.get(name);
+    if (!entry) {
+      return false;
+    }
+    entry.plugin.uninstall?.(entry.timeGuardClass);
     return manager.plugins.delete(name);
   }
 
   /**
-   * Clear all plugins
+   * Clear all plugins — calls each one's uninstall() hook (if implemented)
+   * before forgetting it, for the same reason as unuse().
    */
   static clear(): void {
     const manager = PluginManager.getInstance();
+    for (const entry of manager.plugins.values()) {
+      entry.plugin.uninstall?.(entry.timeGuardClass);
+    }
     manager.plugins.clear();
   }
 
@@ -120,7 +137,7 @@ export class PluginManager {
 
     try {
       plugin.install(timeGuardClass, config);
-      this.plugins.set(plugin.name, plugin);
+      this.plugins.set(plugin.name, { plugin, timeGuardClass });
       if (process.env.NODE_ENV !== 'production') {
         console.warn(
           `Plugin "${plugin.name}" v${plugin.version} registered successfully`,
