@@ -1,18 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as React from 'react';
 import * as Vue from 'vue';
-import {
-  Pipe,
-  type PipeTransform,
-  Injectable,
-  NgZone,
-  InjectionToken,
-  Inject,
-  Optional,
-  ChangeDetectorRef,
-  inject as angularInject,
-} from '@angular/core';
-import { Observable } from 'rxjs';
+import { ChangeDetectorRef, inject as angularInject } from '@angular/core';
 
 // Mock React with a fully functional Context Provider simulation
 vi.mock('react', () => {
@@ -64,17 +53,17 @@ vi.mock('vue', () => {
       value: init,
     };
   });
-  const watch = vi.fn((deps, cb) => {
+  const watch = vi.fn((_deps, cb) => {
     cb();
   });
   const onUnmounted = vi.fn((cb) => {
     cb();
   });
   let injectedConfig: any = undefined;
-  const inject = vi.fn((key, def) => {
+  const inject = vi.fn((_key, def) => {
     return injectedConfig !== undefined ? injectedConfig : def;
   });
-  const provide = vi.fn((key, val) => {
+  const provide = vi.fn((_key, val) => {
     injectedConfig = val;
   });
   return { ref, watch, onUnmounted, inject, provide };
@@ -103,15 +92,11 @@ vi.mock('@angular/core', () => {
 });
 
 import {
-  useTimeGuard as useReactTimeGuard,
-  useCurrentTime as useReactCurrentTime,
   useRelativeTime as useReactRelativeTime,
   useTimeRange as useReactTimeRange,
   TimeGuardProvider,
 } from '../src/react';
 import {
-  useTimeGuard as useVueTimeGuard,
-  useCurrentTime as useVueCurrentTime,
   useRelativeTime as useVueRelativeTime,
   vTimeGuard,
   TimeGuardVuePlugin,
@@ -121,7 +106,6 @@ import {
   TimeGuardRelativePipe,
   TimeGuardService,
   TimeGuardLiveFormatPipe,
-  TIME_GUARD_CONFIG,
 } from '../src/angular';
 import { TimeGuard, TimeRange } from '../src/core';
 

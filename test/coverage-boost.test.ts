@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TimeGuard, TimeRange } from '../src/index';
+import { TimeGuard } from '../src/index';
 import { DurationResult } from '../src/core';
 
 describe('Coverage Boost for TimeGuard Branch Paths', () => {

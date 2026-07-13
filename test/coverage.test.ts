@@ -28,7 +28,7 @@ import {
   getConjunctionLabel,
   formatZeroDuration,
 } from '../src/utils/duration-locale';
-import { registerAllLocales, ALL_LOCALES } from '../src/locales/index';
+import { registerAllLocales } from '../src/locales/index';
 import relativeTimePlugin, {
   RelativeTimePlugin,
 } from '../src/plugins/relative-time';
@@ -1375,7 +1375,6 @@ describe('Coverage Tests - Missing Branches', () => {
       },
     });
     PluginManager.use(customPlugin, TimeGuard);
-    const now = timeGuard('2024-01-01');
     const past = timeGuard('2023-12-31');
     expect(past.fromNow()).toBeDefined();
     PluginManager.clear();
@@ -1814,7 +1813,6 @@ describe('Coverage Tests - Missing Branches', () => {
 
   it('should handle relative time with very small milliseconds', () => {
     PluginManager.use(relativeTimePlugin, TimeGuard);
-    const now = timeGuard('2024-01-01 00:00:00.000');
     const slightlyPast = timeGuard('2024-01-01 00:00:00.001');
     expect(slightlyPast.fromNow()).toBeDefined();
     PluginManager.clear();
@@ -2083,7 +2081,6 @@ describe('Coverage Tests - Missing Branches', () => {
     });
     PluginManager.use(customPlugin, TimeGuard);
     const past = timeGuard('2024-01-01 10:00:00');
-    const now = timeGuard('2024-01-01 12:00:00');
     expect(past.fromNow()).toBeDefined();
     PluginManager.clear();
   });
