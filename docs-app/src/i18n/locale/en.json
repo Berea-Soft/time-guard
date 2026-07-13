@@ -103,7 +103,6 @@
   "docs.hero.title": "TimeGuard Documentation",
   "docs.hero.description": "Modern date and time manipulation library based on the Temporal API. Fast, extensible and production-ready.",
   "docs.hero.cta_examples": "View examples",
-  "docs.hero.cta_demo": "Try demo",
   "docs.hero.cta_demos": "Try demos",
 
   "docs.quickstart.title": "Quick Start",
@@ -133,6 +132,7 @@
   "doc_section.features_title": "Key Benefits",
   "doc_section.copied": "Copied!",
   "doc_section.copy": "Copy",
+  "doc_section.view_live_demo": "View live demo",
 
   "examples.title": "Examples",
   "demos.title": "Demos",

@@ -11,12 +11,12 @@ export const DOCS_DATA: DocCategory[] = [
         title: 'Instalación',
         subtitle: 'Un solo paquete, cero peer dependencies obligatorias',
         description:
-          'TimeGuard se instala como un único paquete. Los frameworks (React, Vue, Angular, Svelte, Solid, Qwik) son peer dependencies *opcionales* — solo se necesitan si importas el subpath correspondiente (ej. `@bereasoftware/time-guard/react`). Un proyecto sin ningún framework instala y usa la librería sin advertencias.',
+          'TimeGuard se instala como un único paquete. Los frameworks (React, Vue, Angular, Svelte, Solid, Qwik) son peer dependencies *opcionales* — solo se necesitan si importas el subpath correspondiente (ej. `@bereasoftware/time-guard/react`). Un proyecto sin ningún framework instala y usa la librería sin advertencias. Hay 4 formas de traer TimeGuard a tu proyecto — Node.js (npm/pnpm/yarn), navegador (CDN), TypeScript (consideraciones de configuración) y descarga directa (un solo archivo, sin bundler) — cada una en su propia página a la izquierda.',
         features: [
-          'npm install @bereasoftware/time-guard · pnpm add @bereasoftware/time-guard · yarn add @bereasoftware/time-guard',
-          'Sin dependencias obligatorias más allá de @js-temporal/polyfill (auto-instalado como dependency, no peer)',
-          'TypeScript incluido de fábrica — declaraciones .d.ts publicadas junto al paquete, sin @types/ por separado',
-          'Elige el entry point: @bereasoftware/time-guard (con polyfill) vs. /native (sin polyfill) — ver "Native Mode" más abajo',
+          'Node.js — npm/pnpm/yarn, ESM o CommonJS, cualquier entry point',
+          'Navegador — <script> directo vía CDN (unpkg/jsdelivr), sin build step',
+          'TypeScript — declaraciones .d.ts incluidas de fábrica, sin @types/ por separado',
+          'Descarga — un solo archivo IIFE autocontenido para proyectos sin bundler',
         ],
         examples: [
           {
@@ -39,7 +39,115 @@ console.log(now.format('dddd, DD MMMM YYYY')); // "Wednesday, 20 May 2026"
 // import { useCurrentTime } from '@bereasoftware/time-guard/vue';`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
+      },
+      {
+        id: 'installation-nodejs',
+        title: 'Node.js',
+        subtitle: 'npm, pnpm, yarn — ESM y CommonJS, cualquier entry point',
+        description:
+          'En Node.js, TimeGuard funciona igual de bien con `import` (ESM) que con `require` (CommonJS) — el paquete publica ambos formatos para cada entry point vía el campo `exports` de `package.json`. No hace falta configuración adicional más allá de instalar el paquete.',
+        features: [
+          'npm install @bereasoftware/time-guard',
+          'pnpm add @bereasoftware/time-guard',
+          'yarn add @bereasoftware/time-guard',
+          'ESM (import) y CommonJS (require) — ambos soportados sin configuración extra',
+          'Node.js 18+ recomendado (mismo mínimo que @js-temporal/polyfill)',
+        ],
+        examples: [
+          {
+            title: 'ESM vs. CommonJS',
+            description: 'Misma API, dos sintaxis de import distintas.',
+            code: `// ESM (import) — package.json con "type": "module", o archivos .mjs
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+// CommonJS (require) — proyectos Node.js clásicos
+const { TimeGuard } = require('@bereasoftware/time-guard');
+
+// Ambos exponen la misma API:
+const now = TimeGuard.now();
+console.log(now.format('YYYY-MM-DD'));`,
+          },
+        ],
+      },
+      {
+        id: 'installation-browser',
+        title: 'Navegador',
+        subtitle: 'Vía CDN, sin bundler ni paso de build',
+        description:
+          'Para páginas sin proceso de build, TimeGuard publica un bundle IIFE autocontenido (incluye el polyfill de Temporal) que expone todo bajo el global `BereasoftTimeGuard` — sirve directamente el archivo publicado en npm desde cualquier CDN de paquetes (unpkg, jsDelivr), sin necesidad de instalar nada.',
+        features: [
+          'https://unpkg.com/@bereasoftware/time-guard/dist/time-guard.iife.js',
+          'https://cdn.jsdelivr.net/npm/@bereasoftware/time-guard/dist/time-guard.iife.js',
+          'Expone el global BereasoftTimeGuard — BereasoftTimeGuard.TimeGuard, BereasoftTimeGuard.Duration, etc.',
+          'Incluye el polyfill de Temporal — funciona en cualquier navegador moderno sin configuración adicional',
+        ],
+        examples: [
+          {
+            title: 'Uso directo con <script>',
+            description:
+              'Sin npm, sin bundler — solo un <script> y el global queda disponible.',
+            code: `<script src="https://unpkg.com/@bereasoftware/time-guard/dist/time-guard.iife.js"></script>
+<script>
+  const { TimeGuard } = BereasoftTimeGuard;
+  const now = TimeGuard.now();
+  document.body.textContent = now.format('dddd, DD MMMM YYYY');
+</script>`,
+          },
+        ],
+      },
+      {
+        id: 'installation-typescript',
+        title: 'TypeScript',
+        subtitle:
+          'Configuración de tsconfig.json para que resuelvan los subpaths',
+        description:
+          'Los tipos de TimeGuard se publican junto al paquete — no hace falta `@types/@bereasoftware__time-guard` ni nada por separado. El único punto de atención es `moduleResolution`: TimeGuard usa el campo `exports` de `package.json` para exponer sus subpaths (`/react`, `/vue`, `/native`, etc.), y la opción clásica `"moduleResolution": "node"` de TypeScript IGNORA ese campo por completo — solo entiende `exports` con `"bundler"`, `"node16"` o `"nodenext"`.',
+        features: [
+          '"moduleResolution": "bundler" — recomendado si usás Vite/esbuild/webpack (lo que usa este mismo repo)',
+          '"moduleResolution": "node16" / "nodenext" — alternativa si tu proyecto compila con tsc directamente',
+          '"moduleResolution": "node" (clásico) — NO resuelve los tipos de los subpaths (@bereasoftware/time-guard/react, etc.), aunque el import funcione en runtime',
+          'target de ES2020 o superior recomendado (alineado con @js-temporal/polyfill)',
+        ],
+        examples: [
+          {
+            title: 'tsconfig.json mínimo recomendado',
+            description:
+              'La parte relevante para que los subpaths de TimeGuard resuelvan tipos correctamente.',
+            code: `{
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "strict": true
+  }
+}`,
+          },
+        ],
+      },
+      {
+        id: 'installation-download',
+        title: 'Descarga',
+        subtitle: 'Un solo archivo, sin bundler ni gestor de paquetes',
+        description:
+          'Si tu proyecto no usa npm ni un bundler, descargá el bundle IIFE directamente y serví lo como un archivo estático más — funciona igual que el uso vía CDN, pero auto-hospedado.',
+        features: [
+          'Descargá dist/time-guard.iife.js desde unpkg, jsDelivr, o npm pack',
+          'Copiá el archivo a tu carpeta de assets estáticos',
+          'Incluí lo con un <script src="/ruta/a/time-guard.iife.js"></script> local',
+        ],
+        examples: [
+          {
+            title: 'Auto-hospedado',
+            description:
+              'Mismo resultado que la CDN, sin depender de un servicio externo.',
+            code: `<!-- Archivo servido desde tu propio dominio -->
+<script src="/vendor/time-guard.iife.js"></script>
+<script>
+  const { TimeGuard } = BereasoftTimeGuard;
+  console.log(TimeGuard.now().format('YYYY-MM-DD HH:mm:ss'));
+</script>`,
+          },
+        ],
       },
     ],
   },
@@ -92,7 +200,6 @@ TimeGuard.range(timeGuard('2024-01-01'), timeGuard('2024-01-15'))
 timeGuard('2024-01-01').toPlainDate(); // { year: 2024, month: 1, day: 1, dayOfWeek: 1 }`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -132,7 +239,6 @@ console.log(specific.format('YYYY-MM-DD')); // "2026-05-20"
 console.log(tomorrow.format('YYYY-MM-DD')); // "2026-05-21" (Nueva instancia)`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'accessors',
@@ -160,7 +266,6 @@ console.log(date.dayOfWeek());  // 3 (Miércoles)
 console.log(date.isLeapYear()); // false`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'query-methods',
@@ -198,7 +303,6 @@ console.log(date.isBetween(start, end, 'day', '[]')); // true
 console.log(date.isBetween(start, end, 'day', '(]')); // true`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'tz-serialization',
@@ -237,7 +341,6 @@ console.log(date.unix());             // 1779532200 (timestamp en segundos)
 console.log(+date);                   // 1779532200000 (valueOf en ms)`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'setters',
@@ -274,7 +377,6 @@ const rounded = date.round({ smallestUnit: 'hour', roundingMode: 'halfExpand' })
 console.log(rounded.format('HH:mm')); // 15:00 (redondea hacia arriba)`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'native-mode',
@@ -339,11 +441,10 @@ console.log(badTz.getTimeZoneId()); // null — sigue siendo un PlainDateTime, n
 // TimeGuard no te avisará por sí solo.`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'typescript-usage',
-        title: 'TypeScript',
+        title: 'TypeScript — Tipos y Uso',
         subtitle: 'Tipos incluidos, null-safety real, y cómo tipar tus plugins',
         description:
           'Las declaraciones `.d.ts` se publican junto al paquete — no hay que instalar `@types/` por separado. La mayoría de los tipos públicos (`ITimeGuardConfig`, `DurationParts`, `Unit`, etc.) se importan con `import type` desde el mismo entry point que usas para el valor. Varios métodos devuelven explícitamente `T | null` — vale la pena conocerlos si usas `strictNullChecks` (activado por defecto en proyectos modernos).',
@@ -377,7 +478,6 @@ const unit: Unit = 'day';
 console.log(date.add({ [unit]: 5 }).format('YYYY-MM-DD'));`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'bundle-size',
@@ -466,7 +566,6 @@ console.log(getAvailableLocales());
 // ['en', 'es', 'fr', 'de', 'ja', 'ar', 'zh-cn', 'ru', 'pt-br', 'sw', ...]`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -502,7 +601,6 @@ const unionRange = rangeA.union(rangeB);
 console.log(unionRange.end.format('YYYY-MM-DD'));     // "2026-05-30"`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'businessdays',
@@ -530,7 +628,6 @@ console.log(delivery.format('dddd, DD MMMM YYYY'));
 // Output: "jueves, 28 mayo 2026" (Viernes 22 -> Martes 26 (1) -> Miércoles 27 (2) -> Jueves 28 (3))`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'diff-modes',
@@ -571,7 +668,6 @@ console.log(cal.format('en')); // "2 months and 5 days"
 console.log(cal.format('es')); // "2 meses y 5 días"`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'duration-result',
@@ -613,7 +709,6 @@ console.log(explanation.steps);
 // ["Parsed dates: 2024-01-15...", "2024 is a leap year...", "Years: 2", ...]`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -699,7 +794,6 @@ console.log(CalendarManager.getInstance().list());
 // ['gregory', 'islamic', 'hebrew', 'chinese', 'japanese', 'buddhist', 'fiscal-year']`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -745,7 +839,6 @@ console.log(duration.humanize({ locale: 'es' }));
 console.log(duration.asDays()); // 1159 días aproximados`,
           },
         ],
-        playground: { enabled: true, mode: 'runner', exampleIndex: 0 },
       },
       {
         id: 'relative-time-plugin',
@@ -796,7 +889,6 @@ const veryRecent = TimeGuard.now().subtract({ second: 3 }) as any;
 console.log(veryRecent.fromNow());         // "hace un instante"`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'advanced-format-plugin',
@@ -836,7 +928,6 @@ console.log(paris.format('z'));              // "+02:00"
 console.log(paris.format('zzz'));            // "Europe/Paris"`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'duration-plugin',
@@ -885,7 +976,6 @@ console.log(iso.toISO());     // "P1Y2M25DT5H" (3 semanas + 4 días = 25 días)
 console.log(iso.toObject());  // { years: 1, months: 2, weeks: 3, days: 4, hours: 5, ... }`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
       {
         id: 'plugin-authoring',
@@ -948,7 +1038,6 @@ console.log(PluginManager.hasPlugin('fiscal-quarter')); // true
 console.log(PluginManager.listPlugins()); // [..., 'fiscal-quarter']`,
           },
         ],
-        playground: { enabled: true, mode: 'runner' },
       },
     ],
   },
@@ -1277,7 +1366,34 @@ export default component$(() => {
           'useRelativeTime() — texto relativo ("hace 5 minutos") que se recalcula automáticamente',
           'useTimeRange(start, end) — rango reactivo que se actualiza cuando cambian los extremos',
         ],
-        examples: [],
+        examples: [
+          {
+            title: 'React · Provider + hooks reactivos',
+            description:
+              'TimeGuardProvider configura el locale global; useCurrentTime y useRelativeTime se actualizan solos sin fugas de memoria al desmontar.',
+            code: `import { useState } from 'react';
+import { useCurrentTime, useRelativeTime } from '@bereasoftware/time-guard/react';
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+const pastDate = TimeGuard.now().subtract({ minute: 30 }).toDate();
+
+export default function Clock() {
+  const [locale, setLocale] = useState('es');
+  const now = useCurrentTime({ interval: 1000 });
+  const relative = useRelativeTime(pastDate);
+
+  return (
+    <div>
+      <p>{now.locale(locale).format('HH:mm:ss')}</p>
+      <p>Relativo: {relative}</p>
+      <button onClick={() => setLocale((l) => (l === 'es' ? 'en' : 'es'))}>
+        Cambiar a {locale === 'es' ? 'EN' : 'ES'}
+      </button>
+    </div>
+  );
+}`,
+          },
+        ],
         demoComponentId: 'react-demo',
       },
       {
@@ -1293,7 +1409,29 @@ export default component$(() => {
           'useRelativeTime(date, options?) — Ref<string> de texto relativo con deep watching',
           'v-time-guard:format / :relative — directiva para formateo reactivo directo en templates',
         ],
-        examples: [],
+        examples: [
+          {
+            title: 'Vue 3 · Composables + directiva',
+            description:
+              'useCurrentTime devuelve un Ref<TimeGuard> reactivo; la directiva v-time-guard formatea directamente en el template sin código extra.',
+            code: `<template>
+  <p>{{ now.locale(locale).format('HH:mm:ss') }}</p>
+  <p>Relativo: {{ relative }}</p>
+  <span v-time-guard:format="'now'" data-pattern="HH:mm:ss" data-live="true"></span>
+  <button @click="locale = locale === 'es' ? 'en' : 'es'">Cambiar idioma</button>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useCurrentTime, useRelativeTime } from '@bereasoftware/time-guard/vue';
+import { TimeGuard } from '@bereasoftware/time-guard';
+
+const locale = ref<'es' | 'en'>('es');
+const now = useCurrentTime({ interval: 1000 });
+const relative = useRelativeTime(TimeGuard.now().subtract({ minute: 30 }).toDate());
+</script>`,
+          },
+        ],
         demoComponentId: 'vue-demo',
       },
       {
@@ -1310,7 +1448,38 @@ export default component$(() => {
           'TimeGuardLiveFormatPipe — pipe live optimizado, corre fuera de NgZone para máximo rendimiento',
           'TimeGuardService — servicio injectable con getCurrentTime() observable',
         ],
-        examples: [],
+        examples: [
+          {
+            title: 'Angular · Pipes standalone',
+            description:
+              'timeGuardLiveFormat sondea fuera de NgZone para no disparar detección de cambios innecesaria; timeGuardRelative formatea tiempo relativo.',
+            code: `import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  TimeGuardLiveFormatPipe,
+  TimeGuardRelativePipe,
+} from '@bereasoftware/time-guard/angular';
+
+@Component({
+  selector: 'app-clock',
+  standalone: true,
+  imports: [CommonModule, TimeGuardLiveFormatPipe, TimeGuardRelativePipe],
+  template: \`
+    <p>{{ 'now' | timeGuardLiveFormat:'HH:mm:ss':1000:locale }}</p>
+    <p>Relativo: {{ pastDate | timeGuardRelative:locale }}</p>
+    <button (click)="toggleLocale()">Cambiar idioma</button>
+  \`,
+})
+export class ClockComponent {
+  locale: 'es' | 'en' = 'es';
+  pastDate = new Date(Date.now() - 30 * 60 * 1000);
+
+  toggleLocale(): void {
+    this.locale = this.locale === 'es' ? 'en' : 'es';
+  }
+}`,
+          },
+        ],
         demoComponentId: 'angular-demo',
       },
     ],
@@ -1349,7 +1518,6 @@ setInterval(render, 1000);
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'vanilla' },
       },
       {
         id: 'fw-vue',
@@ -1385,7 +1553,6 @@ p { font-size: 18px; color: #42b883; }
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'vue' },
       },
       {
         id: 'fw-react',
@@ -1423,7 +1590,6 @@ export default function App() {
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'react' },
       },
       {
         id: 'fw-svelte-playground',
@@ -1469,7 +1635,6 @@ export default function App() {
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'svelte' },
       },
       {
         id: 'fw-angular',
@@ -1512,7 +1677,6 @@ export class AppComponent {}
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'angular' },
       },
       {
         id: 'fw-solid-playground',
@@ -1549,7 +1713,6 @@ export default function App() {
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'solid' },
       },
       {
         id: 'fw-qwik-playground',
@@ -1589,7 +1752,6 @@ export default component$(() => {
 `,
           },
         ],
-        playground: { enabled: true, mode: 'app', framework: 'qwik' },
       },
     ],
   },

@@ -63,7 +63,6 @@ export default defineConfig(({ mode }): UserConfig => {
   return {
     ...shared,
     // Angular build uses esbuild (supports decorators) instead of Rolldown
-    builder: isAngular ? 'esbuild' : undefined,
     // Rolldown (Vite 8 default) no soporta decoradores legacy de TypeScript
     // Para Angular usamos esbuild como builder
     builder: isAngular ? 'esbuild' : undefined,

@@ -1,59 +1,22 @@
 <script setup lang="ts">
-import { inject, toRef, computed, type Component } from 'vue';
-import { Sparkles } from '@lucide/vue';
+import { inject, toRef, computed } from 'vue';
+import { Sparkles, PlayCircle } from '@lucide/vue';
 import type { DocItem } from '@/types';
 import { I18N_KEY, type I18nContext } from '@/i18n';
-import FrameworkSandbox from '@/components/FrameworkSandbox.vue';
-
-// Demo components registry
-import SvelteDemo from '@/examples/SvelteDemo.vue';
-import SolidDemo from '@/examples/SolidDemo.vue';
-import QwikDemo from '@/examples/QwikDemo.vue';
-import ReactDemo from '@/examples/ReactDemo.vue';
-import VueDemo from '@/examples/VueDemo.vue';
-import AngularDemo from '@/examples/AngularDemo.vue';
-
-const DEMO_REGISTRY: Record<string, Component> = {
-  'svelte-demo': SvelteDemo,
-  'solid-demo': SolidDemo,
-  'qwik-demo': QwikDemo,
-  'react-demo': ReactDemo,
-  'vue-demo': VueDemo,
-  'angular-demo': AngularDemo,
-};
+import DocCodeBlock from '@/components/DocCodeBlock.vue';
 
 const { t } = inject(I18N_KEY) as I18nContext;
 
 const props = defineProps<{ item: DocItem }>();
 const item = toRef(props, 'item');
 
-const demoComponent = computed(() => {
+// La documentación es solo texto + fragmentos de código estáticos — los
+// sandboxes de StackBlitz viven exclusivamente en /demos (ver DemoPage.vue).
+// Si el item referencia un demo, solo enlazamos a él en vez de embeberlo.
+const demoLink = computed(() => {
   const id = item.value?.demoComponentId;
-  return id ? (DEMO_REGISTRY[id] ?? null) : null;
+  return id ? `/demos/${id}` : null;
 });
-
-// Renders a live StackBlitz sandbox for items with `playground.enabled`
-// (the "Frameworks Playground" section, plus the i18n "runner" example) — see
-// FrameworkSandbox.vue. `mode: 'app'` items ship a framework-specific full
-// component; `mode: 'runner'` items ship a generic TS snippet wrapped in a
-// universal console.log runner (defaults to the 'vanilla' template).
-const playgroundSandbox = computed(() => {
-  const pg = item.value?.playground;
-  if (!pg?.enabled) {
-    return null;
-  }
-  const code = item.value?.examples?.[pg.exampleIndex ?? 0]?.code;
-  if (!code) {
-    return null;
-  }
-  return {
-    framework: pg.framework ?? 'vanilla',
-    mode: pg.mode ?? 'runner',
-    code,
-  };
-});
-
-// Playground helpers removed (not used currently)
 </script>
 
 <template>
@@ -105,49 +68,20 @@ const playgroundSandbox = computed(() => {
       </ul>
     </div>
 
-    <!-- Interactive Demo Component (si el item tiene demoComponentId) -->
-    <div v-if="demoComponent" class="space-y-4">
-      <div
-        class="p-4 border bg-white/40 dark:bg-slate-900/30 rounded-2xl border-slate-200/60 dark:border-slate-800/60"
-      >
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span
-            class="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
-            >Demo Interactiva</span
-          >
-        </div>
-        <component :is="demoComponent" />
-      </div>
-    </div>
+    <!-- Enlace al demo en vivo (si el item referencia uno) — el sandbox de
+    StackBlitz en sí solo vive en /demos, aquí solo apuntamos hacia él. -->
+    <router-link
+      v-if="demoLink"
+      :to="demoLink"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors border rounded-xl border-brand-200 dark:border-brand-800/60 text-brand-600 dark:text-brand-400 bg-brand-50/60 dark:bg-brand-950/30 hover:bg-brand-100 dark:hover:bg-brand-900/40"
+    >
+      <PlayCircle class="w-4 h-4" />
+      {{ t('doc_section.view_live_demo') }}
+    </router-link>
 
-    <!-- Live StackBlitz Playground (si el item tiene playground.enabled) -->
-    <div v-if="playgroundSandbox" class="space-y-4">
-      <div
-        class="p-4 border bg-white/40 dark:bg-slate-900/30 rounded-2xl border-slate-200/60 dark:border-slate-800/60"
-      >
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span
-            class="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
-            >Playground StackBlitz</span
-          >
-        </div>
-        <FrameworkSandbox
-          :key="item.id"
-          :framework="playgroundSandbox.framework"
-          :mode="playgroundSandbox.mode"
-          :code="playgroundSandbox.code"
-          :title="item.title"
-        />
-      </div>
-    </div>
-
-    <!-- Static code block fallback: items without a playground (ej. Native
-    Mode, que no puede asumir que el sandbox tenga Temporal global) todavía
-    necesitan mostrar su(s) ejemplo(s) — sin esto, `item.examples` nunca se
-    renderiza en ningún lado. -->
-    <div v-else-if="item.examples?.length" class="space-y-4">
+    <!-- Static code block: muestra los ejemplos del item como texto + código,
+    sin ningún sandbox embebido. -->
+    <div v-if="item.examples?.length" class="space-y-4">
       <div
         v-for="example in item.examples"
         :key="example.title"
@@ -159,9 +93,7 @@ const playgroundSandbox = computed(() => {
         <p class="text-xs text-slate-500 dark:text-slate-400">
           {{ example.description }}
         </p>
-        <pre
-          class="overflow-x-auto p-3 text-xs rounded-xl bg-slate-950 text-slate-100"
-        ><code>{{ example.code }}</code></pre>
+        <DocCodeBlock :code="example.code" />
       </div>
     </div>
   </div>

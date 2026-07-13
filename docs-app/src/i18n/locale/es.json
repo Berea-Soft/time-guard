@@ -118,7 +118,6 @@
   "docs.cta.title": "¿Listo para empezar?",
   "docs.cta.description": "Prueba los ejemplos, integra TimeGuard y contribuye en GitHub.",
   "docs.cta.examples": "Ver ejemplos",
-  "docs.cta.demos": "Probar demos",
   "docs.cta.github": "GitHub",
 
   "docs.overview.view_doc": "Ver documentación",
@@ -133,6 +132,7 @@
   "doc_section.features_title": "Beneficios Clave",
   "doc_section.copied": "¡Copiado!",
   "doc_section.copy": "Copiar",
+  "doc_section.view_live_demo": "Ver demo en vivo",
 
   "examples.title": "Ejemplos",
   "demos.title": "Demos",
