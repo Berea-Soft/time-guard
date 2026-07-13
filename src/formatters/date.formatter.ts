@@ -29,16 +29,22 @@ export class DateFormatter implements IDateFormatter {
 
     // First, protect escaped text in brackets
     const escapedParts: string[] = [];
-    let escapedPattern = pattern.replace(/\[([^\]]+)\]/g, (_match, content) => {
-      escapedParts.push(content);
-      return `~${escapedParts.length - 1}~`;
-    });
+    let escapedPattern = pattern.replace(
+      /\[([^\[\]]*)\]/g,
+      (_match, content) => {
+        escapedParts.push(content);
+        return `~${escapedParts.length - 1}~`;
+      },
+    );
 
     // Protect quoted text by escaping quotes
-    escapedPattern = escapedPattern.replace(/"([^"]*)"/g, (_match, content) => {
-      escapedParts.push(content);
-      return `~${escapedParts.length - 1}~`;
-    });
+    escapedPattern = escapedPattern.replace(
+      /"([^"\\]*(?:\\.[^"\\]*)*)"/g,
+      (_match, content) => {
+        escapedParts.push(content);
+        return `~${escapedParts.length - 1}~`;
+      },
+    );
 
     // Then apply token replacements
     const formatted = escapedPattern.replace(

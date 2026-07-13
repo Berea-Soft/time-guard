@@ -195,7 +195,7 @@ function openSandbox(): void {
  * .fs-frame, leaving .fs-container empty). So target .fs-frame here, not
  * .fs-container, and !important to override the SDK's own inline width.
  */
-:deep(.fs-frame) :deep(iframe) {
+.fs-frame :deep(iframe) {
   width: 100% !important;
   height: 100% !important;
   border: 0;

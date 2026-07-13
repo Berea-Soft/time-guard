@@ -1164,8 +1164,8 @@ export class TimeGuard implements ITimeGuard {
     const plainStart = TemporalAdapter.toPlainDateTime(start.temporal);
     const plainEnd = TemporalAdapter.toPlainDateTime(end.temporal);
 
-    let afterStart = true;
-    let beforeEnd = true;
+    let afterStart: boolean;
+    let beforeEnd: boolean;
 
     if (unit) {
       const startCopy = this.clone().startOf(unit);
