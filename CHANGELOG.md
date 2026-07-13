@@ -1,3 +1,15 @@
+# [2.10.0](https://github.com/Berea-Soft/time-guard/compare/v2.9.0...v2.10.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* update CSS selector for iframe in FrameworkSandbox and improve regex patterns in DateFormatter ([8aa1490](https://github.com/Berea-Soft/time-guard/commit/8aa14900036d1d178be0dc21370328e6abcdf93e))
+
+
+### Features
+
+* add DocCodeBlock component for code display and interaction; update DocSection and localization ([85db942](https://github.com/Berea-Soft/time-guard/commit/85db942d2a1c56871e7f2553adcf363c917096cf))
+
 # [2.9.0](https://github.com/Berea-Soft/time-guard/compare/v2.8.0...v2.9.0) (2026-07-09)
 
 
