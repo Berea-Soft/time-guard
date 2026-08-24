@@ -83,8 +83,63 @@ jobs:
           test -f dist/time-guard.iife.js && echo "IIFE bundle exists"
           test -f dist/time-guard.umd.js && echo "UMD bundle exists"
           test -f dist/time-guard.es.js && echo "ES bundle exists"
+  test-native-temporal:
+    # Node.js 26 is the first release with the Temporal API enabled by
+    # default (unflagged) — this job proves `@bereasoftware/time-guard/native`
+    # genuinely works against real native Temporal, with zero polyfill
+    # installed anywhere in the process, on the exact runtime we tell
+    # users to target in the README.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js 26
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        # Built while the polyfill is still installed — Vite needs to
+        # resolve and inline it for the *main* entry. The native entry's
+        # output must not reference it at all, which the next step proves.
+        run: pnpm build
+
+      - name: Remove @js-temporal/polyfill from node_modules
+        # Belt-and-suspenders: dist/native/index.es.js must be fully
+        # self-contained, with no lingering import specifier for this
+        # package. Deleting it post-build turns any accidental runtime
+        # dependency on it into a hard module-resolution failure instead
+        # of a subtle bundle-size regression.
+        run: rm -rf node_modules/.pnpm/@js-temporal+polyfill@* node_modules/@js-temporal
+
+      - name: Verify native Temporal is available unflagged
+        run: node -e "console.log(Temporal.Now.plainDateTimeISO().toString())"
+
+      - name: Verify native entry works with zero polyfill
+        run: |
+          node --input-type=module -e "
+            import { TimeGuard, timeGuard } from './dist/native/index.es.js';
+            const now = TimeGuard.now();
+            if (typeof now.year() !== 'number') throw new Error('year() did not return a number');
+            const a = timeGuard('2026-05-18T10:30:00');
+            const b = a.add({ days: 3 });
+            if (b.format('YYYY-MM-DD') !== '2026-05-21') throw new Error('add()/format() mismatch: ' + b.format('YYYY-MM-DD'));
+            console.log('native entry OK on real native Temporal, year=' + now.year());
+          "
   release:
-    needs: [test, test-browser]
+    needs: [test, test-browser, test-native-temporal]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:

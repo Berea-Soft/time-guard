@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
+import { pathToFileURL } from 'url';
 import { gzipSync } from 'zlib';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
 describe('Bundle Size Report', () => {
   it('should produce a clean build with no shared chunks', () => {
@@ -79,35 +80,57 @@ describe('Bundle Size Report', () => {
       expect(allDistFiles, `Missing expected file: ${file}`).toContain(file);
     }
 
-    // ── Main bundle should include polyfill import (backward-compatible full entry) ──
-    const coreES = readFileSync(join(distDir, 'time-guard.es.js'), 'utf-8');
-    const hasPolyfillImport = coreES
-      .split('\n')
-      .some(
-        (l) => l.startsWith('import') && l.includes('@js-temporal/polyfill'),
-      );
-    const hasRuntimeMessage =
-      coreES.includes('Temporal API not loaded') ||
-      coreES.includes('Make sure @js-temporal/polyfill');
+    // ── Runtime behavior checks ──
+    // Rolldown bundles @js-temporal/polyfill's code directly (it isn't
+    // marked `external`), so its package name never survives as a literal
+    // import specifier — grepping dist output for that string is a dead
+    // end. Instead, spawn clean `node` processes (vitest's own globalThis
+    // is already polluted with Temporal by test/setup.ts) and verify the
+    // actual contract: the main entry must be fully self-contained (works
+    // with zero pre-existing Temporal), and the native entry must contain
+    // none of the polyfill (it fails fast without one).
+    const mainEntryUrl = pathToFileURL(join(distDir, 'time-guard.es.js')).href;
+    const mainStdout = execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `import { TimeGuard } from ${JSON.stringify(mainEntryUrl)};` +
+          `console.log(typeof TimeGuard.now().year());`,
+      ],
+      { encoding: 'utf-8' },
+    ).trim();
     expect(
-      hasPolyfillImport || hasRuntimeMessage,
-      'Missing polyfill import or runtime message referencing @js-temporal/polyfill',
-    ).toBe(true);
+      mainStdout,
+      'Main entry must self-install the Temporal polyfill and work with no pre-existing globalThis.Temporal',
+    ).toBe('number');
 
-    // ── Native bundle should NOT import the polyfill ──
-    const nativeES = readFileSync(
+    // This suite may itself be running on Node >=26, where the spawned
+    // subprocess would otherwise have genuine native Temporal too — `delete
+    // globalThis.Temporal` right before calling TimeGuard.now() forces the
+    // "no Temporal" scenario deterministically regardless of host Node
+    // version. Import statements are hoisted and evaluate before any other
+    // top-level code, so placing the delete after the `import` line still
+    // runs it before TimeGuard.now() is ever called.
+    const nativeEntryUrl = pathToFileURL(
       join(distDir, 'native', 'index.es.js'),
-      'utf-8',
-    );
-    const nativeHasPolyfill = nativeES
-      .split('\n')
-      .some(
-        (l) => l.startsWith('import') && l.includes('@js-temporal/polyfill'),
-      );
+    ).href;
+    const nativeStdout = execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `import { TimeGuard } from ${JSON.stringify(nativeEntryUrl)};` +
+          `delete globalThis.Temporal;` +
+          `try { TimeGuard.now(); console.log('unexpected-success'); }` +
+          `catch (err) { console.log(err instanceof Error ? err.message : 'unknown-error'); }`,
+      ],
+      { encoding: 'utf-8' },
+    ).trim();
     expect(
-      nativeHasPolyfill,
-      'Native bundle must not import or bundle @js-temporal/polyfill',
-    ).toBe(false);
+      nativeStdout,
+      'Native entry must not bundle the polyfill: it should fail fast with no pre-existing globalThis.Temporal',
+    ).toContain('Temporal API not found on globalThis');
 
     // ── Size sanity checks (full-compatible entry remains within expected budget)
     const coreGzip = gzipSync(readFileSync(join(distDir, 'time-guard.es.js')));
