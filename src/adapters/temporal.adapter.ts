@@ -30,7 +30,10 @@ function useTemporal(): TemporalType {
 
   if (!TemporalLoaded) {
     throw new Error(
-      'Temporal API not loaded. Make sure @js-temporal/polyfill is imported in your app.',
+      'Temporal API not found on globalThis. If you imported "@bereasoftware/time-guard/native", ' +
+        'either run on Node.js >=26 (or a browser with native Temporal support: Chrome/Edge >=144, ' +
+        'Firefox >=139) or load a Temporal polyfill yourself before importing this entry. ' +
+        'Otherwise, import "@bereasoftware/time-guard" instead — it loads @js-temporal/polyfill automatically.',
     );
   }
 
@@ -299,18 +302,6 @@ export class TemporalAdapter {
         !Number.isFinite(value) ||
         !Number.isInteger(value)
       ) {
-        // Log de depuración para rastrear el error
-        if (
-          typeof console !== 'undefined' &&
-          typeof console.error === 'function'
-        ) {
-          console.error(
-            'TemporalAdapter.validatePlainDateTime: campo inválido',
-            field,
-            value,
-            dt,
-          );
-        }
         throw new Error(
           `Temporal error: Expected finite integer for ${field}, got ${value}`,
         );
