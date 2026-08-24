@@ -40,7 +40,22 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
         return originalFormat.call(this, pattern);
       }
 
-      if (!/Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz|z/.test(pattern)) {
+      // Protect literal [...]/"..." text before scanning for advanced
+      // tokens — otherwise a token letter that merely appears inside a
+      // user's escaped literal (e.g. the "k" in "[Asia/Tokyo]") gets
+      // replaced too, corrupting text the user asked to keep verbatim.
+      // Mirrors DateFormatter's own escape handling so the two stay
+      // consistent instead of fighting over the same bracket syntax.
+      const escapedAdvancedParts: string[] = [];
+      const protectedPattern = pattern.replace(
+        /\[([^[\]]*)\]|"([^"\\]*(?:\\.[^"\\]*)*)"/g,
+        (match) => {
+          escapedAdvancedParts.push(match);
+          return `\u0000${escapedAdvancedParts.length - 1}\u0000`;
+        },
+      );
+
+      if (!/Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz|z/.test(protectedPattern)) {
         return originalFormat.call(this, pattern);
       }
 
@@ -113,7 +128,7 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
       };
 
       // Replace advanced tokens - wrap results in brackets to protect from standard formatter
-      const result = pattern.replace(
+      const result = protectedPattern.replace(
         /Q|Do|w|W|gggg|GGGG|k{1,2}|X|x|zzz|z/g,
         (match) => {
           let replacement = '';
@@ -202,8 +217,14 @@ export class AdvancedFormatPlugin implements ITimeGuardPlugin {
         },
       );
 
+      // Restore the protected literal text now that token scanning is done
+      let restored = result;
+      escapedAdvancedParts.forEach((original, index) => {
+        restored = restored.replace(`\u0000${index}\u0000`, original);
+      });
+
       // Apply standard format to the result
-      return originalFormat.call(this, result);
+      return originalFormat.call(this, restored);
     };
   }
 

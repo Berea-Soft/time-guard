@@ -297,6 +297,22 @@ describe('Plugin System', () => {
       expect(result).toContain('March');
       expect(result).toContain('2024');
     });
+
+    it('should not corrupt literal [...] text that happens to contain a token letter', () => {
+      // Regression: the token regex used to scan the raw pattern before
+      // the base formatter got a chance to protect [...]/"..." literals,
+      // so a token letter inside an escaped literal (the 'k' in "Tokyo")
+      // was replaced too — date.format('[Asia/Tokyo]') produced garbage
+      // like "Asia/To[24yo]" instead of the literal text.
+      const date = TimeGuard.from('2024-03-13').timezone('Asia/Tokyo');
+      expect(date.format('[Asia/Tokyo]')).toBe('Asia/Tokyo');
+      expect(date.format('"week" w')).toBe('week 3');
+    });
+
+    it('should still resolve real tokens next to a protected literal', () => {
+      const date = TimeGuard.from('2024-03-13').timezone('Asia/Tokyo');
+      expect(date.format('Q[quarter]')).toBe('1quarter');
+    });
   });
 
   describe('Plugin Integration', () => {
