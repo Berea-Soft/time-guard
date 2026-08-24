@@ -1,3 +1,11 @@
+## [2.10.2](https://github.com/Berea-Soft/time-guard/compare/v2.10.1...v2.10.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **adapter:** clearer native-mode error message, drop stray debug log ([4f40b96](https://github.com/Berea-Soft/time-guard/commit/4f40b968cf792e54f6505e0041cdf0d040564968))
+* **plugins:** protect literal [...] and \"...\" text from advanced-format token scanning ([6fb2beb](https://github.com/Berea-Soft/time-guard/commit/6fb2beb9a0a86b856a1278ca099e29b8f70c63e3))
+
 ## [2.10.1](https://github.com/Berea-Soft/time-guard/compare/v2.10.0...v2.10.1) (2026-07-13)
 
 # [2.10.0](https://github.com/Berea-Soft/time-guard/compare/v2.9.0...v2.10.0) (2026-07-13)
