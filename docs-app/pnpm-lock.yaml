@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bereasoftware/time-guard':
-        specifier: ^2.7.2
-        version: 2.7.2(vue@3.5.34(typescript@6.0.3))
+        specifier: ^2.10.1
+        version: 2.10.1(vue@3.5.34(typescript@6.0.3))
       '@codemirror/autocomplete':
         specifier: ^6.20.2
         version: 6.20.2
@@ -266,8 +266,8 @@ packages:
     resolution: {integrity: sha512-JeSVu/m8x/zpp4CLjYHVNXuhEyOkhPXuxM8YOXjh6L4LlvQNKuUNOTo5KdBuKAcTDHw8DquToTaEkhsBqPXOaA==}
     engines: {node: ^22.18.0 || >=24.11.0}
 
-  '@bereasoftware/time-guard@2.7.2':
-    resolution: {integrity: sha512-FmWjY7m9g9ezdyZDwoKcFrr0gR8lr36KPLBsizi/OuPxX/zBS7sWbE3y5ym8ZBMnQtR1s3xb3IoO3SA6kK1EdQ==}
+  '@bereasoftware/time-guard@2.10.1':
+    resolution: {integrity: sha512-DJUOBqm8d9g5HKgCStkhV0KlRXcCXVJNn5AazCikqmQKLDdh09N0fruLaTKm6bWoQp0rT3DiPRHomOn5WuWXLw==}
     engines: {node: '>=20.18.0', npm: '>=10.8.2'}
     peerDependencies:
       '@angular/core': '>=21.2.14'
@@ -1608,11 +1608,6 @@ packages:
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
-  vue-icons-plus@0.1.9:
-    resolution: {integrity: sha512-OGn0MXLqXCnDlpkxqQj2HDc6+XEQQ/8itS8hJCzehfqMBhX6EkRGKN0g6Hk1ObnotIOJLLihWKWqifYwvxyENA==}
-    peerDependencies:
-      vue: '>=2.7.0'
-
   vue-router@5.0.7:
     resolution: {integrity: sha512-dqfk8kvRbCutmCOCj/XLDqDEYxc1wBdAOGLuVy5M93ifYMsBd5fIjfaPN4tQAbxr5IprdBDIox1gr4wYyOx/SA==}
     peerDependencies:
@@ -1892,10 +1887,9 @@ snapshots:
       '@babel/helper-string-parser': 8.0.0-rc.5
       '@babel/helper-validator-identifier': 8.0.0-rc.5
 
-  '@bereasoftware/time-guard@2.7.2(vue@3.5.34(typescript@6.0.3))':
+  '@bereasoftware/time-guard@2.10.1(vue@3.5.34(typescript@6.0.3))':
     dependencies:
       '@js-temporal/polyfill': 0.5.1
-      vue-icons-plus: 0.1.9(vue@3.5.34(typescript@6.0.3))
     optionalDependencies:
       vue: 3.5.34(typescript@6.0.3)
 
@@ -3358,10 +3352,6 @@ snapshots:
       semver: 7.8.1
     transitivePeerDependencies:
       - supports-color
-
-  vue-icons-plus@0.1.9(vue@3.5.34(typescript@6.0.3)):
-    dependencies:
-      vue: 3.5.34(typescript@6.0.3)
 
   vue-router@5.0.7(@vue/compiler-sfc@3.5.34)(vue@3.5.34(typescript@6.0.3)):
     dependencies:

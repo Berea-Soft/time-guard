@@ -120,7 +120,7 @@
   ],
   "author": "John Andrade <johnandrade@bereasoft.com>",
   "license": "MIT",
-  "description": "A modern, fully-typed TypeScript date/time library built with the Temporal API, SOLID principles, and complete i18n support. Immutable, zero-dependencies, and designed for type safety.",
+  "description": "A modern, fully-typed TypeScript date/time library built with the Temporal API, SOLID principles, and complete i18n support. Immutable and designed for type safety.",
   "maintainers": [
     {
       "name": "John Andrade",
