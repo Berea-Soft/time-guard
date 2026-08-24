@@ -25,10 +25,10 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Berea-Soft/time-guard/ci.yml?style=for-the-badge)](https://github.com/Berea-Soft/time-guard/actions/workflows/ci.yml)
 [![Node](https://img.shields.io/node/v/@bereasoftware/time-guard?style=for-the-badge)](https://www.npmjs.com/package/@bereasoftware/time-guard)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge)](https://www.typescriptlang.org/)
-[![Licencia](https://img.shields.io/github/license/Berea-Soft/email-validator?style=for-the-badge)](https://github.com/Berea-Soft/email-validator/blob/main/LICENSE)
+[![Licencia](https://img.shields.io/github/license/Berea-Soft/time-guard?style=for-the-badge)](https://github.com/Berea-Soft/time-guard/blob/main/LICENSE)
 [![Último commit](https://img.shields.io/github/last-commit/Berea-Soft/time-guard?style=for-the-badge)](https://github.com/Berea-Soft/time-guard/commits/main)
 [![Repositorio](https://img.shields.io/badge/github-repo-blue?logo=github&style=for-the-badge)](https://github.com/Berea-Soft/time-guard)
-[![Cobertura](https://img.shields.io/badge/coverage-95%25-orange?style=for-the-badge)](https://github.com/Berea-Soft/time-guard)
+[![Cobertura](https://img.shields.io/badge/coverage-91%25-orange?style=for-the-badge)](https://github.com/Berea-Soft/time-guard)
 
 ---
 
@@ -117,9 +117,14 @@ pnpm add @bereasoftware/time-guard
 
 ### Requisitos
 
-- **Node.js** 20.18.0+ (soporte de Temporal API)
+TimeGuard expone dos entry points con requisitos de runtime distintos (ver [Bundle Modular](#bundle-modular)):
+
+| Entry | Runtime mínimo | Dependencias |
+| --- | --- | --- |
+| `@bereasoftware/time-guard` (por defecto) | Node.js **18+** o cualquier navegador moderno — el polyfill de Temporal se carga automáticamente, así que el motor JS no necesita soportar Temporal de forma nativa | `@js-temporal/polyfill` >=0.5.0 (instalada automáticamente como dependencia) |
+| `@bereasoftware/time-guard/native` (zero-polyfill) | Node.js **≥26.0.0** (Temporal habilitado por defecto, sin flag, desde el 5 de mayo de 2026), o un navegador con `Temporal` nativo (Chrome/Edge ≥144, Firefox ≥139 — Safari aún no lo soporta de forma estable) | Ninguna — asume que `globalThis.Temporal` ya existe. En Node 24/25 sigue detrás de un flag experimental de V8 (no oficialmente soportado por TimeGuard); si tu runtime aún no expone `Temporal`, carga tu propio polyfill antes de importar este entry |
+
 - **TypeScript** 5.0+ (opcional pero recomendado)
-- **@js-temporal/polyfill** >=0.5.0 (instalado automáticamente como dependencia)
 
 ### 🚀 Uso en Nest.js / Backend
 
@@ -144,11 +149,14 @@ const now = TimeGuard.now();
 
 ### Bundle Modular
 
-TimeGuard usa una arquitectura modular inspirada en dayjs. El **core** pesa ~5KB gzip e incluye solo lo esencial (TimeGuard, formatter, EN/ES, Gregoriano). Locales, plugins y calendarios se cargan bajo demanda:
+TimeGuard usa una arquitectura modular inspirada en dayjs. La lógica del **core** (TimeGuard, formatter, EN/ES, Gregoriano) pesa ~5KB gzip por sí sola. El entry point por defecto (`@bereasoftware/time-guard`) suma a eso el polyfill de `@js-temporal/polyfill` (~35KB gzip) para que funcione sin configuración adicional — el bundle resultante pesa ~50KB gzip. Si tu entorno ya expone `Temporal` de forma nativa o cargas tu propio polyfill, usa el entry `/native` para quedarte solo con los ~5KB del core. Locales, plugins y calendarios se cargan bajo demanda:
 
 ```typescript
-// Core ligero (~5KB gzip) - solo EN/ES
+// Entry por defecto (~50KB gzip): core + polyfill de Temporal auto-cargado
 import { TimeGuard } from '@bereasoftware/time-guard';
+
+// Entry nativo (~5KB gzip): asume que `globalThis.Temporal` ya existe
+import { TimeGuard } from '@bereasoftware/time-guard/native';
 
 // Módulos bajo demanda
 import { ALL_LOCALES } from '@bereasoftware/time-guard/locales';
@@ -1963,9 +1971,9 @@ npm run dev
 ```
 time-guard/
 ├── src/
-│   ├── index.ts                 # Core ligero (~5KB gzip, EN/ES)
-│   ├── polyfill-loader.ts       # Cargador del polyfill Temporal
-│   ├── index.ts                 # Clase principal y punto de entrada
+│   ├── core.ts                  # Core ligero (~5KB gzip, EN/ES)
+│   ├── index.ts                 # Entry por defecto (core + polyfill Temporal auto-cargado)
+│   ├── native.ts                # Entry nativo (asume `globalThis.Temporal` ya existe)
 │   ├── adapters/
 │   │   └── temporal.adapter.ts  # Wrapper del API Temporal
 │   ├── calendars/               # 6 sistemas de calendario

@@ -325,11 +325,12 @@ tg.timezone("America/New_York"); // New instance with different timezone
 
 ```
 src/
-├── index.ts                    # Lightweight core (~5KB gzip, EN/ES only)
-├── polyfill-loader.ts          # Temporal polyfill loader
-├── index.ts               # Main class and entry point
+├── core.ts                     # Implementation (TimeGuard, DurationResult, TimeRange) — no side effects
+├── index.ts                    # Default entry (~50KB gzip): core + auto-loaded Temporal polyfill
+├── native.ts                   # Native entry (~5KB gzip): assumes `globalThis.Temporal` already exists, zero-polyfill
+├── react.ts / vue.ts / angular.ts / svelte.ts / solid.ts / qwik.ts  # Per-framework integrations
 ├── adapters/
-│   └── temporal.adapter.ts     # Temporal API adapter
+│   └── temporal.adapter.ts     # Temporal API adapter (shared by index.ts and native.ts)
 ├── calendars/
 │   ├── index.ts                # Exports all calendar systems
 │   └── calendar.manager.ts     # Manager + Gregorian (core)
@@ -341,8 +342,10 @@ src/
 ├── plugins/
 │   ├── manager.ts              # Plugin manager
 │   ├── relative-time/          # Relative time plugin
-│   ├── duration/               # ISO 8601 duration plugin
+│   ├── duration/                # ISO 8601 duration plugin
 │   └── advanced-format/        # Advanced format plugin
+├── utils/
+│   └── duration-locale.ts      # Duration localization helpers
 └── types/                      # TypeScript interfaces & types
 
 test/
@@ -351,9 +354,15 @@ test/
 ├── comprehensive.test.ts       # Integration tests
 ├── locales.test.ts             # Locale tests
 ├── plugins.test.ts             # Plugin tests
-├── bundle-size.test.ts         # Bundle size validation
+├── temporal-polyfill.test.ts   # Verifies the default entry against the polyfill
+├── native.test.ts              # Verifies the `/native` entry
+├── bundle-size.test.ts         # Bundle size + real-runtime proof that the default
+│                                #   entry works with no pre-existing Temporal and the
+│                                #   native entry fails without one (zero baked-in polyfill)
 └── setup.ts                    # Vitest global setup
 ```
+
+`core.ts` is the only module that implements TimeGuard's logic — both `index.ts` and `native.ts` re-export the exact same code (`export * from './core'`). This guarantees, by construction, that both entries have **identical API surface and functionality**; the only difference between them is whether the Temporal polyfill is auto-loaded (`index.ts`) or the runtime is assumed to already expose native `Temporal` (`native.ts`). See [Requirements](README.en.md#requirements) for the Node.js/browser versions each one needs.
 
 ### Modular Build System
 
