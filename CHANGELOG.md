@@ -1,3 +1,5 @@
+## [2.10.3](https://github.com/Berea-Soft/time-guard/compare/v2.10.2...v2.10.3) (2026-08-25)
+
 ## [2.10.2](https://github.com/Berea-Soft/time-guard/compare/v2.10.1...v2.10.2) (2026-08-24)
 
 
