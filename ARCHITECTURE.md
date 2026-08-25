@@ -15,7 +15,7 @@ Una librería moderna y completamente tipada en TypeScript para manejo de fecha/
 - 🌍 **Soporte i18n** - Gestión de locales integrada (EN, ES, y extensible)
 - 🔄 **Inmutable** - Todas las operaciones devuelven nuevas instancias
 - 🪝 **Sistema de Plugins** - Extiende funcionalidad con plugins personalizados
-- 📦 **Bundle Modular** - Core ligero (~5KB gzip), carga locales/plugins/calendarios bajo demanda
+- 📦 **Bundle Modular** - Core ligero (~9.5KB gzip), carga locales/plugins/calendarios bajo demanda
 - 🔗 **Polyfill Auto-cargado** - `@js-temporal/polyfill` se instala y carga automáticamente
 
 ## 📦 Instalación
@@ -326,8 +326,8 @@ tg.timezone("America/New_York"); // Nueva instancia con diferente zona horaria
 ```
 src/
 ├── core.ts                     # Implementación (TimeGuard, DurationResult, TimeRange) — sin efectos secundarios
-├── index.ts                    # Entry por defecto (~50KB gzip): core + polyfill de Temporal auto-cargado
-├── native.ts                   # Entry nativo (~5KB gzip): asume `globalThis.Temporal` ya existe, zero-polyfill
+├── index.ts                    # Entry por defecto (~52KB gzip el archivo, ~75KB con todo cargado): core + polyfill de Temporal auto-cargado
+├── native.ts                   # Entry nativo (~10KB gzip con core+EN/ES): asume `globalThis.Temporal` ya existe, zero-polyfill
 ├── react.ts / vue.ts / angular.ts / svelte.ts / solid.ts / qwik.ts  # Integraciones por framework
 ├── adapters/
 │   └── temporal.adapter.ts     # Adaptador del API Temporal (compartido por index.ts y native.ts)
@@ -503,7 +503,7 @@ const temporal = tg.toTemporal();
 
 ## 🚀 Rendimiento
 
-- **Core ~5KB gzip** — solo lo esencial (TimeGuard, formatter, EN/ES, Gregoriano)
+- **Core ~9.5KB gzip** — solo lo esencial (TimeGuard, formatter, EN/ES, Gregoriano)
 - Sobrecarga mínima a través del patrón adaptador
 - Evaluación perezosa donde es posible
 - Caché eficiente de locales
@@ -535,7 +535,7 @@ Licencia MIT - Ver archivo LICENSE para detalles
 - [x] Sistema de plugins (relative-time, duration, advanced-format)
 - [x] 6 sistemas de calendario (Gregoriano, Islámico, Hebreo, Chino, Japonés, Budista)
 - [x] Build UMD/IIFE para CDN y `<script>`
-- [x] Arquitectura modular (core ~5KB gzip + carga bajo demanda)
+- [x] Arquitectura modular (core ~9.5KB gzip + carga bajo demanda)
 - [ ] Soporte avanzado de zona horaria (conversiones DST)
 - [ ] Optimizaciones de rendimiento
 - [ ] Patrones de recurrencia de fechas

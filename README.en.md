@@ -133,13 +133,13 @@ const now = TimeGuard.now();
 
 ### Modular Bundle
 
-TimeGuard uses a modular architecture inspired by dayjs. The **core** logic (TimeGuard, formatter, EN/ES, Gregorian) weighs ~5KB gzip on its own. The default entry point (`@bereasoftware/time-guard`) adds `@js-temporal/polyfill` (~35KB gzip) on top of that so it works with zero setup — the resulting bundle weighs ~50KB gzip. If your environment already exposes `Temporal` natively, or you load your own polyfill, use the `/native` entry to keep only the ~5KB core. Locales, plugins, and calendars are loaded on demand:
+TimeGuard uses a modular architecture inspired by dayjs. The **core** logic (TimeGuard, formatter, EN/ES, Gregorian) weighs ~9.5KB gzip on its own, in a chunk shared by every entry. The default entry point (`@bereasoftware/time-guard`) adds `@js-temporal/polyfill` on top of that (~52KB gzip for the entry file itself, polyfill included) — with locales/calendars/plugins also loaded and no tree-shaking, the total climbs to ~75KB gzip. If your environment already exposes `Temporal` natively, or you load your own polyfill, use the `/native` entry to stay at ~10KB gzip (the same shared core, minus the polyfill) — or ~24KB if your bundler doesn't tree-shake the rest. Locales, plugins, and calendars are loaded on demand:
 
 ```typescript
-// Default entry (~50KB gzip): core + auto-loaded Temporal polyfill
+// Default entry (~52KB gzip for the entry file, ~75KB with everything loaded): core + auto-loaded Temporal polyfill
 import { TimeGuard } from "@bereasoftware/time-guard";
 
-// Native entry (~5KB gzip): assumes `globalThis.Temporal` already exists
+// Native entry (~10KB gzip with core+EN/ES): assumes `globalThis.Temporal` already exists
 import { TimeGuard } from "@bereasoftware/time-guard/native";
 
 // On-demand modules
@@ -1766,7 +1766,7 @@ npm run dev
 ```
 time-guard/
 ├── src/
-│   ├── core.ts                  # Lightweight core (~5KB gzip, EN/ES)
+│   ├── core.ts                  # Lightweight core (~9.5KB gzip, EN/ES)
 │   ├── index.ts                 # Default entry (core + auto-loaded Temporal polyfill)
 │   ├── native.ts                # Native entry (assumes `globalThis.Temporal` already exists)
 │   ├── adapters/

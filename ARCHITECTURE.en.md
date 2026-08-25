@@ -15,7 +15,7 @@ A modern, fully-typed TypeScript date/time library built using the **Temporal AP
 - 🌍 **i18n Support** - Built-in locale management (EN, ES, and extensible)
 - 🔄 **Immutable** - All operations return new instances
 - 🪝 **Plugin System** - Extend functionality with custom plugins
-- 📦 **Modular Bundle** - Lightweight core (~5KB gzip), load locales/plugins/calendars on demand
+- 📦 **Modular Bundle** - Lightweight core (~9.5KB gzip), load locales/plugins/calendars on demand
 - 🔗 **Auto-loaded Polyfill** - `@js-temporal/polyfill` installed and loaded automatically
 
 ## 📦 Installation
@@ -326,8 +326,8 @@ tg.timezone("America/New_York"); // New instance with different timezone
 ```
 src/
 ├── core.ts                     # Implementation (TimeGuard, DurationResult, TimeRange) — no side effects
-├── index.ts                    # Default entry (~50KB gzip): core + auto-loaded Temporal polyfill
-├── native.ts                   # Native entry (~5KB gzip): assumes `globalThis.Temporal` already exists, zero-polyfill
+├── index.ts                    # Default entry (~52KB gzip for the file, ~75KB with everything loaded): core + auto-loaded Temporal polyfill
+├── native.ts                   # Native entry (~10KB gzip with core+EN/ES): assumes `globalThis.Temporal` already exists, zero-polyfill
 ├── react.ts / vue.ts / angular.ts / svelte.ts / solid.ts / qwik.ts  # Per-framework integrations
 ├── adapters/
 │   └── temporal.adapter.ts     # Temporal API adapter (shared by index.ts and native.ts)
@@ -503,7 +503,7 @@ const temporal = tg.toTemporal();
 
 ## 🚀 Performance
 
-- **Core ~5KB gzip** — only the essentials (TimeGuard, formatter, EN/ES, Gregorian)
+- **Core ~9.5KB gzip** — only the essentials (TimeGuard, formatter, EN/ES, Gregorian)
 - Minimal overhead through adapter pattern
 - Lazy evaluation where possible
 - Efficient locale caching
@@ -535,7 +535,7 @@ Contributions are welcome! Please ensure:
 - [x] Plugin system (relative-time, duration, advanced-format)
 - [x] 6 calendar systems (Gregorian, Islamic, Hebrew, Chinese, Japanese, Buddhist)
 - [x] UMD/IIFE builds for CDN and `<script>`
-- [x] Modular architecture (core ~5KB gzip + on-demand loading)
+- [x] Modular architecture (core ~9.5KB gzip + on-demand loading)
 - [ ] Advanced timezone support (DST conversions)
 - [ ] Performance optimizations
 - [ ] Date recurrence patterns
